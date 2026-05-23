@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "private-ai-harness",
+  "description": "Personal AI harness with Karpathy guidelines, commit discipline, parallel agent patterns, TDD, debugging, and code review skills",
+  "owner": {
+    "name": "CagesThrottleUs"
+  },
+  "plugins": [
+    {
+      "name": "private-ai-harness",
+      "description": "Personal AI harness: Karpathy guidelines, commit discipline, parallel agents, TDD, debugging, code review workflows, caveman mode",
+      "version": "1.0.0",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
