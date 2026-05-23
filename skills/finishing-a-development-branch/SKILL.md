@@ -59,9 +59,44 @@ Tests failing (<N> failures). Must fix before completing:
 Cannot proceed with merge/PR until tests pass.
 ```
 
-Stop. Don't proceed to Step 2.
+Stop. Don't proceed to Step 1.5.
 
-**If tests pass:** Continue to Step 2.
+**If tests pass:** Continue to Step 1.5.
+
+### Step 1.5: Review Gate
+
+Run `/review all` before presenting merge/PR options. All four agents run in parallel.
+
+```
+/review all
+```
+
+This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
+
+**If any agent returns Critical:** Stop. Do not present merge/PR options.
+```
+Review gate failed — Critical issues found.
+Fix all Critical issues before completing this branch.
+
+Critical findings:
+1. [AGENT] file:line — issue
+2. ...
+```
+
+**If any agent returns Important:** Present options but pre-select **draft PR** for Option 2. Note all Important issues.
+
+**If all agents clean / Minor only:** Continue to Step 2. All options available.
+
+**Skip review gate only if:**
+- User explicitly says "skip review" (they take responsibility)
+- This is a pure `chore` commit (no code logic changed — only config, lockfile, tooling)
+
+```bash
+# Verify it's truly chore-only (no source file changes)
+git diff <base>...HEAD --name-only | grep -vE "\.(json|lock|yaml|yml|toml|md|txt)$"
+# If output is empty → chore-only, gate can be skipped
+# If output has source files → gate required
+```
 
 ### Step 2: Detect Environment
 
@@ -146,20 +181,17 @@ git branch -d <feature-branch>
 
 #### Option 2: Push and Create PR
 
-```bash
-# Push branch
-git push -u origin <feature-branch>
+Use the `pr-creator` skill — it handles spec linkage, commit-msg.sh compliance, WHY body, traceability, and review gates automatically.
 
-# Create PR
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-## Summary
-<2-3 bullets of what changed>
-
-## Test Plan
-- [ ] <verification steps>
-EOF
-)"
 ```
+/pr-creator
+```
+
+`pr-creator` will:
+1. Push the branch
+2. Validate title + body via commit-msg.sh
+3. Run `/review all` (already done in Step 1.5 — skip if results are fresh)
+4. Create PR as draft or ready based on review results
 
 **Do NOT clean up worktree** — user needs it alive to iterate on PR feedback.
 

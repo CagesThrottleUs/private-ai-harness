@@ -23,6 +23,27 @@ Run deterministic checks first (mechanical, no judgment). Then run structural ch
 
 ---
 
+## Spec Identity
+
+Every spec file must begin with a YAML frontmatter block assigning a globally unique `spec_id`.
+
+**Format:** `SPEC-N` (no zero-padding, e.g., `SPEC-1`, `SPEC-42`)
+
+```markdown
+---
+spec_id: SPEC-1
+title: User Authentication
+status: approved
+---
+```
+
+`spec_id` is the root of the traceability chain:
+```
+SPEC-N → REQ-NNN → @spec_id + @req_id (code) → @spec_id + @validates_req (tests)
+```
+
+---
+
 ## 1. Deterministic Checks (automated — run these first)
 
 Search the spec file for each pattern. Flag every match.
@@ -86,6 +107,24 @@ grep -c "## Out of Scope" <spec-file>
 
 Must be exactly 1. Missing = FAIL. Empty = FAIL.
 
+### 1f. spec_id Present and Valid Format
+
+```bash
+# Must appear in frontmatter (first 10 lines)
+head -10 <spec-file> | grep -E "^spec_id: SPEC-[1-9][0-9]*$"
+```
+
+Missing or malformed spec_id = FAIL. Valid: `SPEC-1`, `SPEC-42`. Invalid: `SPEC-001`, `spec-1`, `SPEC-0`.
+
+### 1g. spec_id Globally Unique
+
+```bash
+# Across all spec files
+grep -rh "^spec_id:" .ai/specs/ | sort | uniq -d
+```
+
+Any duplicate = FAIL. Each spec must have a unique SPEC-N that is never reused, even after a spec is retired.
+
 ---
 
 ## 2. Structural Checks (judgment required)
@@ -143,6 +182,106 @@ If the spec says "returns user data on success", it must also specify what happe
 
 ---
 
+## 4. Code Traceability Checks (run after implementation, before merge)
+
+These checks are **post-implementation**. Run them after code exists — not at spec time.
+
+**Required on every public construct (Tier 1–5 per code-documentation skill):**
+- `@spec_id SPEC-N` — which spec this construct implements
+- `@req_id REQ-NNN` — which requirement within that spec
+
+**Required on every test unit (Tier 6):**
+- `@spec_id SPEC-N` — which spec is being validated
+- `@validates_req REQ-NNN` — which requirement within that spec
+
+**No exemptions.** Every written construct must trace to a spec and requirement. If it exists in the codebase, a spec must exist for it.
+
+### 4a. Every REQ Has At Least One Code Annotation
+
+Scan all source files (language-agnostic). Exclude non-source dirs and config/data files.
+
+```bash
+# Find all spec_id annotations in source (language-agnostic)
+grep -rn "spec_id: SPEC-\|@spec_id SPEC-" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
+  --exclude-dir="dist" --exclude-dir="build" --exclude-dir=".ai" \
+  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
+  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
+  <src-dir>
+
+# Find all req_id annotations in source
+grep -rn "req_id: REQ-\|@req_id REQ-" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
+  --exclude-dir="dist" --exclude-dir="build" --exclude-dir=".ai" \
+  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
+  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
+  <src-dir>
+```
+
+Every `REQ-NNN` in the spec must appear at least once as a `req_id:` / `@req_id` annotation in source, paired with the correct `spec_id:` / `@spec_id`. Missing = FAIL.
+
+### 4b. Every REQ Has At Least One Test Annotation
+
+```bash
+# Find all validates_req annotations in test files
+grep -rn "validates_req: REQ-\|@validates_req REQ-" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
+  <test-dir>
+
+# Find paired spec_id in test files
+grep -rn "spec_id: SPEC-\|@spec_id SPEC-" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
+  <test-dir>
+```
+
+Every `REQ-NNN` in the spec must appear at least once as `validates_req:` / `@validates_req` paired with the correct `spec_id:` / `@spec_id`. Missing = FAIL.
+
+### 4c. No Orphaned Annotations
+
+Code annotations must only reference SPECs and REQs that exist in spec files.
+
+```bash
+# All SPEC-N values referenced in source
+grep -rh "spec_id: SPEC-\|@spec_id SPEC-" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir=".ai" \
+  --exclude="*.md" \
+  <src-dir> | grep -oE "SPEC-[1-9][0-9]*" | sort -u
+
+# All SPEC-N values defined in spec files
+grep -rh "^spec_id:" .ai/specs/ | grep -oE "SPEC-[1-9][0-9]*" | sort -u
+
+# diff the two — anything in code but not in specs = orphaned
+```
+
+Orphaned SPEC-N in code = FAIL. Orphaned REQ-NNN (exists in annotation but not in that spec's REQ blocks) = FAIL.
+
+### 4d. Every Source Module Has @spec_id at File Level
+
+Every source file must have a file-level `spec_id:` / `@spec_id` annotation in its header comment or module docstring. No exceptions.
+
+```bash
+# Files missing spec_id annotation — every listed file is a FAIL
+grep -rL "spec_id:\|@spec_id" \
+  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
+  --exclude-dir="dist" --exclude-dir="build" \
+  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
+  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
+  <src-dir>
+```
+
+Missing `@spec_id` on any source file = FAIL. If it exists in the codebase, a spec must exist for it.
+
+### 4e. Traceability Matrix
+
+Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
+
+| SPEC | REQ | Statement | Implemented In | Tested In |
+|------|-----|-----------|----------------|-----------|
+| SPEC-1 | REQ-001 | ... | `auth.ts:42` | `auth.test.ts:15` |
+| SPEC-1 | REQ-002 | ... | ❌ MISSING | ❌ MISSING |
+
+---
+
 ## Output Format
 
 ```
@@ -160,6 +299,14 @@ If the spec says "returns user data on success", it must also specify what happe
 ### Logic Failures (N)
 - [description]
 
+### Code Traceability Failures (N) — post-implementation only
+- SPEC-N: missing `spec_id:` frontmatter in spec file
+- SPEC-N: duplicate spec_id detected across multiple spec files
+- SPEC-N / REQ-NNN: no `@spec_id` + `@req_id` annotation found in codebase
+- SPEC-N / REQ-NNN: no `@spec_id` + `@validates_req` annotation found in tests
+- SPEC-N (orphaned): code references SPEC-N not found in any spec file
+- REQ-NNN (orphaned): code references REQ-NNN not found in SPEC-N
+
 ### Warnings (advisory, non-blocking)
 - [observation]
 
@@ -167,6 +314,8 @@ If the spec says "returns user data on success", it must also specify what happe
 ```
 
 Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
+
+Save traceability matrix (after implementation) to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`.
 
 ---
 
@@ -191,20 +340,31 @@ Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
 
 ## Integration
 
-Run after `brainstorming` writes spec, before `writing-plans` starts.
+Two gates:
+1. **Spec gate** (Sections 1–3): After `brainstorming` writes spec, before `writing-plans` starts.
+2. **Traceability gate** (Section 4): After implementation, before merge. Run via `pr-reviewer` agent or manually.
 
 ```dot
 digraph gate_position {
     "brainstorming writes spec" [shape=box];
-    "spec-quality-gate" [shape=box style=filled fillcolor=lightyellow];
-    "spec-quality-gate passes?" [shape=diamond];
+    "spec-quality-gate (1-3)" [shape=box style=filled fillcolor=lightyellow];
+    "spec gate passes?" [shape=diamond];
     "fix spec" [shape=box];
-    "writing-plans" [shape=box];
+    "writing-plans + implementation" [shape=box];
+    "traceability gate (section 4)" [shape=box style=filled fillcolor=lightyellow];
+    "traceability passes?" [shape=diamond];
+    "add @req_id / @validates_req" [shape=box];
+    "merge / PR" [shape=box];
 
-    "brainstorming writes spec" -> "spec-quality-gate";
-    "spec-quality-gate" -> "spec-quality-gate passes?";
-    "spec-quality-gate passes?" -> "fix spec" [label="FAIL"];
-    "fix spec" -> "spec-quality-gate" [label="re-run"];
-    "spec-quality-gate passes?" -> "writing-plans" [label="PASS"];
+    "brainstorming writes spec" -> "spec-quality-gate (1-3)";
+    "spec-quality-gate (1-3)" -> "spec gate passes?";
+    "spec gate passes?" -> "fix spec" [label="FAIL"];
+    "fix spec" -> "spec-quality-gate (1-3)" [label="re-run"];
+    "spec gate passes?" -> "writing-plans + implementation" [label="PASS"];
+    "writing-plans + implementation" -> "traceability gate (section 4)";
+    "traceability gate (section 4)" -> "traceability passes?";
+    "traceability passes?" -> "add @spec_id + @req_id / @validates_req" [label="FAIL"];
+    "add @spec_id + @req_id / @validates_req" -> "traceability gate (section 4)" [label="re-run"];
+    "traceability passes?" -> "merge / PR" [label="PASS"];
 }
 ```

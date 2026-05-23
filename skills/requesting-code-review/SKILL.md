@@ -1,103 +1,102 @@
 ---
 name: requesting-code-review
-description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+description: Use when completing tasks, implementing major features, or before merging. Routes to the right review agent(s) based on context. For full suite use /review all. For targeted review use /review <type>.
 ---
 
 # Requesting Code Review
 
-Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
+Route to the right review agent(s) for what you've built. Reviews are mandatory before merge — the type and depth depend on what changed.
 
-**Core principle:** Review early, review often.
+**Core principle:** Review early, review often. After each task, not just at PR time.
 
-## When to Request Review
+---
 
-**Mandatory:**
-- After each task in subagent-driven development
-- After completing major feature
-- Before merge to main
+## Review Agent Roster
 
-**Optional but valuable:**
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
+| Agent | Invocation | Use when |
+|-------|-----------|----------|
+| `pr-reviewer` | `/review pr` | Every PR, always. 5 dimensions (code quality, docs, security, reliability, performance) + traceability. Blocks without spec. |
+| `spec-impl-reviewer` | `/review spec` | You have a spec and want to verify the implementation actually satisfies acceptance criteria — not just that annotations exist. |
+| `test-quality-reviewer` | `/review tests` | Tests were added or modified. Checks meaningful assertions, spec TC coverage, mutation resistance, anti-patterns. |
+| `security-reviewer` | `/review security` | PR touches auth, input handling, data access, external communication, config, or adds new endpoints/handlers. |
+| `full-project-reviewer` | `/review full` | Before releases, after major milestones, full codebase audit. Not per-PR. |
+| **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
+
+---
+
+## When to Use Which
+
+### Minimum (every PR)
+```
+/review pr
+```
+
+### Standard (recommended for all feature PRs)
+```
+/review all
+```
+Runs pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer in parallel.
+
+### After each task (during subagent-driven development)
+```
+/review pr
+```
+Catch issues before they compound. Fix before moving to next task.
+
+### Before merge (mandatory)
+```
+/review all
+```
+All four agents. Aggregated report. No merge if any Critical finding.
+
+### Full codebase audit (periodic)
+```
+/review full
+```
+Not per-PR. Use after significant milestones or before production releases.
+
+---
 
 ## How to Request
 
-**1. Get git SHAs:**
-```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
-HEAD_SHA=$(git rev-parse HEAD)
+**Quick (most common):**
+```
+/review all
+```
+The `review` skill collects inputs, dispatches all agents in parallel, aggregates results.
+
+**Targeted:**
+```
+/review security      ← just security
+/review spec          ← just spec correctness
+/review tests         ← just test quality
 ```
 
-**2. Dispatch code reviewer subagent:**
+**Direct from chat:**
+- "review my PR" → routes to `/review pr`
+- "does this satisfy the spec" → routes to `/review spec`
+- "check my tests" → routes to `/review tests`
+- "security review" → routes to `/review security`
 
-Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
+---
 
-**Placeholders:**
-- `{DESCRIPTION}` - Brief summary of what you built
-- `{PLAN_OR_REQUIREMENTS}` - What it should do
-- `{BASE_SHA}` - Starting commit
-- `{HEAD_SHA}` - Ending commit
+## Act on Feedback
 
-**3. Act on feedback:**
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
-- Note Minor issues for later
-- Push back if reviewer is wrong (with reasoning)
+| Severity | Action |
+|----------|--------|
+| Critical | Fix immediately before any other work |
+| Important | Fix before merge — do not proceed |
+| Minor | Note for later, address when possible |
 
-## Example
+Push back if reviewer is wrong — with technical reasoning and evidence.
 
-```
-[Just completed Task 2: Add verification function]
+---
 
-You: Let me request code review before proceeding.
+## Integration
 
-BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
-HEAD_SHA=$(git rev-parse HEAD)
+- **Subagent-driven development:** `/review pr` after each task
+- **pr-creator:** runs `/review all` automatically before creating PR (Step 5)
+- **finishing-a-development-branch:** runs `/review all` before merge/PR options
+- **Ad-hoc:** `/review <type>` any time during development
 
-[Dispatch code reviewer subagent]
-  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
-  PLAN_OR_REQUIREMENTS: Task 2 from docs/superpowers/plans/deployment-plan.md
-  BASE_SHA: a7981ec
-  HEAD_SHA: 3df7661
-
-[Subagent returns]:
-  Strengths: Clean architecture, real tests
-  Issues:
-    Important: Missing progress indicators
-    Minor: Magic number (100) for reporting interval
-  Assessment: Ready to proceed
-
-You: [Fix progress indicators]
-[Continue to Task 3]
-```
-
-## Integration with Workflows
-
-**Subagent-Driven Development:**
-- Review after EACH task
-- Catch issues before they compound
-- Fix before moving to next task
-
-**Executing Plans:**
-- Review after each task or at natural checkpoints
-- Get feedback, apply, continue
-
-**Ad-Hoc Development:**
-- Review before merge
-- Review when stuck
-
-## Red Flags
-
-**Never:**
-- Skip review because "it's simple"
-- Ignore Critical issues
-- Proceed with unfixed Important issues
-- Argue with valid technical feedback
-
-**If reviewer wrong:**
-- Push back with technical reasoning
-- Show code/tests that prove it works
-- Request clarification
-
-See template at: requesting-code-review/code-reviewer.md
+See `review/SKILL.md` for the full orchestration logic.
