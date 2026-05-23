@@ -2,8 +2,9 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-6 run automatically. Step 7 (VoiceMode /voicemode:install)
-# must be run manually inside Claude Code — see instructions at the end.
+# Steps 1-7 run automatically. Step 8 self-installs this repo as a Claude plugin.
+# Step 9 installs the commit-msg git hook in the current project.
+# Step 10 (VoiceMode /voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
 
@@ -116,15 +117,75 @@ else
   info "Installing VoiceMode plugin..."
   claude plugin install voicemode@voicemode && ok "voicemode plugin installed" || warn "plugin install failed"
 fi
+echo ""
 
+# ── 8. Self-install: private-ai-harness plugin ───────────────────────────────
+echo "8.  private-ai-harness plugin (skills + agents)"
+
+# Resolve repo root relative to this script — works from any CWD
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+info "Repo root: $REPO_ROOT"
+
+if ! check_cmd claude; then
+  warn "claude CLI not found — run these manually inside Claude Code:"
+  warn "  /plugin marketplace add $REPO_ROOT"
+  warn "  /plugin install private-ai-harness@private-ai-harness --scope user"
+  warn "  /reload-plugins"
+else
+  info "Adding private-ai-harness as marketplace..."
+  claude plugin marketplace add "$REPO_ROOT" \
+    && ok "marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+
+  info "Installing private-ai-harness plugin (user scope)..."
+  claude plugin install private-ai-harness@private-ai-harness --scope user \
+    && ok "private-ai-harness installed" \
+    || warn "install failed — check output above"
+fi
 echo ""
+
+# ── 9. commit-msg git hook ────────────────────────────────────────────────────
+echo "9.  commit-msg hook"
+
+# Install into the repo containing this script (the harness itself)
+HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
+HOOK_SOURCE="$REPO_ROOT/scripts/commit-msg.sh"
+
+if [[ ! -f "$HOOK_SOURCE" ]]; then
+  warn "scripts/commit-msg.sh not found — skipping hook install"
+elif [[ ! -d "$REPO_ROOT/.git" ]]; then
+  warn "$REPO_ROOT is not a git repo — skipping hook install"
+else
+  chmod +x "$HOOK_SOURCE"
+  ln -sf "$HOOK_SOURCE" "$HOOK_TARGET"
+  ok "commit-msg hook installed → $HOOK_TARGET"
+fi
+
+# Also offer to install into the current working directory's repo if different
+CWD_GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -n "$CWD_GIT_ROOT" && "$CWD_GIT_ROOT" != "$REPO_ROOT" ]]; then
+  CWD_HOOK="$CWD_GIT_ROOT/.git/hooks/commit-msg"
+  info "Also installing hook into current project: $CWD_GIT_ROOT"
+  ln -sf "$HOOK_SOURCE" "$CWD_HOOK" \
+    && ok "commit-msg hook installed → $CWD_HOOK" \
+    || warn "hook install failed for $CWD_GIT_ROOT"
+fi
+echo ""
+
 echo "═══════════════════════════════════════════"
-echo -e "${YELLOW}MANUAL STEP REQUIRED — run inside Claude Code:${RESET}"
+echo -e "${YELLOW}MANUAL STEPS REQUIRED — run inside Claude Code:${RESET}"
 echo ""
-echo "  /voicemode:install"
+echo "  /voicemode:install    — installs VoiceMode CLI, FFmpeg, voice services"
+echo "  /reload-plugins       — activates private-ai-harness skills + agents"
 echo ""
-echo "This installs VoiceMode CLI, FFmpeg, and local voice services."
-echo "It cannot be scripted because it runs as a Claude skill."
+echo "Verify plugin loaded:"
+echo "  /plugin list"
+echo ""
+echo "Available after reload:"
+echo "  Skills : /review, /pr-creator, /spec-quality-gate, /code-documentation"
+echo "           /requesting-code-review, /finishing-a-development-branch ..."
+echo "  Agents : pr-reviewer, spec-impl-reviewer, test-quality-reviewer,"
+echo "           security-reviewer, full-project-reviewer"
 echo "═══════════════════════════════════════════"
 echo ""
 ok "Done. Check any warnings above."
