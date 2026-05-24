@@ -5,7 +5,7 @@ description: Use when a spec has been written and must be validated before imple
 
 # Spec Quality Gate
 
-Linter + design reviewer for specs. Run after brainstorming writes the spec, before writing-plans starts.
+Design reviewer for specs. Run after brainstorming writes the spec, before writing-plans starts.
 
 **Core principle:** A spec that passes human review but fails the quality gate is not a spec — it is a wish list.
 
@@ -21,9 +21,9 @@ If the gate fails, fix the spec. Do not proceed to writing-plans.
 
 ## Gate Execution Order
 
-Run all sections in order. Report ALL failures across all sections before asking for fixes.
+Read the spec. Evaluate all sections in order. Report ALL failures across all sections before asking for fixes.
 
-1. Deterministic checks (mechanical, no judgment)
+1. Format checks (read and verify presence/structure)
 2. Structural checks (judgment on form)
 3. Logic checks (judgment on completeness)
 4. Design completeness checks (judgment on correctness)
@@ -53,19 +53,18 @@ SPEC-N → REQ-NNN → @spec_id + @req_id (code) → @spec_id + @validates_req (
 
 ---
 
-## 1. Deterministic Checks (automated — run these first)
+## 1. Format Checks (read and verify)
 
-Search the spec file for each pattern. Flag every match.
+Read the spec and verify each of the following. Every missing item is a blocking failure.
 
-### 1a. Vague / Emotional Language (ZERO TOLERANCE)
+### 1a. Vague / Emotional Language
 
-```bash
-grep -niE \
-  "tbd|todo|somehow|appropriate(ly)?|intuitive|clean|nice|good performance|fast enough|user.?friendly|should work|seamless|simple(ly)?|obvious|easy to use|high.?quality" \
-  <spec-file>
-```
+Scan every acceptance criterion and requirement statement for unmeasurable language:
 
-Every match is a blocking failure. Replace with a measurable criterion.
+- Words like: `TBD`, `TODO`, `somehow`, `appropriate`, `intuitive`, `clean`, `nice`, `fast enough`, `user-friendly`, `should work`, `seamless`, `simple`, `obvious`, `easy to use`, `high-quality`
+- Any criterion where a reasonable engineer could disagree on whether it's met without additional data
+
+Every match = blocking failure. Replace with a measurable criterion.
 
 | Forbidden | Required |
 |-----------|---------|
@@ -76,58 +75,35 @@ Every match is a blocking failure. Replace with a measurable criterion.
 
 ### 1b. Requirement ID Coverage
 
-Every requirement block must start with `REQ-NNN:`. Count IDs and verify sequential, no gaps.
-
-```bash
-grep -c "^### REQ-[0-9]" <spec-file>
-grep "^### REQ-[0-9]" <spec-file>
-```
+Every requirement block must start with `### REQ-NNN:`. Verify:
+- All IDs follow `REQ-NNN` format (three-digit zero-padded or consistent with project convention)
+- IDs are sequential with no gaps
+- No duplicate IDs
 
 ### 1c. Mandatory Subsections Per Requirement
 
 Each `### REQ-NNN` block must contain all four:
 
-```bash
-# For each REQ block, verify presence of:
-# - "**Statement:**"
-# - "**Acceptance Criteria:**"
-# - "**Dependencies:**" (may be "None" explicitly)
-# - "**Test Cases:**"
-```
+- `**Statement:**` — what the system must do
+- `**Acceptance Criteria:**` — measurable conditions for done
+- `**Dependencies:**` — explicit list or "None"
+- `**Test Cases:**` — named TCs with descriptions
 
 Missing any subsection = FAIL for that REQ.
 
 ### 1d. Test Coverage Matrix Present
 
-```bash
-grep -c "## Test Coverage Matrix" <spec-file>
-```
+Spec must contain exactly one `## Test Coverage Matrix` section mapping every TC to its REQ.
 
-Must be exactly 1. Missing = FAIL.
+### 1e. Out of Scope Section Present and Non-Empty
 
-### 1e. Out of Scope Section Present
+Spec must contain exactly one `## Out of Scope` section with at least one explicit exclusion. An empty section is a failure — something is always out of scope.
 
-```bash
-grep -c "## Out of Scope" <spec-file>
-```
+### 1f. Spec Identity Valid
 
-Must be exactly 1. Missing = FAIL. Empty = FAIL.
+Front matter must have `spec_id: SPEC-N` where N is a positive integer with no zero-padding. Missing, malformed, or `SPEC-0` = FAIL.
 
-### 1f. spec_id Present and Valid Format
-
-```bash
-head -10 <spec-file> | grep -E "^spec_id: SPEC-[1-9][0-9]*$"
-```
-
-Missing or malformed spec_id = FAIL. Valid: `SPEC-1`, `SPEC-42`. Invalid: `SPEC-001`, `spec-1`, `SPEC-0`.
-
-### 1g. spec_id Globally Unique
-
-```bash
-grep -rh "^spec_id:" .ai/specs/ | sort | uniq -d
-```
-
-Any duplicate = FAIL. Each spec must have a unique SPEC-N that is never reused, even after a spec is retired.
+If reviewing multiple specs in the same project, verify the `spec_id` is unique across all existing spec files.
 
 ---
 
@@ -135,12 +111,12 @@ Any duplicate = FAIL. Each spec must have a unique SPEC-N that is never reused, 
 
 ### 2a. Acceptance Criteria Are Measurable
 
-For every acceptance criterion line (`- [ ]`), verify it contains at least one of:
+For every acceptance criterion line, verify it contains at least one of:
 - A number, threshold, or count (e.g., `< 200ms`, `>= 99.9%`, `exactly 3 retries`)
 - A binary condition with specific inputs and outputs (e.g., "returns HTTP 401 when token is expired")
 - A reference to a deterministic comparison (e.g., "output matches fixture in `tests/fixtures/expected.json`")
 
-Criteria that are purely qualitative → FAIL.
+Purely qualitative criteria → FAIL.
 
 ### 2b. Dependency Assumed Behaviors
 
@@ -162,7 +138,7 @@ Every `- TC-` entry must have a descriptive name (not "test case 1", "happy path
 
 ### 2d. No Orphaned Test Cases
 
-Every test case ID in the Test Coverage Matrix must appear in exactly one `REQ-NNN` block's Test Cases list. Orphaned TCs (in matrix but not in a REQ) = FAIL.
+Every test case ID in the Test Coverage Matrix must appear in exactly one `REQ-NNN` block's Test Cases list. TCs in the matrix but not in any REQ = FAIL.
 
 ---
 
@@ -228,7 +204,7 @@ Any spec that modifies how users acquire, activate, upgrade, configure, or remov
 
 A channel that falls through to an unspecified error state without being named = FAIL.
 
-To enumerate channels: read the project's installation documentation before writing the spec. Do not rely on the spec author's knowledge. If the documentation lists it, the spec must account for it.
+To enumerate channels: read the project's installation documentation before reviewing the spec. Do not rely on memory. If the documentation lists it, the spec must account for it.
 
 ### 4e. External Interfaces Must Be Inventoried
 
@@ -294,7 +270,7 @@ Every domain term, system concept, or role name used in the spec must be defined
 
 ### 5d. Assumptions Are Explicit
 
-Every assumption the spec makes — about the environment, about user behavior, about the state of the system before the spec's feature runs, about external systems — must be stated in an explicit Assumptions section or within the relevant REQ's Dependencies table. An implicit assumption is a hidden requirement. It will fail in production and be invisible in review.
+Every assumption the spec makes — about the environment, about user behavior, about the state of the system before the spec's feature runs, about external systems — must be stated in an explicit Assumptions section or within the relevant REQ's Dependencies table. An implicit assumption is a hidden requirement.
 
 **Bad:** A spec that requires network access without stating "assumes network is available and `registry.example.com` is reachable."
 
@@ -310,83 +286,31 @@ Conversely: if an item is partially in scope, it must be split — the in-scope 
 
 ---
 
-## 6. Code Traceability Checks (run after implementation, before merge)
+## 6. Code Traceability Checks (post-implementation only)
 
-These checks are **post-implementation**. Run them after code exists — not at spec time.
+Run after code exists — not at spec time. Evaluate by reading source and test files.
 
-**Required on every public construct (Tier 1–5 per code-documentation skill):**
+**Required on every public construct:**
 - `@spec_id SPEC-N` — which spec this construct implements
 - `@req_id REQ-NNN` — which requirement within that spec
 
-**Required on every test unit (Tier 6):**
+**Required on every test unit:**
 - `@spec_id SPEC-N` — which spec is being validated
 - `@validates_req REQ-NNN` — which requirement within that spec
 
-**No exemptions.** Every written construct must trace to a spec and requirement. If it exists in the codebase, a spec must exist for it.
-
 ### 6a. Every REQ Has At Least One Code Annotation
 
-```bash
-grep -rn "spec_id: SPEC-\|@spec_id SPEC-" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
-  --exclude-dir="dist" --exclude-dir="build" --exclude-dir=".ai" \
-  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
-  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
-  <src-dir>
-
-grep -rn "req_id: REQ-\|@req_id REQ-" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
-  --exclude-dir="dist" --exclude-dir="build" --exclude-dir=".ai" \
-  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
-  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
-  <src-dir>
-```
-
-Every `REQ-NNN` in the spec must appear at least once as a `req_id:` / `@req_id` annotation in source, paired with the correct `spec_id:` / `@spec_id`. Missing = FAIL.
+Read source files. Every `REQ-NNN` in the spec must appear at least once as a `@req_id` annotation paired with the correct `@spec_id`. Missing = FAIL.
 
 ### 6b. Every REQ Has At Least One Test Annotation
 
-```bash
-grep -rn "validates_req: REQ-\|@validates_req REQ-" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
-  <test-dir>
-
-grep -rn "spec_id: SPEC-\|@spec_id SPEC-" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
-  <test-dir>
-```
-
-Every `REQ-NNN` must appear at least once as `validates_req:` / `@validates_req` paired with the correct `spec_id:`. Missing = FAIL.
+Read test files. Every `REQ-NNN` must appear at least once as `@validates_req` paired with the correct `@spec_id`. Missing = FAIL.
 
 ### 6c. No Orphaned Annotations
 
-```bash
-# All SPEC-N values referenced in source
-grep -rh "spec_id: SPEC-\|@spec_id SPEC-" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir=".ai" \
-  --exclude="*.md" \
-  <src-dir> | grep -oE "SPEC-[1-9][0-9]*" | sort -u
+Every `SPEC-N` or `REQ-NNN` referenced in source or test files must correspond to a real spec file and a real requirement within it. Dangling references = FAIL.
 
-# All SPEC-N values defined in spec files
-grep -rh "^spec_id:" .ai/specs/ | grep -oE "SPEC-[1-9][0-9]*" | sort -u
-```
-
-Orphaned SPEC-N in code = FAIL. Orphaned REQ-NNN = FAIL.
-
-### 6d. Every Source Module Has @spec_id at File Level
-
-```bash
-grep -rL "spec_id:\|@spec_id" \
-  --exclude-dir=".git" --exclude-dir="node_modules" --exclude-dir="vendor" \
-  --exclude-dir="dist" --exclude-dir="build" \
-  --exclude="*.json" --exclude="*.yaml" --exclude="*.yml" \
-  --exclude="*.toml" --exclude="*.md" --exclude="*.lock" \
-  <src-dir>
-```
-
-Missing `@spec_id` on any source file = FAIL.
-
-### 6e. Traceability Matrix
+### 6d. Traceability Matrix
 
 Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
 
@@ -405,8 +329,8 @@ Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
 **Date:** YYYY-MM-DD
 **Status:** PASS | FAIL
 
-### Deterministic Failures (N)
-- [REQ-NNN / Section]: [exact failing text] → [required fix]
+### Format Failures (N)
+- [Section]: [description of what is missing or malformed]
 
 ### Structural Failures (N)
 - [REQ-NNN]: [description of structural gap]
@@ -431,10 +355,8 @@ Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
 - [5e] Out of Scope item "<name>" has footprint in <REQ-NNN>
 
 ### Code Traceability Failures (N) — post-implementation only
-- SPEC-N: missing `spec_id:` frontmatter in spec file
-- SPEC-N: duplicate spec_id detected across multiple spec files
-- SPEC-N / REQ-NNN: no `@spec_id` + `@req_id` annotation found in codebase
-- SPEC-N / REQ-NNN: no `@spec_id` + `@validates_req` annotation found in tests
+- SPEC-N / REQ-NNN: no @spec_id + @req_id annotation found in source
+- SPEC-N / REQ-NNN: no @spec_id + @validates_req annotation found in tests
 - SPEC-N (orphaned): code references SPEC-N not found in any spec file
 - REQ-NNN (orphaned): code references REQ-NNN not found in SPEC-N
 
@@ -488,30 +410,5 @@ Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
 ## Integration
 
 Two gates:
-1. **Spec gate** (Sections 1–5): After `brainstorming` writes spec, before `writing-plans` starts. Covers format, structure, logic, design completeness, and self-consistency.
+1. **Spec gate** (Sections 1–5): After `brainstorming` writes spec, before `writing-plans` starts.
 2. **Traceability gate** (Section 6): After implementation, before merge. Run via `pr-reviewer` agent or manually.
-
-```dot
-digraph gate_position {
-    "brainstorming writes spec" [shape=box];
-    "spec-quality-gate (1-5)" [shape=box style=filled fillcolor=lightyellow];
-    "spec gate passes?" [shape=diamond];
-    "fix spec" [shape=box];
-    "writing-plans + implementation" [shape=box];
-    "traceability gate (section 6)" [shape=box style=filled fillcolor=lightyellow];
-    "traceability passes?" [shape=diamond];
-    "add @req_id / @validates_req" [shape=box];
-    "merge / PR" [shape=box];
-
-    "brainstorming writes spec" -> "spec-quality-gate (1-5)";
-    "spec-quality-gate (1-5)" -> "spec gate passes?";
-    "spec gate passes?" -> "fix spec" [label="FAIL"];
-    "fix spec" -> "spec-quality-gate (1-5)" [label="re-run"];
-    "spec gate passes?" -> "writing-plans + implementation" [label="PASS"];
-    "writing-plans + implementation" -> "traceability gate (section 6)";
-    "traceability gate (section 6)" -> "traceability passes?";
-    "traceability passes?" -> "add @spec_id + @req_id / @validates_req" [label="FAIL"];
-    "add @spec_id + @req_id / @validates_req" -> "traceability gate (section 6)" [label="re-run"];
-    "traceability passes?" -> "merge / PR" [label="PASS"];
-}
-```
