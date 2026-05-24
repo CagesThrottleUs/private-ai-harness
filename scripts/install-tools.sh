@@ -94,12 +94,23 @@ echo ""
 echo "6.  Claude plugins (code-review, code-simplifier, skill-creator, claude-md-management, security-guidance)"
 if ! check_cmd claude; then
   warn "claude CLI not found — run these manually:"
+  warn "  claude plugin marketplace add anthropics/claude-plugins-official"
   warn "  claude plugin install code-review@claude-plugins-official"
   warn "  claude plugin install code-simplifier@claude-plugins-official"
   warn "  claude plugin install skill-creator@claude-plugins-official"
   warn "  claude plugin install claude-md-management@claude-plugins-official"
   warn "  claude plugin install security-guidance@claude-plugins-official"
 else
+  info "Registering claude-plugins-official marketplace..."
+  claude plugin marketplace add anthropics/claude-plugins-official \
+    && ok "marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+
+  info "Refreshing claude-plugins-official marketplace..."
+  claude plugin marketplace update claude-plugins-official \
+    && ok "marketplace refreshed" \
+    || warn "marketplace refresh failed — installs below may also fail"
+
   for plugin in \
     code-review@claude-plugins-official \
     code-simplifier@claude-plugins-official \
