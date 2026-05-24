@@ -55,3 +55,19 @@ Checklist before merge:
 - [ ] New developer workflow → guide added to `wiki/guides/`
 - [ ] Feature shipped → changelog entry in `wiki/changelog/`
 - [ ] Breaking change → onboarding updated in `wiki/ONBOARDING.md`
+
+## Harness Meta-Doc Sync Rule
+
+When working inside this repo (skills, agents, install script, plugin manifest):
+**AGENTS.md, CLAUDE.md, and README.md are a synchronized triple.**
+
+| Change made | Must update |
+|-------------|-------------|
+| New or renamed skill | `AGENTS.md` skill table, `README.md` skill table |
+| New or changed agent | `AGENTS.md` agent table, `README.md` agent table |
+| New install step | `AGENTS.md` external skills list (if applicable), `README.md` install list |
+| Version bump criteria change | `CLAUDE.md` version bump rules, `AGENTS.md` version bump rules |
+| Upstream skill change | `CLAUDE.md` upstream watch list, `AGENTS.md` upstream watch list |
+| New workflow rule | `CLAUDE.md` rules section |
+
+Commit all three in the same commit when they diverge.

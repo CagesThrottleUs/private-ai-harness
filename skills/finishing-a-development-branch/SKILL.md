@@ -41,6 +41,19 @@ For each changed file, ask: does this change public behavior, an API surface, an
 
 Wiki entries must ship in the same branch as the behavior. There is no "doc pass" later.
 
+**For changes inside this harness repo** (skills, agents, install script, plugin manifest),
+also check the meta-doc triple:
+
+| Change on this branch | Must update |
+|-----------------------|-------------|
+| New or renamed skill | `AGENTS.md` skill table + `README.md` skill table |
+| New or changed agent | `AGENTS.md` agent table + `README.md` agent table |
+| New install step | `README.md` install list + `AGENTS.md` external skills (if applicable) |
+| Workflow rule change | `CLAUDE.md` + `AGENTS.md` doc-sync rule section |
+| Upstream watch list change | `CLAUDE.md` + `AGENTS.md` upstream section |
+
+Commit `AGENTS.md`, `CLAUDE.md`, and `README.md` in the same commit when they diverge.
+
 ### Step 1: Verify Tests
 
 **Before presenting options, verify tests pass:**
