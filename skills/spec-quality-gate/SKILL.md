@@ -91,6 +91,13 @@ Each `### REQ-NNN` block must contain all four:
 
 Missing any subsection = FAIL for that REQ.
 
+`**Test Cases:**` must contain at minimum:
+- ≥1 TC covering the primary success path with specific inputs and expected outputs stated
+- ≥1 TC covering each distinct failure or error path mentioned in the Statement or ACs
+- ≥1 TC per numeric boundary (any threshold, limit, or count in the ACs)
+
+A `**Test Cases:**` section that is present but empty, or contains only a placeholder like "TBD" or "to be defined" = FAIL equal to the section being absent.
+
 ### 1d. Test Coverage Matrix Present
 
 Spec must contain exactly one `## Test Coverage Matrix` section mapping every TC to its REQ.
@@ -139,6 +146,99 @@ Every `- TC-` entry must have a descriptive name (not "test case 1", "happy path
 ### 2d. No Orphaned Test Cases
 
 Every test case ID in the Test Coverage Matrix must appear in exactly one `REQ-NNN` block's Test Cases list. TCs in the matrix but not in any REQ = FAIL.
+
+### 2e. Every Acceptance Criterion Maps to At Least One TC
+
+Read each AC line in every REQ. For each line, find the TC(s) that prove it. If no TC in the block exercises that specific criterion, it is untested by design — a phantom requirement.
+
+This is a one-to-one mapping obligation: every AC line → ≥1 TC. An AC that cannot be covered by any named TC in the spec = FAIL. A TC that covers no AC in its REQ = phantom TC, also FAIL.
+
+### 2f. Decision Coverage — Every Branch Tested Both Ways
+
+*Inspired by DO-178B Level B: every decision exercised as TRUE and as FALSE.*
+
+For every conditional behavior in a REQ — any `if / when / unless / on failure / on success / otherwise` — there must be a TC that drives the condition TRUE and a separate TC that drives it FALSE.
+
+**Bad:** REQ states "if token is expired, return 401" and has only one TC: `TC-001: expired token returns 401`.
+
+**Good:** `TC-001: expired token returns 401` AND `TC-002: valid token does not return 401`.
+
+The second TC is the decision complement. Without it, the implementation could return 401 unconditionally and every test would still pass. Missing either side of a decision = FAIL.
+
+For compound conditions (`A AND B`, `A OR B`): each sub-condition must be independently exercised — there must be a TC where A is the deciding factor (B held constant) and a TC where B is the deciding factor (A held constant). This is the MC/DC requirement from DO-178B Level A.
+
+### 2g. Boundary Value Coverage
+
+*Inspired by NASA verification standards and SQLite's exhaustive boundary testing.*
+
+For every numeric threshold, limit, count, or range in an AC, three TCs are required:
+- One at exactly the boundary value
+- One just inside the passing side (boundary − minimum step)
+- One just outside the failing side (boundary + minimum step)
+
+**Example:** AC states "response time < 200ms"
+- TC at 199ms (just inside — must pass)
+- TC at 200ms (at boundary — must fail)
+- TC at 201ms (just outside — must fail)
+
+For enumerated states (e.g., retry counts 0, 1, 2, max): TCs at the first value, last value, and one beyond max.
+
+For string or collection length limits: empty, one element, exactly at limit, one over limit.
+
+A threshold in an AC with no boundary TCs = FAIL.
+
+### 2h. Negative Path and Error Injection Completeness
+
+*Inspired by NASA's fault tolerance verification and SQLite's fault injection suite.*
+
+Every distinct failure mode, error code, or error path named anywhere in the spec must have a TC that actively triggers it. "Passive" coverage — where a TC happens to reach an error path as a side effect — does not count.
+
+For each error case:
+- The TC must name the specific failure condition being induced
+- The TC must state the exact expected output (error code, message, state)
+- The TC must be distinct from the happy-path TCs (not a variant of TC-001 with one parameter changed and no expected-error assertion)
+
+Any named error path with no dedicated TC = FAIL.
+
+### 2i. Mutation Resistance
+
+*Inspired by SQLite's philosophy: a test that passes against a wrong implementation is not a test.*
+
+For each TC, reason: "If the implementation were subtly wrong — off-by-one on a threshold, inverted condition, wrong error code, missing a field in the response — would this TC catch it?"
+
+A TC fails this check if:
+- It asserts only that an operation completed, not what it returned
+- It uses a threshold looser than the AC (AC says `< 200ms`, TC asserts `< 1000ms`)
+- It checks a proxy observable instead of the actual required behavior
+- The AC would still be "satisfied" if the implementation returned slightly wrong values
+
+A TC that would pass even if the requirement were violated is a phantom test. Mark it FAIL and require the assertion be tightened to the exact values stated in the AC.
+
+### 2j. Test Case Independence
+
+*Inspired by NASA's test isolation requirements.*
+
+Every TC must be executable in isolation. A TC must not depend on state created by another TC running before it.
+
+If TC-003 requires data seeded by TC-001, then:
+- Either TC-003 must set up its own preconditions (described in the TC)
+- Or the dependency must be made explicit: `**Preconditions:** [specific state the test environment must be in, described independently of any other TC]`
+
+A TC whose preconditions can only be satisfied by running another TC first, with no standalone setup described = FAIL.
+
+Exception: integration TCs that explicitly test sequenced behavior (e.g., "verify state after step 1 AND step 2") must label themselves as sequence tests and state why isolation is impossible.
+
+### 2k. Fault Injection Coverage for External Interfaces
+
+*Inspired by NASA/JPL fault protection requirements and SQLite's OS-layer fault injection.*
+
+For every external interface inventoried under check 4e, at least one TC must simulate each of its stated failure modes.
+
+If the Dependencies table says "Redis: returns nil on miss; connection times out after 500ms under network partition" — there must be:
+- A TC where Redis returns nil (verifying the system's miss-handling)
+- A TC where the Redis connection times out (verifying the system's partition behavior)
+
+No external interface failure mode without a corresponding TC = FAIL. This check is the test-side enforcement of check 4e.
 
 ---
 
@@ -333,7 +433,17 @@ Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
 - [Section]: [description of what is missing or malformed]
 
 ### Structural Failures (N)
-- [REQ-NNN]: [description of structural gap]
+- [REQ-NNN / 2a]: acceptance criterion "<text>" is qualitative with no measurable threshold
+- [REQ-NNN / 2b]: dependency "<name>" has no assumed behavior stated
+- [REQ-NNN / 2c]: TC "<id>" has generic name
+- [2d]: TC "<id>" appears in matrix but not in any REQ block
+- [REQ-NNN / 2e]: AC "<text>" has no TC that exercises it; or TC "<id>" covers no AC in its REQ
+- [REQ-NNN / 2f]: condition "<text>" has TC for TRUE branch but no TC for FALSE branch (or vice versa); or compound condition missing independent variation of sub-condition
+- [REQ-NNN / 2g]: threshold "<value>" in AC has no boundary TCs (at, below, above)
+- [REQ-NNN / 2h]: error path "<description>" has no dedicated TC that actively triggers it
+- [REQ-NNN / 2i]: TC "<id>" assertion too loose — would pass against a wrong implementation; specific failure mode described
+- [REQ-NNN / 2j]: TC "<id>" depends on state from another TC with no standalone precondition described
+- [REQ-NNN / 2k]: external interface "<name>" failure mode "<mode>" has no TC that simulates it
 
 ### Logic Failures (N)
 - [description]
@@ -375,11 +485,21 @@ Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
 | Failure | Fix |
 |---------|-----|
 | "TBD" in acceptance criteria | Decide now or mark REQ as out of scope |
-| No test cases in REQ block | Name at least two TCs: happy path + error case |
+| No test cases in REQ block | Name at minimum: one primary success TC, one error TC per failure path, one boundary TC per threshold |
+| `**Test Cases:**` present but empty | Write the TCs; presence of the subsection header is not coverage |
 | Dependency with no assumed behavior | Write exact contract this requirement depends on |
 | Acceptance criterion is "user can do X easily" | Rewrite with a time limit, success rate, or error count |
 | Missing Out of Scope section | Add explicit exclusions — what someone might assume is in scope |
 | REQ with no acceptance criteria | Every REQ needs ≥ 1 measurable criterion |
+| AC with no TC covering it | Add a TC with specific inputs and the exact expected output from the AC |
+| TC with no AC it covers | Either map it to an AC or remove it — untethered TCs are noise |
+| Decision with only one branch tested | Add the complement TC (if TC tests the TRUE case, add one for FALSE) |
+| Compound condition with no independent sub-condition variation | Add TCs that vary each sub-condition independently while holding the other constant (MC/DC) |
+| Threshold with no boundary TCs | Add TCs at exactly the boundary, one step below, one step above |
+| Error path with no TC that triggers it | Add a TC that actively induces that failure; assert the exact expected error output |
+| TC assertion too loose | Tighten to the exact value/condition stated in the AC; "completed successfully" is not an assertion |
+| TC requires another TC to run first | Add standalone preconditions to the TC; describe required state independently |
+| External interface failure mode with no TC | Add a TC per failure mode in the Dependencies table; simulate the failure explicitly |
 | Capability not classified as NEW or EXTENDING | Classify inline with one-sentence rationale; move deferred items to Out of Scope |
 | Non-obvious constant with no justification | Add inline parenthetical citing its basis: matching constant, standard, benchmark, or constraint |
 | Observable change with no documentation REQ | Add a REQ whose statement names a specific documentation artifact to be updated |
@@ -398,6 +518,15 @@ Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
 - "The dependency works as expected" (expected by whom? state it)
 - Acceptance criteria that an AI or human could disagree on without more data
 - Test cases named "test1", "happy path", "edge case"
+- A `**Test Cases:**` section that exists but contains no actual TCs
+- An AC with no TC pointing at it — every written requirement is a promise; an unkept promise is not a requirement
+- A TC that asserts only "did not error" or "completed" without checking the actual output — this is a false green
+- A decision or conditional in the spec with only one branch covered by TCs — the untested branch is untested code by design
+- A threshold in an AC with no boundary TCs — implementations routinely fail at exact boundary conditions
+- An error path that has no TC actively inducing it — passive coverage (reaching the error path incidentally) does not prove the system handles it correctly
+- TCs that can only run in sequence — sequential dependency means failures produce misleading results; hidden coupling between tests hides bugs
+- An external interface with stated failure modes but no TC that simulates any of them — fault tolerance untested is fault tolerance unproven
+- A TC whose assertion is looser than its AC — if the AC says `< 200ms` and the test asserts `< 1000ms`, the test cannot catch a regression
 - A capability described as "reserved", "coming soon", or "deferred" inside requirements — absent or in a REQ, never in between
 - A constant with no sentence explaining why that value and not another
 - An identifier in a shared namespace with no stated convention check
