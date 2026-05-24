@@ -77,9 +77,10 @@ This script installs (in order):
 4. **claude-mem** — persistent memory MCP (`npx claude-mem install`)
 5. **UI skills** — `impeccable`, `emilkowalski/skill`, `taste-skill` via `npx skills add`
 6. **Claude plugins** — `code-review`, `code-simplifier`, `skill-creator`, `claude-md-management`, `security-guidance`
-7. **VoiceMode** — marketplace + plugin install
-8. **This repo as a plugin** — registers the harness as a local Claude marketplace and installs it at user scope
-9. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
+7. **LSP plugins** — `clangd-lsp`, `gopls-lsp`, `jdtls-lsp`, `kotlin-lsp`, `rust-analyzer-lsp`, `typescript-lsp`
+8. **VoiceMode** — marketplace + plugin install
+9. **This repo as a plugin** — registers the harness as a local Claude marketplace and installs it at user scope
+10. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
 
 ### Manual steps (run inside Claude Code after the script)
 

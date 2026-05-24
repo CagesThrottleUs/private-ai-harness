@@ -2,9 +2,9 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-7 run automatically. Step 8 self-installs this repo as a Claude plugin.
-# Step 9 installs the commit-msg git hook in the current project.
-# Step 10 (VoiceMode /voicemode:install) must be run manually inside Claude Code.
+# Steps 1-9 run automatically. Step 9 self-installs this repo as a Claude plugin.
+# Step 10 installs the commit-msg git hook in the current project.
+# VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
 
@@ -108,8 +108,33 @@ else
 fi
 echo ""
 
-# ── 7. VoiceMode ─────────────────────────────────────────────────────────────
-echo "7.  VoiceMode"
+# ── 7. LSP plugins ───────────────────────────────────────────────────────────
+echo "7.  LSP plugins (clangd, gopls, jdtls, kotlin, rust-analyzer, typescript)"
+if ! check_cmd claude; then
+  warn "claude CLI not found — run these manually:"
+  warn "  claude plugin install clangd-lsp@claude-plugins-official"
+  warn "  claude plugin install gopls-lsp@claude-plugins-official"
+  warn "  claude plugin install jdtls-lsp@claude-plugins-official"
+  warn "  claude plugin install kotlin-lsp@claude-plugins-official"
+  warn "  claude plugin install rust-analyzer-lsp@claude-plugins-official"
+  warn "  claude plugin install typescript-lsp@claude-plugins-official"
+else
+  for plugin in \
+    clangd-lsp@claude-plugins-official \
+    gopls-lsp@claude-plugins-official \
+    jdtls-lsp@claude-plugins-official \
+    kotlin-lsp@claude-plugins-official \
+    rust-analyzer-lsp@claude-plugins-official \
+    typescript-lsp@claude-plugins-official
+  do
+    info "Installing $plugin..."
+    claude plugin install "$plugin" && ok "$plugin installed" || warn "$plugin install failed"
+  done
+fi
+echo ""
+
+# ── 8. VoiceMode ─────────────────────────────────────────────────────────────
+echo "8.  VoiceMode"
 if ! check_cmd claude; then
   warn "claude CLI not found — run VoiceMode steps manually inside Claude Code"
 else
@@ -121,8 +146,8 @@ else
 fi
 echo ""
 
-# ── 8. Self-install: private-ai-harness plugin ───────────────────────────────
-echo "8.  private-ai-harness plugin (skills + agents)"
+# ── 9. Self-install: private-ai-harness plugin ───────────────────────────────
+echo "9.  private-ai-harness plugin (skills + agents)"
 
 # Resolve repo root relative to this script — works from any CWD
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -146,8 +171,8 @@ else
 fi
 echo ""
 
-# ── 9. commit-msg git hook ────────────────────────────────────────────────────
-echo "9.  commit-msg hook"
+# ── 10. commit-msg git hook ──────────────────────────────────────────────────
+echo "10. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
