@@ -86,19 +86,21 @@ fi
 echo ""
 
 # ── 6. Claude plugins ────────────────────────────────────────────────────────
-echo "6.  Claude plugins (code-review, code-simplifier, skill-creator, claude-md-management)"
+echo "6.  Claude plugins (code-review, code-simplifier, skill-creator, claude-md-management, security-guidance)"
 if ! check_cmd claude; then
   warn "claude CLI not found — run these manually:"
   warn "  claude plugin install code-review@claude-plugins-official"
   warn "  claude plugin install code-simplifier@claude-plugins-official"
   warn "  claude plugin install skill-creator@claude-plugins-official"
   warn "  claude plugin install claude-md-management@claude-plugins-official"
+  warn "  claude plugin install security-guidance@claude-plugins-official"
 else
   for plugin in \
     code-review@claude-plugins-official \
     code-simplifier@claude-plugins-official \
     skill-creator@claude-plugins-official \
-    claude-md-management@claude-plugins-official
+    claude-md-management@claude-plugins-official \
+    security-guidance@claude-plugins-official
   do
     info "Installing $plugin..."
     claude plugin install "$plugin" && ok "$plugin installed" || warn "$plugin install failed"
