@@ -3,6 +3,8 @@
 This repo is a Claude Code plugin: skills, agents, scripts, and philosophy docs.
 No application code. No tests. No build step.
 
+@AGENTS.md
+
 ---
 
 ## Repo layout
