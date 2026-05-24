@@ -2,10 +2,11 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-13 run automatically. Step 10 self-installs this repo as a Claude plugin.
+# Steps 1-14 run automatically. Step 10 self-installs this repo as a Claude plugin.
 # Step 11 injects caveman mode into ~/.claude/CLAUDE.md.
 # Step 12 injects commit discipline into ~/.claude/CLAUDE.md.
-# Step 13 installs the commit-msg git hook in the current project.
+# Step 13 injects development workflow into ~/.claude/CLAUDE.md.
+# Step 14 installs the commit-msg git hook in the current project.
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
@@ -251,8 +252,33 @@ EOF
 fi
 echo ""
 
-# ── 13. commit-msg git hook ──────────────────────────────────────────────────
-echo "13. commit-msg hook"
+# ── 13. Development workflow — global CLAUDE.md ─────────────────────────────
+echo "13. Development workflow (global CLAUDE.md)"
+
+WORKFLOW_MARKER="## Development Workflow"
+
+if grep -q "$WORKFLOW_MARKER" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
+  ok "workflow block already present in $GLOBAL_CLAUDE_MD"
+else
+  # Insert before CODEGRAPH_START if present, otherwise append
+  if grep -q "<!-- CODEGRAPH_START -->" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
+    sed -i '' "s|<!-- CODEGRAPH_START -->|## Development Workflow\n\n**ALWAYS follow for any feature, fix, or spec work. Mandatory, not suggestions.**\n\n@$REPO_ROOT/skills/workflow/SKILL.md\n\n<!-- CODEGRAPH_START -->|" "$GLOBAL_CLAUDE_MD"
+  else
+    cat >> "$GLOBAL_CLAUDE_MD" <<EOF
+
+## Development Workflow
+
+**ALWAYS follow for any feature, fix, or spec work. Mandatory, not suggestions.**
+
+@$REPO_ROOT/skills/workflow/SKILL.md
+EOF
+  fi
+  ok "workflow block added to $GLOBAL_CLAUDE_MD"
+fi
+echo ""
+
+# ── 14. commit-msg git hook ──────────────────────────────────────────────────
+echo "14. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
