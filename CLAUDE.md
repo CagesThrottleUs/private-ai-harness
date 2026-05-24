@@ -84,6 +84,20 @@ Scopes: `skills` `agents` `scripts` `plugin` `docs`
 
 ---
 
+## Upstream skills to keep current
+
+Three skills are sourced from external references and can drift. Check and sync periodically:
+
+| File | Source | How to check |
+|------|--------|-------------|
+| `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill --web` |
+| `skills/using-superpowers/SKILL.md` | upstream superpowers skill | `gh search repos "claude superpowers skill"` |
+| `skills/karpathy/SKILL.md` | [Karpathy tweet](https://x.com/karpathy/status/2015883857489522876) + community distillations | `gh search repos "karpathy claude skill"` |
+
+When upgrading: diff upstream against local, preserve any local customizations, bump patch version.
+
+---
+
 ## What not to do
 
 - Don't create application code, test files, or CI pipelines in this repo

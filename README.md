@@ -59,9 +59,23 @@ Not a product. Optimized for one workflow.
 
 ### Prerequisites
 
-- macOS (scripts assume `zsh`/`bash`)
-- [Node.js](https://nodejs.org/) ≥ 18 (for `npm`/`npx`)
-- [Claude Code](https://claude.ai/code) CLI installed and authenticated
+| Dependency | Why |
+|------------|-----|
+| macOS | scripts assume `zsh`/`bash` |
+| [Node.js](https://nodejs.org/) ≥ 18 | `npm`/`npx` for CodeGraph, Context7, claude-mem, skills |
+| [Claude Code](https://claude.ai/code) CLI (`claude`) | plugin install, marketplace registration |
+| [GitHub CLI](https://cli.github.com/) (`gh`) | checking upstream skill repos for updates |
+
+### Upstream skills to monitor for updates
+
+These skills are sourced from external repos and may drift from the upstream originals.
+Check them periodically with `gh` and sync if they've changed:
+
+| Skill | Upstream | Check command |
+|-------|----------|---------------|
+| `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill` |
+| `skills/using-superpowers/SKILL.md` | upstream superpowers skill | `gh search repos "claude superpowers skill"` |
+| `skills/karpathy/SKILL.md` | [Karpathy guidelines](https://x.com/karpathy/status/2015883857489522876) | manual review |
 
 ### One-command install
 
@@ -75,12 +89,13 @@ This script installs (in order):
 2. **CodeGraph** — AST knowledge graph MCP server (`npm i -g @colbymchenry/codegraph`)
 3. **Context7** — live library docs MCP (`npx ctx7 setup`)
 4. **claude-mem** — persistent memory MCP (`npx claude-mem install`)
-5. **UI skills** — `impeccable`, `emilkowalski/skill`, `taste-skill` via `npx skills add`
+5. **Skills** — `impeccable`, `emilkowalski/skill`, `taste-skill`, `mukul975/Anthropic-Cybersecurity-Skills` (754 cybersecurity skills)
 6. **Claude plugins** — `code-review`, `code-simplifier`, `skill-creator`, `claude-md-management`, `security-guidance`
 7. **LSP plugins** — `clangd-lsp`, `gopls-lsp`, `jdtls-lsp`, `kotlin-lsp`, `rust-analyzer-lsp`, `typescript-lsp`
-8. **VoiceMode** — marketplace + plugin install
-9. **This repo as a plugin** — registers the harness as a local Claude marketplace and installs it at user scope
-10. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
+8. **Understand-Anything** — multimodal analysis plugin (`Lum1104/Understand-Anything`)
+9. **VoiceMode** — marketplace + plugin install
+10. **This repo as a plugin** — registers the harness as a local Claude marketplace and installs it at user scope
+11. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
 
 ### Manual steps (run inside Claude Code after the script)
 
