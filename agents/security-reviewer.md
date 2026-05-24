@@ -295,3 +295,27 @@ This is mandatory. Assess how the attack surface grows over time.
 - Skip the threat model — it drives everything else
 - Approve if any Critical finding exists
 - Ignore new dependencies — supply chain is an attack vector
+
+---
+
+## Anthropic-Cybersecurity-Skills
+
+754 specialist cybersecurity skills are available via `mukul975/Anthropic-Cybersecurity-Skills`.
+**Before executing any step above, check if a matching skill exists and invoke it.**
+
+Key skill categories to reach for by step:
+
+| Review Step | Relevant skill prefix |
+|-------------|-----------------------|
+| Threat model / kill chain | `analyzing-cyber-kill-chain`, `analyzing-apt-group-*` |
+| Input validation / injection | `performing-sql-injection-*`, `testing-xss-*`, `testing-command-injection-*` |
+| Auth / IDOR | `testing-idor-*`, `testing-broken-authentication-*`, `testing-jwt-*` |
+| Cryptography | `testing-cryptographic-failures-*`, `analyzing-*-cryptography-*` |
+| Secrets in code | `scanning-secrets-*`, `performing-credential-*` |
+| Dependency / supply chain | `analyzing-software-supply-chain-*`, `performing-dependency-confusion-*` |
+| Cloud / infra | `analyzing-aws-*`, `analyzing-azure-*`, `analyzing-kubernetes-audit-*` |
+| Malware / C2 | `analyzing-command-and-control-*`, `analyzing-cobalt-strike-*` |
+| Forensics / logs | `analyzing-linux-audit-logs-*`, `analyzing-api-gateway-access-logs` |
+
+Invoke via the `Skill` tool: `Skill("performing-sql-injection-testing")`, etc.
+If no exact match, use `Skill("security-testing-*")` to discover adjacent skills.

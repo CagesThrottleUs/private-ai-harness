@@ -105,6 +105,10 @@ Output: [test quality report with anti-patterns and TC coverage]
 
 #### `/review security`
 
+Before dispatching, check whether any `Anthropic-Cybersecurity-Skills` apply to the
+change (e.g. `testing-idor-*`, `performing-sql-injection-*`, `analyzing-jwt-*`).
+Invoke matching skills first — they provide domain-specific checklists the agent should follow.
+
 Dispatch `security-reviewer` agent:
 ```
 Agent (security-reviewer):
