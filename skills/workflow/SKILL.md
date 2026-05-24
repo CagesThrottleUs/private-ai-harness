@@ -6,6 +6,12 @@ user-invocable: true
 
 ## The Basic Workflow
 
+0. **Research & Reuse** _(mandatory before any new implementation)_
+   - `gh search repos` and `gh search code` first — find existing implementations before writing anything new.
+   - Context7 or vendor docs second — confirm API behavior, package usage, version-specific details.
+   - Check npm/PyPI/crates.io/etc. for battle-tested libraries before writing utility code.
+   - Prefer adopting or porting a proven approach over net-new code when it meets the requirement.
+
 1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves spec to `.ai/specs/` using REQ-NNN requirement format with test case mappings.
 
 2. **spec-quality-gate** - Activates after spec is written. Lints spec for vague language, missing REQ-NNN structure, unmeasurable criteria, undeclared dependencies. FAIL = fix spec, re-run. PASS = proceed.
@@ -56,18 +62,20 @@ Checklist before merge:
 - [ ] Feature shipped → changelog entry in `wiki/changelog/`
 - [ ] Breaking change → onboarding updated in `wiki/ONBOARDING.md`
 
-## Harness Meta-Doc Sync Rule
+## AGENTS.md + CLAUDE.md Sync Rule
 
-When working inside this repo (skills, agents, install script, plugin manifest):
-**AGENTS.md, CLAUDE.md, and README.md are a synchronized triple.**
+**In any project:** any commit that touches documentation, public behavior, project structure,
+or tooling must also update `CLAUDE.md` and `AGENTS.md` in the same commit.
+
+If either file does not exist yet, create it. A missing file is not a reason to skip.
 
 | Change made | Must update |
 |-------------|-------------|
-| New or renamed skill | `AGENTS.md` skill table, `README.md` skill table |
-| New or changed agent | `AGENTS.md` agent table, `README.md` agent table |
-| New install step | `AGENTS.md` external skills list (if applicable), `README.md` install list |
-| Version bump criteria change | `CLAUDE.md` version bump rules, `AGENTS.md` version bump rules |
-| Upstream skill change | `CLAUDE.md` upstream watch list, `AGENTS.md` upstream watch list |
-| New workflow rule | `CLAUDE.md` rules section |
+| New skill / tool / command | `AGENTS.md` inventory |
+| New or changed agent / subagent | `AGENTS.md` agent table |
+| New install or setup step | `AGENTS.md` tools section + `CLAUDE.md` if workflow changes |
+| New workflow rule or convention | `CLAUDE.md` rules section |
+| Breaking API or behavior change | `CLAUDE.md` + `AGENTS.md` contracts |
+| New external dependency | `AGENTS.md` if AI-relevant, `CLAUDE.md` if it affects how to work in the repo |
 
-Commit all three in the same commit when they diverge.
+Commit `AGENTS.md` and `CLAUDE.md` in the same commit as the change that triggered the update.
