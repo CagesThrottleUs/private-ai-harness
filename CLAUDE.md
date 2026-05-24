@@ -84,6 +84,22 @@ Scopes: `skills` `agents` `scripts` `plugin` `docs`
 
 ---
 
+## Meta-doc sync rule
+
+`AGENTS.md`, `CLAUDE.md`, and `README.md` are a synchronized triple.
+Any change to skills, agents, install steps, or plugin structure must update all three in the same commit.
+
+| Change | Must update |
+|--------|-------------|
+| New or renamed skill | `AGENTS.md` skill table, `README.md` skill table |
+| New or changed agent | `AGENTS.md` agent table, `README.md` agent table |
+| New install step | `README.md` install list, `AGENTS.md` external skills (if applicable) |
+| Version bump rule change | `AGENTS.md` version bump table, `CLAUDE.md` version bump section |
+| Upstream skill change | `AGENTS.md` upstream section, `CLAUDE.md` upstream section |
+| New workflow rule | `CLAUDE.md` rules section |
+
+---
+
 ## Upstream skills to keep current
 
 Three skills are sourced from external references and can drift. Check and sync periodically:
