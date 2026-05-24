@@ -2,8 +2,9 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-11 run automatically. Step 10 self-installs this repo as a Claude plugin.
-# Step 11 installs the commit-msg git hook in the current project.
+# Steps 1-12 run automatically. Step 10 self-installs this repo as a Claude plugin.
+# Step 11 injects caveman mode into ~/.claude/CLAUDE.md.
+# Step 12 installs the commit-msg git hook in the current project.
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
@@ -206,8 +207,31 @@ else
 fi
 echo ""
 
-# ── 11. commit-msg git hook ──────────────────────────────────────────────────
-echo "11. commit-msg hook"
+# ── 11. Caveman mode — global CLAUDE.md ──────────────────────────────────────
+echo "11. Caveman mode (global CLAUDE.md)"
+
+GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+CAVEMAN_MARKER="## Caveman Mode"
+
+if grep -q "$CAVEMAN_MARKER" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
+  ok "caveman block already present in $GLOBAL_CLAUDE_MD"
+else
+  cat >> "$GLOBAL_CLAUDE_MD" <<EOF
+
+## Caveman Mode
+
+**ALWAYS active. Every session. Every response.**
+
+@$REPO_ROOT/skills/caveman/SKILL.md
+
+Default level: **full**. Active unless user says "stop caveman" or "normal mode".
+EOF
+  ok "caveman block added to $GLOBAL_CLAUDE_MD"
+fi
+echo ""
+
+# ── 12. commit-msg git hook ──────────────────────────────────────────────────
+echo "12. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
