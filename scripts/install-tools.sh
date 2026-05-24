@@ -2,8 +2,8 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-9 run automatically. Step 9 self-installs this repo as a Claude plugin.
-# Step 10 installs the commit-msg git hook in the current project.
+# Steps 1-11 run automatically. Step 10 self-installs this repo as a Claude plugin.
+# Step 11 installs the commit-msg git hook in the current project.
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
@@ -69,10 +69,10 @@ info "Running: npx claude-mem install"
 npx claude-mem install && ok "claude-mem installed" || warn "claude-mem install failed — check output above"
 echo ""
 
-# ── 5. UI skills ──────────────────────────────────────────────────────────────
-echo "5.  UI skills (impeccable, emilkowalski/skill, taste-skill)"
+# ── 5. UI + Cybersecurity skills ─────────────────────────────────────────────
+echo "5.  Skills (impeccable, emilkowalski/skill, taste-skill, Anthropic-Cybersecurity-Skills)"
 if ! check_cmd npx; then
-  warn "npx not found — skipping UI skills"
+  warn "npx not found — skipping skills"
 else
   info "npx skills add pbakaus/impeccable"
   npx skills add pbakaus/impeccable && ok "impeccable" || warn "impeccable failed"
@@ -82,6 +82,11 @@ else
 
   info "npx skills add Leonxlnx/taste-skill"
   npx skills add Leonxlnx/taste-skill && ok "taste-skill" || warn "taste-skill failed"
+
+  info "npx skills add mukul975/Anthropic-Cybersecurity-Skills"
+  npx skills add mukul975/Anthropic-Cybersecurity-Skills \
+    && ok "Anthropic-Cybersecurity-Skills (754 skills)" \
+    || warn "Anthropic-Cybersecurity-Skills failed"
 fi
 echo ""
 
@@ -133,8 +138,27 @@ else
 fi
 echo ""
 
-# ── 8. VoiceMode ─────────────────────────────────────────────────────────────
-echo "8.  VoiceMode"
+# ── 8. Understand-Anything ───────────────────────────────────────────────────
+echo "8.  Understand-Anything (multimodal analysis plugin)"
+if ! check_cmd claude; then
+  warn "claude CLI not found — run these manually inside Claude Code:"
+  warn "  /plugin marketplace add Lum1104/Understand-Anything"
+  warn "  /plugin install understand-anything"
+else
+  info "Adding Understand-Anything marketplace..."
+  claude plugin marketplace add Lum1104/Understand-Anything \
+    && ok "marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+
+  info "Installing understand-anything plugin..."
+  claude plugin install understand-anything \
+    && ok "understand-anything installed" \
+    || warn "install failed — check output above"
+fi
+echo ""
+
+# ── 9. VoiceMode ─────────────────────────────────────────────────────────────
+echo "9.  VoiceMode"
 if ! check_cmd claude; then
   warn "claude CLI not found — run VoiceMode steps manually inside Claude Code"
 else
@@ -146,8 +170,8 @@ else
 fi
 echo ""
 
-# ── 9. Self-install: private-ai-harness plugin ───────────────────────────────
-echo "9.  private-ai-harness plugin (skills + agents)"
+# ── 10. Self-install: private-ai-harness plugin ──────────────────────────────
+echo "10. private-ai-harness plugin (skills + agents)"
 
 # Resolve repo root relative to this script — works from any CWD
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -171,8 +195,8 @@ else
 fi
 echo ""
 
-# ── 10. commit-msg git hook ──────────────────────────────────────────────────
-echo "10. commit-msg hook"
+# ── 11. commit-msg git hook ──────────────────────────────────────────────────
+echo "11. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
