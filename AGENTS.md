@@ -77,10 +77,11 @@ These are installed via `scripts/install-tools.sh` and available alongside this 
 
 | Source | What it adds |
 |--------|-------------|
-| `mukul975/Anthropic-Cybersecurity-Skills` | 754 cybersecurity skills — invoke in `/review security` |
 | `pbakaus/impeccable` | UI quality review |
 | `emilkowalski/skill` | Frontend component patterns |
 | `Leonxlnx/taste-skill` | Visual taste heuristics |
+
+> `mukul975/Anthropic-Cybersecurity-Skills` (754 skills) is commented out in `scripts/install-tools.sh` — uncomment to enable.
 
 ---
 

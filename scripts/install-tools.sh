@@ -83,10 +83,10 @@ else
   info "npx skills add Leonxlnx/taste-skill"
   npx skills add Leonxlnx/taste-skill && ok "taste-skill" || warn "taste-skill failed"
 
-  info "npx skills add mukul975/Anthropic-Cybersecurity-Skills"
-  npx skills add mukul975/Anthropic-Cybersecurity-Skills \
-    && ok "Anthropic-Cybersecurity-Skills (754 skills)" \
-    || warn "Anthropic-Cybersecurity-Skills failed"
+  # info "npx skills add mukul975/Anthropic-Cybersecurity-Skills"
+  # npx skills add mukul975/Anthropic-Cybersecurity-Skills \
+  #   && ok "Anthropic-Cybersecurity-Skills (754 skills)" \
+  #   || warn "Anthropic-Cybersecurity-Skills failed"
 fi
 echo ""
 
