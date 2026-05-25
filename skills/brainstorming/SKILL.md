@@ -9,6 +9,25 @@ Help turn ideas into fully formed designs and specs through natural collaborativ
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
+## References — What a Great Spec Looks Like
+
+These are the north star. Every spec written here should aspire to this bar.
+
+**SQLite** — [requirements.html](https://sqlite.org/requirements.html)
+Every requirement has a test ID. Test suite is 8× larger than the implementation. Richard Hipp's rule: if it's not tested, it doesn't exist. Every statement is immediately testable.
+
+**RFC 8446 (TLS 1.3)** — IETF RFC format
+Every state, every transition, every error condition named. Implementable from the doc alone. The MUST/SHOULD/MAY taxonomy forces every statement to be universal truth or verifiable behavior.
+
+**seL4 microkernel** — NICTA/Data61
+Spec written in Isabelle/HOL. Mathematically proven correct. If the proof compiles, the code is correct by construction. Ultimate form of the contract idea.
+
+**WebAssembly specification** — W3C
+Every instruction has formal reduction rules. No ambiguity possible. Multiple independent implementations converged on identical behavior from the spec alone.
+
+**DO-178C** — aviation flight software standard
+Every requirement traced to a test, every test traced to a requirement. No orphans. Traceability matrix is a mandatory deliverable.
+
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
@@ -160,18 +179,12 @@ Every spec must follow this structure. This is not optional.
 **Depends on:** REQ-NNN (if applicable)
 
 **Test Cases:**
-- TC-REQ001-01: [primary success path — state specific inputs AND expected outputs, not just "it works"]
-- TC-REQ001-02: [failure/error path — name the induced failure condition AND the exact expected error output]
-- TC-REQ001-03: [boundary — for each numeric threshold in ACs: at the boundary, one step below, one step above]
-- TC-REQ001-04: [decision complement — if AC has a conditional, this TC drives the opposite branch to TC-01]
-- TC-REQ001-05: [fault injection — if REQ uses an external interface, this TC simulates that interface failing]
+- TC-REQ001-01: [specific inputs → exact expected output; a wrong implementation must make this test fail]
+- TC-REQ001-02: [one TC per AC — each proves its AC, not just witnesses it]
 
-**Testing standard:** These specs are held to the rigor of three reference standards:
-- **DO-178B** (aviation software certification) — every requirement must trace to a test; every decision (if/else branch) must be exercised both TRUE and FALSE; compound conditions require independent variation of each sub-condition (MC/DC).
-- **SQLite testing philosophy** — tests must be specific enough to catch mutations (off-by-one, inverted condition, wrong constant); every boundary condition tested at, below, and above; no phantom tests that would pass against a wrong implementation.
-- **NASA verification standards** — test to spec, not to code; each TC runs in isolation with no dependency on prior TCs; every external interface failure mode has a TC that actively simulates it.
+One TC per AC minimum. Each TC must state inputs and exact expected output.
 
-Not every REQ needs all five TC types — only the types that apply to its ACs. But every AC must map to at least one TC that specifically proves it. A TC that would pass even if the requirement were slightly wrong (off-by-one, inverted condition, wrong error code) is a phantom — rewrite until a wrong implementation would make it fail.
+**North star:** every statement in a spec is either a universal truth or immediately falsifiable by a test. A TC that would pass against a wrong implementation is not a test — it is a wish. Ask: *if the implementation were subtly wrong — off-by-one, inverted condition, missing field — would this TC catch it?* If not, rewrite it until it would.
 
 ---
 
@@ -201,12 +214,7 @@ Not every REQ needs all five TC types — only the types that apply to its ACs. 
 - **Testable:** if you can't write a test case name for a requirement, the requirement is not specific enough.
 - **No TBD:** unresolved items are either decided or moved to Out of Scope.
 - **Dependencies declared:** if a requirement depends on external behavior, that behavior is stated explicitly.
-- **Every AC covered** *(DO-178B)*: draw a line from every AC to at least one TC that specifically proves it. An AC with no TC is an untested promise.
-- **Both branches tested** *(DO-178B Level B — decision coverage)*: every conditional in the spec (if/when/unless/on failure) needs a TC for the TRUE outcome and a TC for the FALSE outcome. One-sided coverage means the untested branch goes to production unverified. For compound conditions (A AND B), each sub-condition must independently determine the outcome in at least one TC *(DO-178B Level A — MC/DC)*.
-- **Boundaries tested** *(SQLite)*: every numeric threshold (< 200ms, ≤ 5 retries, ≥ 99.9%) needs TCs at the boundary, one step inside, one step outside. Implementations break at boundaries, not in the middle.
-- **Errors actively triggered** *(NASA)*: a TC that passively reaches an error path is not error coverage. The TC must name the induced failure and assert the exact expected error output.
-- **TCs independent** *(NASA)*: each TC must run without relying on state from another TC. Sequential coupling hides bugs and makes failures misleading.
-- **No phantom tests** *(SQLite)*: if a slightly wrong implementation (off-by-one constant, inverted condition, missing field) would still pass a TC, that TC proves nothing. Tighten the assertion to the exact values in the AC.
+- **Honest tests:** every TC must fail if its AC were slightly wrong — off-by-one, inverted condition, missing field. A TC that passes against a wrong implementation is a phantom.
 
 **Spec Self-Review:**
 After writing the spec document, check before running the formal quality gate:
@@ -218,12 +226,7 @@ After writing the spec document, check before running the formal quality gate:
 5. **Requirement completeness:** Every REQ-NNN has Statement, Acceptance Criteria, Dependencies, Test Cases.
 6. **Emotional language scan:** Any "intuitive", "clean", "fast", "good"? Replace with measurable equivalents.
 7. **Test Coverage Matrix:** Present and every REQ has at least one TC.
-8. **AC-to-TC map** *(DO-178B)*: For each AC line, can you name the TC that proves it? If any AC has no TC pointing at it, write the TC now.
-9. **Decision coverage** *(DO-178B Level B)*: For each conditional in any REQ (if/when/on failure), is there a TC for both outcomes? For compound conditions, is each sub-condition varied independently *(MC/DC — Level A)*? If any branch is missing, add it.
-10. **Boundary TCs** *(SQLite)*: For each numeric threshold in any AC, are there TCs at the boundary, below, and above? If not, add them.
-11. **Error induction** *(NASA)*: For each error path named in any REQ, is there a TC that actively triggers it — not just reaches it? If the TC only checks "no error", it is not error coverage.
-12. **Fault injection** *(NASA/SQLite)*: For each external interface in Dependencies, is there a TC simulating its failure? If not, add it.
-13. **TC independence** *(NASA)*: Can each TC run standalone without another TC having run first? If any TC requires prior state, add a Preconditions block describing that state independently.
+8. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
 
 Fix inline, then invoke the `spec-quality-gate` skill for the formal pass.
 
