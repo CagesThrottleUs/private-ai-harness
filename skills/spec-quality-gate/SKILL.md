@@ -7,9 +7,36 @@ description: Use when a spec has been written and must be validated before imple
 
 Design reviewer for specs. Run after brainstorming writes the spec, before writing-plans starts.
 
-**Core principle:** A spec that passes human review but fails the quality gate is not a spec — it is a wish list.
+**Extended principle:** The gate must prove the spec is the contract, code is the implementation of the contract. Ensure that spec is not a wish list or vague in nature.
 
-**Extended principle:** The gate must prove the spec is *self-consistent and complete*, not just well-formatted. A spec with correct structure but wrong design is still a failing spec.
+## References — What a Great Spec Looks Like
+
+These are the north star. When evaluating a spec, ask: *does this meet this bar?*
+
+**SQLite** — [requirements.html](https://sqlite.org/requirements.html)
+Every requirement has a test ID. Test suite is 8× larger than the implementation. Richard Hipp's rule: if it's not tested, it doesn't exist. Every statement is immediately testable.
+
+**RFC 8446 (TLS 1.3)** — IETF RFC format
+Every state, every transition, every error condition named. Implementable from the doc alone. The MUST/SHOULD/MAY taxonomy forces every statement to be universal truth or verifiable behavior.
+
+**seL4 microkernel** — NICTA/Data61
+Spec written in Isabelle/HOL. Mathematically proven correct. If the proof compiles, the code is correct by construction. Ultimate form of the contract idea.
+
+**WebAssembly specification** — W3C
+Every instruction has formal reduction rules. No ambiguity possible. Multiple independent implementations converged on identical behavior from the spec alone.
+
+**DO-178C** — aviation flight software standard
+Every requirement traced to a test, every test traced to a requirement. No orphans. Traceability matrix is a mandatory deliverable.
+
+## North Star
+
+> **Every statement in a spec is either a universal truth (an axiom) or something that can be immediately falsified by a test.**
+
+Nothing in between. No statement survives if a reasonable engineer could disagree on whether it is satisfied without running a test.
+
+When this standard is met, the resulting code tends to be provably correct at the boundaries that matter, maintainable by engineers who weren't there when it was written, and durable across refactors because the contract is explicit.
+
+The checks below are the floor. The north star is the ceiling. Use it as the lens for every judgment call.
 
 ## The Iron Law
 
@@ -17,32 +44,35 @@ Design reviewer for specs. Run after brainstorming writes the spec, before writi
 NO PLAN WITHOUT A PASSING QUALITY GATE FIRST
 ```
 
-If the gate fails, fix the spec. Do not proceed to writing-plans.
+## Convergence Rule
+
+**Max 2 re-run cycles.** Do not loop beyond this.
+
+- **Cycle 0** — initial run. Report all failures.
+- **Cycle 1** — re-run after author fixes Cycle 0 failures. Report remaining.
+- **Cycle 2** — re-run after Cycle 1 fixes. If still failing, output a **Persistent Failures** report and stop. Escalate to human review.
+
+A spec that cannot pass in 2 fix cycles has a design problem the gate cannot resolve.
 
 ## Gate Execution Order
 
-Read the spec. Evaluate all sections in order. Report ALL failures across all sections before asking for fixes.
+Read the spec. Report ALL failures before asking for fixes.
 
-1. Format checks (read and verify presence/structure)
-2. Structural checks (judgment on form)
-3. Logic checks (judgment on completeness)
-4. Design completeness checks (judgment on correctness)
-5. Self-consistency checks (judgment on closure)
-6. Code traceability checks (post-implementation only)
+1. Format checks — mechanical, verify presence and structure
+2. Quality checks — judgment against the north star
+3. Consistency checks — verify the spec is a closed system
 
 ---
 
 ## Spec Identity
 
-Every spec file must begin with a YAML frontmatter block assigning a globally unique `spec_id`.
-
-**Format:** `SPEC-N` (no zero-padding, e.g., `SPEC-1`, `SPEC-42`)
+Every spec file must begin with YAML frontmatter:
 
 ```markdown
 ---
-spec_id: SPEC-1
-title: User Authentication
-status: approved
+spec_id: SPEC-N
+title: <title>
+status: draft | approved
 ---
 ```
 
@@ -51,373 +81,93 @@ status: approved
 SPEC-N → REQ-NNN → @spec_id + @req_id (code) → @spec_id + @validates_req (tests)
 ```
 
+`SPEC-N` where N is a positive integer, no zero-padding. Missing or malformed = blocking failure.
+
 ---
 
-## 1. Format Checks (read and verify)
+## 1. Format Checks
 
-Read the spec and verify each of the following. Every missing item is a blocking failure.
+Verify each. Every missing item is a blocking failure.
 
-### 1a. Vague / Emotional Language
+**1a.** Frontmatter has valid `spec_id: SPEC-N`
 
-Scan every acceptance criterion and requirement statement for unmeasurable language:
+**1b.** Every requirement block starts with `### REQ-NNN:` — sequential, no gaps, no duplicates
 
-- Words like: `TBD`, `TODO`, `somehow`, `appropriate`, `intuitive`, `clean`, `nice`, `fast enough`, `user-friendly`, `should work`, `seamless`, `simple`, `obvious`, `easy to use`, `high-quality`
-- Any criterion where a reasonable engineer could disagree on whether it's met without additional data
-
-Every match = blocking failure. Replace with a measurable criterion.
-
-| Forbidden | Required |
-|-----------|---------|
-| "must be fast" | "p99 latency < 200ms under 100 concurrent requests" |
-| "should be intuitive" | "new user completes task X without documentation in < 3 minutes" |
-| "good error handling" | "all error paths return structured error with code, message, and retry hint" |
-| "TBD" | Specific value or explicit deferral with rationale |
-
-### 1b. Requirement ID Coverage
-
-Every requirement block must start with `### REQ-NNN:`. Verify:
-- All IDs follow `REQ-NNN` format (three-digit zero-padded or consistent with project convention)
-- IDs are sequential with no gaps
-- No duplicate IDs
-
-### 1c. Mandatory Subsections Per Requirement
-
-Each `### REQ-NNN` block must contain all four:
-
+**1c.** Every REQ block contains all four subsections:
 - `**Statement:**` — what the system must do
 - `**Acceptance Criteria:**` — measurable conditions for done
 - `**Dependencies:**` — explicit list or "None"
-- `**Test Cases:**` — named TCs with descriptions
+- `**Test Cases:**` — named TCs, not empty, not "TBD"
 
-Missing any subsection = FAIL for that REQ.
+**1d.** `## Test Coverage Matrix` section exists, mapping every TC to its REQ
 
-`**Test Cases:**` must contain at minimum:
-- ≥1 TC covering the primary success path with specific inputs and expected outputs stated
-- ≥1 TC covering each distinct failure or error path mentioned in the Statement or ACs
-- ≥1 TC per numeric boundary (any threshold, limit, or count in the ACs)
-
-A `**Test Cases:**` section that is present but empty, or contains only a placeholder like "TBD" or "to be defined" = FAIL equal to the section being absent.
-
-### 1d. Test Coverage Matrix Present
-
-Spec must contain exactly one `## Test Coverage Matrix` section mapping every TC to its REQ.
-
-### 1e. Out of Scope Section Present and Non-Empty
-
-Spec must contain exactly one `## Out of Scope` section with at least one explicit exclusion. An empty section is a failure — something is always out of scope.
-
-### 1f. Spec Identity Valid
-
-Front matter must have `spec_id: SPEC-N` where N is a positive integer with no zero-padding. Missing, malformed, or `SPEC-0` = FAIL.
-
-If reviewing multiple specs in the same project, verify the `spec_id` is unique across all existing spec files.
+**1e.** `## Out of Scope` section exists with at least one explicit exclusion
 
 ---
 
-## 2. Structural Checks (judgment required)
+## 2. Quality Checks
 
-### 2a. Acceptance Criteria Are Measurable
+For each REQ, apply the north star: *can this statement be proven true or false by running a test?*
 
-For every acceptance criterion line, verify it contains at least one of:
-- A number, threshold, or count (e.g., `< 200ms`, `>= 99.9%`, `exactly 3 retries`)
-- A binary condition with specific inputs and outputs (e.g., "returns HTTP 401 when token is expired")
-- A reference to a deterministic comparison (e.g., "output matches fixture in `tests/fixtures/expected.json`")
+**Scope rule:** These checks evaluate spec requirements and acceptance criteria only. A TC is evidence against an AC — it is not itself an AC requiring further coverage. Adding TCs to satisfy one check does not trigger re-evaluation of those TCs under remaining checks.
 
-Purely qualitative criteria → FAIL.
+### 2a. Every Statement and AC Is Falsifiable
 
-### 2b. Dependency Assumed Behaviors
+A statement passes if a deterministic test can prove it true or false. Fails if:
 
-Every entry in a `**Dependencies:**` table must have a non-empty "Assumed Behavior" column. "N/A" is acceptable only for internal utilities with no external surface. "Assumed to work" is NOT acceptable.
+- Language is vague: `TBD`, `intuitive`, `fast enough`, `user-friendly`, `clean`, `seamless`, `appropriate`, `should work`, `simple`, `easy`, `nice`, `obvious`, `high-quality`
+- A reasonable engineer could disagree on whether it is satisfied without running a test
+- No threshold, binary outcome, or reference to a deterministic artifact
 
-**Good:**
-```
-| Redis | Returns cached value within 1ms on hit; returns nil on miss |
-```
+| Failing | Passing |
+|---------|---------|
+| "must be fast" | "p99 latency < 200ms under 100 concurrent requests" |
+| "good error handling" | "all error paths return `{code, message, retry_hint}`" |
+| "should be intuitive" | "new user completes task X without docs in < 3 min" |
+| "TBD" | specific value, or explicit deferral with rationale in Out of Scope |
 
-**Bad:**
-```
-| Redis | Assumed to work |
-```
+### 2b. Every AC Has at Least One TC That Would Fail If the AC Were Violated
 
-### 2c. Test Cases Are Named, Not Generic
+For each AC line, a TC must exist that:
+- States its inputs
+- States its exact expected output, matching the AC's measurable condition
+- Would produce a different result if the implementation violated the AC
 
-Every `- TC-` entry must have a descriptive name (not "test case 1", "happy path").
+A TC that asserts only "operation completed" or "no error" without checking the actual output is not a test — it is a green light with no signal. Mark FAIL.
 
-### 2d. No Orphaned Test Cases
+### 2c. Every TC Is Honest
 
-Every test case ID in the Test Coverage Matrix must appear in exactly one `REQ-NNN` block's Test Cases list. TCs in the matrix but not in any REQ = FAIL.
+Ask: *if the implementation were subtly wrong — off-by-one, inverted condition, wrong error code, missing field — would this TC catch it?*
 
-### 2e. Every Acceptance Criterion Maps to At Least One TC
+If no: the TC is a phantom. State what specific assertion makes it real.
 
-Read each AC line in every REQ. For each line, find the TC(s) that prove it. If no TC in the block exercises that specific criterion, it is untested by design — a phantom requirement.
+### 2d. Every Error Path Is Owned
 
-This is a one-to-one mapping obligation: every AC line → ≥1 TC. An AC that cannot be covered by any named TC in the spec = FAIL. A TC that covers no AC in its REQ = phantom TC, also FAIL.
+Every failure mode, error condition, or edge case mentioned anywhere in the spec must be:
+- Handled by a REQ that specifies exact behavior, or
+- Listed in Out of Scope with a rationale
 
-### 2f. Decision Coverage — Every Branch Tested Both Ways
-
-*Inspired by DO-178B Level B: every decision exercised as TRUE and as FALSE.*
-
-For every conditional behavior in a REQ — any `if / when / unless / on failure / on success / otherwise` — there must be a TC that drives the condition TRUE and a separate TC that drives it FALSE.
-
-**Bad:** REQ states "if token is expired, return 401" and has only one TC: `TC-001: expired token returns 401`.
-
-**Good:** `TC-001: expired token returns 401` AND `TC-002: valid token does not return 401`.
-
-The second TC is the decision complement. Without it, the implementation could return 401 unconditionally and every test would still pass. Missing either side of a decision = FAIL.
-
-For compound conditions (`A AND B`, `A OR B`): each sub-condition must be independently exercised — there must be a TC where A is the deciding factor (B held constant) and a TC where B is the deciding factor (A held constant). This is the MC/DC requirement from DO-178B Level A.
-
-### 2g. Boundary Value Coverage
-
-*Inspired by NASA verification standards and SQLite's exhaustive boundary testing.*
-
-For every numeric threshold, limit, count, or range in an AC, three TCs are required:
-- One at exactly the boundary value
-- One just inside the passing side (boundary − minimum step)
-- One just outside the failing side (boundary + minimum step)
-
-**Example:** AC states "response time < 200ms"
-- TC at 199ms (just inside — must pass)
-- TC at 200ms (at boundary — must fail)
-- TC at 201ms (just outside — must fail)
-
-For enumerated states (e.g., retry counts 0, 1, 2, max): TCs at the first value, last value, and one beyond max.
-
-For string or collection length limits: empty, one element, exactly at limit, one over limit.
-
-A threshold in an AC with no boundary TCs = FAIL.
-
-### 2h. Negative Path and Error Injection Completeness
-
-*Inspired by NASA's fault tolerance verification and SQLite's fault injection suite.*
-
-Every distinct failure mode, error code, or error path named anywhere in the spec must have a TC that actively triggers it. "Passive" coverage — where a TC happens to reach an error path as a side effect — does not count.
-
-For each error case:
-- The TC must name the specific failure condition being induced
-- The TC must state the exact expected output (error code, message, state)
-- The TC must be distinct from the happy-path TCs (not a variant of TC-001 with one parameter changed and no expected-error assertion)
-
-Any named error path with no dedicated TC = FAIL.
-
-### 2i. Mutation Resistance
-
-*Inspired by SQLite's philosophy: a test that passes against a wrong implementation is not a test.*
-
-For each TC, reason: "If the implementation were subtly wrong — off-by-one on a threshold, inverted condition, wrong error code, missing a field in the response — would this TC catch it?"
-
-A TC fails this check if:
-- It asserts only that an operation completed, not what it returned
-- It uses a threshold looser than the AC (AC says `< 200ms`, TC asserts `< 1000ms`)
-- It checks a proxy observable instead of the actual required behavior
-- The AC would still be "satisfied" if the implementation returned slightly wrong values
-
-A TC that would pass even if the requirement were violated is a phantom test. Mark it FAIL and require the assertion be tightened to the exact values stated in the AC.
-
-### 2j. Test Case Independence
-
-*Inspired by NASA's test isolation requirements.*
-
-Every TC must be executable in isolation. A TC must not depend on state created by another TC running before it.
-
-If TC-003 requires data seeded by TC-001, then:
-- Either TC-003 must set up its own preconditions (described in the TC)
-- Or the dependency must be made explicit: `**Preconditions:** [specific state the test environment must be in, described independently of any other TC]`
-
-A TC whose preconditions can only be satisfied by running another TC first, with no standalone setup described = FAIL.
-
-Exception: integration TCs that explicitly test sequenced behavior (e.g., "verify state after step 1 AND step 2") must label themselves as sequence tests and state why isolation is impossible.
-
-### 2k. Fault Injection Coverage for External Interfaces
-
-*Inspired by NASA/JPL fault protection requirements and SQLite's OS-layer fault injection.*
-
-For every external interface inventoried under check 4e, at least one TC must simulate each of its stated failure modes.
-
-If the Dependencies table says "Redis: returns nil on miss; connection times out after 500ms under network partition" — there must be:
-- A TC where Redis returns nil (verifying the system's miss-handling)
-- A TC where the Redis connection times out (verifying the system's partition behavior)
-
-No external interface failure mode without a corresponding TC = FAIL. This check is the test-side enforcement of check 4e.
+An error path that falls through to unspecified behavior = FAIL.
 
 ---
 
-## 3. Logic Checks
+## 3. Consistency Checks
 
-### 3a. Dependencies Have Their Own REQs or Are External
+### 3a. No Contradictions
 
-If a dependency is internal (a component in this system), it must have its own `REQ-NNN` block. If external, it must appear in the Assumptions table.
+No two REQs specify conflicting behavior for the same input. No AC in one REQ undercuts an AC in another.
 
-### 3b. Requirements Are Independent
+### 3b. Terms Defined Once, Used Consistently
 
-Each REQ must be implementable without implementing all other REQs simultaneously. If REQ-003 can only be tested after REQ-001 and REQ-002 are complete, mark it explicitly:
+Every domain term, role, or concept is defined exactly once. No term carries two meanings across REQs.
 
-```
-**Depends on:** REQ-001, REQ-002
-```
+### 3c. Every Dependency Named
 
-### 3c. Requirements Are Complete — No Implicit Behavior
+Every external system, API, service, or component the spec depends on appears in a Dependencies table with its assumed behavior stated exactly. "Assumed to work" is not an assumed behavior.
 
-If the spec says "returns user data on success", it must also specify what happens on failure. Every happy path REQ must have a corresponding error/edge REQ or explicitly state "error handling covered by REQ-NNN".
+### 3d. Out of Scope Is Clean
 
----
-
-## 4. Design Completeness Checks
-
-These catch design holes that pass structural review but represent incomplete thinking: unclassified capabilities, unjustified constants, missing observability requirements, uncovered delivery channels, uninventoried external interfaces, namespace violations, and unmotivated conditional logic. A spec can be perfectly formatted and still be designwise incomplete. These checks close that gap.
-
-### 4a. Every Capability Must Be Classified as NEW or EXTENDING
-
-For every feature, interface point, configuration option, or behavior the spec introduces:
-
-- **NEW** — did not exist before this spec. Must include a one-sentence rationale for why it is being added.
-- **EXTENDING** — modifies or builds on something that already exists. Must name the existing thing it extends.
-
-A capability with no classification = FAIL.
-
-**Deferred-but-present is not a valid classification.** Any element described as "reserved", "coming soon", or "implementation deferred" must be removed from the requirements entirely and placed in Out of Scope. If it has no implementation plan in this spec, it has no presence in this spec's requirements or interface surface.
-
-### 4b. Non-Obvious Constants Require Justification
-
-Every constant value in the spec — timeout, limit, retry count, size, rate, version number, threshold — that is not directly derivable from an industry standard, regulation, or existing project convention must cite its basis in an inline parenthetical.
-
-**Bad:** "Request must complete within 10 seconds."
-
-**Good:** "Request must complete within 10 seconds (matches the existing probe timeout established for all network operations in this system; see `<reference>`)."
-
-Acceptable bases: measured benchmark, matching an existing system constant, cited standard or RFC, stated constraint from a stakeholder, hardware/platform limit. "Reasonable", "standard practice", or "industry norm" without a citation = FAIL.
-
-### 4c. Every Observable Change Requires a Documentation Requirement
-
-Any change the spec introduces that is visible outside the system boundary — new configuration option, new API field or endpoint, new error code, new log format, new metric, changed behavior of existing interface, new user-facing message — must have a corresponding REQ that covers updating the relevant documentation surface (API reference, user guide, changelog, operational runbook, inline help text, migration guide).
-
-Test: for each observable change introduced, is there a REQ whose statement explicitly names a documentation artifact to be updated? If not = FAIL for that change.
-
-This applies regardless of how small the change is. A new exit code with no documentation REQ is incomplete.
-
-### 4d. All Delivery Channels Must Be Covered or Explicitly Excluded
-
-Any spec that modifies how users acquire, activate, upgrade, configure, or remove the system must enumerate every supported delivery channel from the project's own documentation (README, install guide, release notes). Each channel must either:
-
-- Have explicit handling in a REQ, or
-- Appear in Out of Scope with a rationale.
-
-A channel that falls through to an unspecified error state without being named = FAIL.
-
-To enumerate channels: read the project's installation documentation before reviewing the spec. Do not rely on memory. If the documentation lists it, the spec must account for it.
-
-### 4e. External Interfaces Must Be Inventoried
-
-Any interface the spec crosses outside the system's own process boundary — external API call, OS-level command, filesystem operation, database query, network request, inter-process communication, third-party service, hardware interface — must be inventoried in the relevant REQ's Dependencies table or a dedicated `**External Interfaces:**` section with:
-
-- **Availability**: what environments, platforms, or versions provide this interface
-- **Failure modes**: what the spec does when the interface is unavailable, slow, or returns unexpected output
-- **Platform alternatives**: if the interface is not universally available, name the equivalent for each unsupported environment, or explicitly exclude that environment in Out of Scope
-
-An interface that is used in a REQ but not inventoried = FAIL. An interface that is platform-specific without a named alternative or explicit exclusion = FAIL.
-
-### 4f. Shared-Namespace Identifiers Must Follow Conventions and Be Conflict-Free
-
-Any identifier introduced into a shared namespace — environment variable, configuration key, feature flag, API endpoint path, event or message type name, database column, metric name, log field — must:
-
-1. Follow the project's established naming convention for that namespace (check the project's contribution guide or existing identifiers for the pattern).
-2. Be verified as not already used by the system itself or by commonly co-installed tools. The spec must include one sentence confirming this check was performed.
-
-An identifier that does not follow the project's naming convention = FAIL. An identifier with no collision-check statement = FAIL.
-
-### 4g. Every Conditional Path Must Be Motivated
-
-Every conditional branch in the spec — not just fallbacks, but every `if / else`, `on success / on failure`, `when X / otherwise` — must state WHY that path exists, not just WHAT it does.
-
-**Bad:** "If the operation fails, return error code 503."
-
-**Good:** "If the operation fails, return error code 503 (signals a transient upstream fault; allows the caller to retry without treating the request as definitively rejected)."
-
-The motivation does not need to be long. One clause is enough. A branch whose existence cannot be explained = a branch whose necessity has not been established. Missing motivation = FAIL.
-
----
-
-## 5. Self-Consistency Checks
-
-These verify the spec is a closed logical system: every actor is accounted for, every decision is exhaustive, every term means exactly one thing, every assumption is visible, and scope boundaries have no contradictions. A spec that passes all prior sections but fails here is internally incoherent.
-
-### 5a. Every Actor Is Accounted For
-
-Enumerate every actor who interacts with the system described by this spec: user roles, system types, environment configurations, calling systems, integration partners, operators. For each actor, trace their path through the requirements. Every actor must reach a defined outcome — either handled by a REQ or explicitly excluded in Out of Scope.
-
-No actor may fall into an undefined state. An actor who is implicitly assumed to behave identically to another actor = FAIL (make it explicit or prove it).
-
-### 5b. Every Decision Is Exhaustively Enumerated
-
-For every branching point in the spec — selection logic, conditional execution, fallback chains, error routing — list all possible input states and show which branch handles each one. An "else" that covers unnamed residual cases without describing what those cases are = FAIL.
-
-**Bad:** "If condition A, do X. If condition B, do Y. Otherwise, return error."
-
-**Good:**
-```
-All possible states:
-  A — [description]: handled by REQ-NNN
-  B — [description]: handled by REQ-NNN
-  C — [description, why this is the residual]: returns error per REQ-NNN
-  (exhaustive — no other states possible because [reason])
-```
-
-The exhaustiveness proof can be brief. What it cannot be is absent.
-
-### 5c. Every Term Is Defined and Used Consistently
-
-Every domain term, system concept, or role name used in the spec must be defined exactly once — either in a Glossary section, in the first REQ that introduces it, or in an Assumptions section. No term may be used as a synonym for another term. No term may carry two different meanings in different REQs. Ambiguous terminology is an unresolved requirement.
-
-### 5d. Assumptions Are Explicit
-
-Every assumption the spec makes — about the environment, about user behavior, about the state of the system before the spec's feature runs, about external systems — must be stated in an explicit Assumptions section or within the relevant REQ's Dependencies table. An implicit assumption is a hidden requirement.
-
-**Bad:** A spec that requires network access without stating "assumes network is available and `registry.example.com` is reachable."
-
-**Good:** An Assumptions section or dependency row that names each environmental precondition and what happens when it is violated.
-
-Missing Assumptions section when the spec has environmental preconditions = FAIL.
-
-### 5e. Scope Boundary Has No Contradictions
-
-Every item listed in Out of Scope must have zero footprint inside the requirements. If an Out of Scope item is referenced in an AC, either the item is actually in scope (move it to a REQ) or the AC is wrong (remove the reference). Contradiction between Out of Scope and any REQ = FAIL.
-
-Conversely: if an item is partially in scope, it must be split — the in-scope portion has a REQ, the out-of-scope portion is listed separately with the boundary clearly drawn.
-
----
-
-## 6. Code Traceability Checks (post-implementation only)
-
-Run after code exists — not at spec time. Evaluate by reading source and test files.
-
-**Required on every public construct:**
-- `@spec_id SPEC-N` — which spec this construct implements
-- `@req_id REQ-NNN` — which requirement within that spec
-
-**Required on every test unit:**
-- `@spec_id SPEC-N` — which spec is being validated
-- `@validates_req REQ-NNN` — which requirement within that spec
-
-### 6a. Every REQ Has At Least One Code Annotation
-
-Read source files. Every `REQ-NNN` in the spec must appear at least once as a `@req_id` annotation paired with the correct `@spec_id`. Missing = FAIL.
-
-### 6b. Every REQ Has At Least One Test Annotation
-
-Read test files. Every `REQ-NNN` must appear at least once as `@validates_req` paired with the correct `@spec_id`. Missing = FAIL.
-
-### 6c. No Orphaned Annotations
-
-Every `SPEC-N` or `REQ-NNN` referenced in source or test files must correspond to a real spec file and a real requirement within it. Dangling references = FAIL.
-
-### 6d. Traceability Matrix
-
-Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
-
-| SPEC | REQ | Statement | Implemented In | Tested In |
-|------|-----|-----------|----------------|-----------|
-| SPEC-1 | REQ-001 | ... | `auth.ts:42` | `auth.test.ts:15` |
-| SPEC-1 | REQ-002 | ... | ❌ MISSING | ❌ MISSING |
+No item listed in Out of Scope appears in any requirement. If it has a footprint in a REQ, it is in scope — move it to a requirement.
 
 ---
 
@@ -428,50 +178,25 @@ Build and save to `.ai/reports/YYYY-MM-DD-<feature>-traceability.md`:
 **Spec:** <path>
 **Date:** YYYY-MM-DD
 **Status:** PASS | FAIL
+**North Star:** Every statement is either a universal truth or immediately falsifiable by a test.
 
 ### Format Failures (N)
-- [Section]: [description of what is missing or malformed]
+- [check]: [what is missing or malformed]
 
-### Structural Failures (N)
-- [REQ-NNN / 2a]: acceptance criterion "<text>" is qualitative with no measurable threshold
-- [REQ-NNN / 2b]: dependency "<name>" has no assumed behavior stated
-- [REQ-NNN / 2c]: TC "<id>" has generic name
-- [2d]: TC "<id>" appears in matrix but not in any REQ block
-- [REQ-NNN / 2e]: AC "<text>" has no TC that exercises it; or TC "<id>" covers no AC in its REQ
-- [REQ-NNN / 2f]: condition "<text>" has TC for TRUE branch but no TC for FALSE branch (or vice versa); or compound condition missing independent variation of sub-condition
-- [REQ-NNN / 2g]: threshold "<value>" in AC has no boundary TCs (at, below, above)
-- [REQ-NNN / 2h]: error path "<description>" has no dedicated TC that actively triggers it
-- [REQ-NNN / 2i]: TC "<id>" assertion too loose — would pass against a wrong implementation; specific failure mode described
-- [REQ-NNN / 2j]: TC "<id>" depends on state from another TC with no standalone precondition described
-- [REQ-NNN / 2k]: external interface "<name>" failure mode "<mode>" has no TC that simulates it
+### Quality Failures (N)
+- [REQ-NNN / 2a]: AC "<text>" — vague; rewrite as [specific measurable form]
+- [REQ-NNN / 2b]: AC "<text>" — no TC exercises it; or TC "<id>" passes against a wrong implementation
+- [REQ-NNN / 2c]: TC "<id>" — asserts [what]; would not catch [specific wrong implementation]
+- [REQ-NNN / 2d]: error path "<description>" — not handled in any REQ and not in Out of Scope
 
-### Logic Failures (N)
-- [description]
-
-### Design Completeness Failures (N)
-- [4a] "<capability>": no NEW/EXTENDING classification; or deferred capability present in requirements
-- [4b] <REQ-NNN>: constant "<value>" has no stated basis
-- [4c] "<observable change>" introduced with no corresponding documentation REQ
-- [4d] delivery channel "<name>" not handled or explicitly excluded
-- [4e] external interface "<name>" used in <REQ-NNN> with no inventory entry
-- [4f] identifier "<NAME>" missing naming-convention compliance or collision-check statement
-- [4g] <REQ-NNN> branch "<condition>": no motivation stated for why this path exists
-
-### Self-Consistency Failures (N)
-- [5a] actor "<name>" has no mapped path through requirements or Out of Scope
-- [5b] <REQ-NNN> branching point: residual "else" state not enumerated
-- [5c] term "<word>" used without definition, or used with two different meanings
-- [5d] environmental precondition assumed but not stated in Assumptions or Dependencies
-- [5e] Out of Scope item "<name>" has footprint in <REQ-NNN>
-
-### Code Traceability Failures (N) — post-implementation only
-- SPEC-N / REQ-NNN: no @spec_id + @req_id annotation found in source
-- SPEC-N / REQ-NNN: no @spec_id + @validates_req annotation found in tests
-- SPEC-N (orphaned): code references SPEC-N not found in any spec file
-- REQ-NNN (orphaned): code references REQ-NNN not found in SPEC-N
+### Consistency Failures (N)
+- [3a]: REQ-NNN and REQ-MMM contradict on [specific condition]
+- [3b]: term "<word>" used with different meanings in REQ-NNN and REQ-MMM
+- [3c]: "<dependency>" used but not named; assumed behavior not stated
+- [3d]: Out of Scope item "<name>" has footprint in REQ-NNN
 
 ### Warnings (advisory, non-blocking)
-- [observation]
+- [something that passes the checks but does not meet the north star]
 
 **Action required:** Fix all FAIL items. Re-run gate. Only proceed to writing-plans on PASS.
 ```
@@ -480,64 +205,9 @@ Save report to `.ai/reports/YYYY-MM-DD-<feature>-quality-gate.md`.
 
 ---
 
-## Common Failures
-
-| Failure | Fix |
-|---------|-----|
-| "TBD" in acceptance criteria | Decide now or mark REQ as out of scope |
-| No test cases in REQ block | Name at minimum: one primary success TC, one error TC per failure path, one boundary TC per threshold |
-| `**Test Cases:**` present but empty | Write the TCs; presence of the subsection header is not coverage |
-| Dependency with no assumed behavior | Write exact contract this requirement depends on |
-| Acceptance criterion is "user can do X easily" | Rewrite with a time limit, success rate, or error count |
-| Missing Out of Scope section | Add explicit exclusions — what someone might assume is in scope |
-| REQ with no acceptance criteria | Every REQ needs ≥ 1 measurable criterion |
-| AC with no TC covering it | Add a TC with specific inputs and the exact expected output from the AC |
-| TC with no AC it covers | Either map it to an AC or remove it — untethered TCs are noise |
-| Decision with only one branch tested | Add the complement TC (if TC tests the TRUE case, add one for FALSE) |
-| Compound condition with no independent sub-condition variation | Add TCs that vary each sub-condition independently while holding the other constant (MC/DC) |
-| Threshold with no boundary TCs | Add TCs at exactly the boundary, one step below, one step above |
-| Error path with no TC that triggers it | Add a TC that actively induces that failure; assert the exact expected error output |
-| TC assertion too loose | Tighten to the exact value/condition stated in the AC; "completed successfully" is not an assertion |
-| TC requires another TC to run first | Add standalone preconditions to the TC; describe required state independently |
-| External interface failure mode with no TC | Add a TC per failure mode in the Dependencies table; simulate the failure explicitly |
-| Capability not classified as NEW or EXTENDING | Classify inline with one-sentence rationale; move deferred items to Out of Scope |
-| Non-obvious constant with no justification | Add inline parenthetical citing its basis: matching constant, standard, benchmark, or constraint |
-| Observable change with no documentation REQ | Add a REQ whose statement names a specific documentation artifact to be updated |
-| Delivery channel not covered or excluded | Read project install docs; add a REQ or Out of Scope entry per channel |
-| External interface not inventoried | Add to Dependencies table with availability, failure modes, and platform alternatives |
-| Shared-namespace identifier with no convention check | Verify naming pattern; add one-sentence collision-check confirmation |
-| Conditional branch with no motivation | Add one clause explaining why the condition exists |
-| Actor not accounted for | Map to a REQ or Out of Scope; prove the mapping is explicit |
-| Else branch covering unnamed states | List all possible states; label each one; name the residual explicitly |
-| Implicit environmental assumption | Move to Assumptions section with a stated violation behavior |
-
-## Red Flags — Do NOT Approve
-
-- "We'll figure out the metrics later"
-- "This is obvious" (if it's obvious, state it explicitly)
-- "The dependency works as expected" (expected by whom? state it)
-- Acceptance criteria that an AI or human could disagree on without more data
-- Test cases named "test1", "happy path", "edge case"
-- A `**Test Cases:**` section that exists but contains no actual TCs
-- An AC with no TC pointing at it — every written requirement is a promise; an unkept promise is not a requirement
-- A TC that asserts only "did not error" or "completed" without checking the actual output — this is a false green
-- A decision or conditional in the spec with only one branch covered by TCs — the untested branch is untested code by design
-- A threshold in an AC with no boundary TCs — implementations routinely fail at exact boundary conditions
-- An error path that has no TC actively inducing it — passive coverage (reaching the error path incidentally) does not prove the system handles it correctly
-- TCs that can only run in sequence — sequential dependency means failures produce misleading results; hidden coupling between tests hides bugs
-- An external interface with stated failure modes but no TC that simulates any of them — fault tolerance untested is fault tolerance unproven
-- A TC whose assertion is looser than its AC — if the AC says `< 200ms` and the test asserts `< 1000ms`, the test cannot catch a regression
-- A capability described as "reserved", "coming soon", or "deferred" inside requirements — absent or in a REQ, never in between
-- A constant with no sentence explaining why that value and not another
-- An identifier in a shared namespace with no stated convention check
-- A conditional branch whose existence cannot be explained in one sentence
-- An "else" that is not backed by a named, exhaustive enumeration of what states reach it
-- Any spec touching acquisition, deployment, or upgrade that does not name every known delivery channel from the project's own documentation
-- An environmental precondition that is assumed rather than stated
-- A term used in two REQs with subtly different meanings
-
 ## Integration
 
 Two gates:
-1. **Spec gate** (Sections 1–5): After `brainstorming` writes spec, before `writing-plans` starts.
-2. **Traceability gate** (Section 6): After implementation, before merge. Run via `pr-reviewer` agent or manually.
+
+1. **Spec gate** (Sections 1–3): After `brainstorming` writes spec, before `writing-plans` starts.
+2. **Traceability gate**: After implementation, before merge. Every public construct annotated `@spec_id SPEC-N @req_id REQ-NNN`. Every test annotated `@spec_id SPEC-N @validates_req REQ-NNN`. Run via `pr-reviewer` agent or manually.
