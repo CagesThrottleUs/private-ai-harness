@@ -28,7 +28,8 @@ For each task:
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
 4. Before committing: run the `design-principles` **Review Checklist** — catch violations before they land
-5. Mark as completed
+5. Before committing: apply `code-documentation` to every public construct written — full docstring, `@spec_id`, `@req_id`
+6. Mark as completed
 
 ### Step 3: Complete Development
 
@@ -70,3 +71,4 @@ After all tasks complete and verified:
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 - **superpowers:design-principles** - Review Checklist run before each task commit (DRY, KISS, YAGNI, SOLID, GoF)
+- **superpowers:code-documentation** - Document every public construct before committing (spec_id, req_id, full docstring)

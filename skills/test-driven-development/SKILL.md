@@ -165,6 +165,8 @@ Over-engineered
 
 Don't add features, refactor other code, or "improve" beyond the test.
 
+**Before moving to REFACTOR:** document every public construct added — apply `code-documentation` (full docstring, `@spec_id`, `@req_id`).
+
 ### Verify GREEN - Watch It Pass
 
 **MANDATORY.**
@@ -336,6 +338,7 @@ Before marking work complete:
 - [ ] Output pristine (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Edge cases and errors covered
+- [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
 
 Can't check all boxes? You skipped TDD. Start over.
 

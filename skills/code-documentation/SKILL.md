@@ -55,6 +55,7 @@ Six tiers. Every tier has the same traceability requirement.
 | Parameters | If any | Name, type, description, whether optional |
 | Return value | If non-void | Type and meaning |
 | Throws/errors | If it can fail | Condition that triggers it |
+| Side effects | If any | Mutations to shared state, I/O, or network calls |
 | Example | Always | One concrete, runnable call |
 | `@spec_id` | Always | SPEC-N of owning spec |
 | `@req_id` | Always | REQ-NNN within that spec (comma-sep if multiple) |
@@ -79,10 +80,9 @@ function validateEmail(email: string): string
 ```
 
 ```python
-# Python — docstring
+# Python — Google-style docstring
 def validate_email(email: str) -> str:
-    """
-    Validate a user-submitted email address against RFC 5321 rules.
+    """Validate a user-submitted email address against RFC 5321 rules.
 
     Args:
         email: Raw string from user input. May be empty or malformed.
@@ -93,10 +93,11 @@ def validate_email(email: str) -> str:
     Raises:
         ValidationError: When email is empty, missing @, or domain is invalid.
 
-    spec_id: SPEC-2
-    req_id: REQ-004
+    Note:
+        spec_id: SPEC-2
+        req_id: REQ-004
 
-    Example:
+    Examples:
         >>> validate_email("User@Example.COM")
         'user@example.com'
     """
@@ -111,11 +112,18 @@ def validate_email(email: str) -> str:
 //
 // spec_id: SPEC-2
 // req_id: REQ-004
-//
-// Example:
-//   ValidateEmail("User@Example.COM") // → "user@example.com"
 func ValidateEmail(email string) (string, error)
 ```
+
+> **Go examples:** Runnable examples belong in `_test.go` as `func ExampleValidateEmail()` — not inline in the godoc comment. pkg.go.dev discovers and executes them automatically.
+>
+> ```go
+> func ExampleValidateEmail() {
+>     result, _ := ValidateEmail("User@Example.COM")
+>     fmt.Println(result)
+>     // Output: user@example.com
+> }
+> ```
 
 ```rust
 // Rust — doc comment
@@ -126,28 +134,45 @@ func ValidateEmail(email string) (string, error)
 /// # Errors
 /// Returns `ValidationError` when email is empty, missing @, or domain is invalid.
 ///
+/// # Panics
+/// Does not panic. (Document any panic condition here — enforced by `clippy::missing_panics_doc`)
+///
 /// spec_id: SPEC-2
 /// req_id: REQ-004
 ///
 /// # Examples
 /// ```
-/// validate_email("User@Example.COM") // → "user@example.com"
+/// assert_eq!(
+///     validate_email("User@Example.COM"),
+///     Ok("user@example.com".to_string())
+/// );
 /// ```
 pub fn validate_email(email: &str) -> Result<String, ValidationError>
 ```
+
+> **Rust `# Safety`:** Every `unsafe fn` or function requiring caller invariants must include a `# Safety` section — enforced by `clippy::missing_safety_doc`.
+>
+> ```rust
+> /// # Safety
+> /// Caller must ensure `ptr` is non-null and aligned, and that `len` bytes are valid.
+> pub unsafe fn read_bytes(ptr: *const u8, len: usize) -> &'static [u8]
+> ```
 
 ```java
 // Java — Javadoc
 /**
  * Validates a user-submitted email address against RFC 5321 rules.
  *
+ * <p>Example:
+ * <pre>{@code
+ * String result = validateEmail("User@Example.COM"); // → "user@example.com"
+ * }</pre>
+ *
  * @param email Raw string from user input. May be empty or malformed.
  * @return Normalized lowercase email if valid.
  * @throws ValidationError When email is empty, missing @, or domain is invalid.
  * @spec_id SPEC-2
  * @req_id REQ-004
- *
- * @example validateEmail("User@Example.COM") // → "user@example.com"
  */
 public String validateEmail(String email)
 ```
@@ -208,17 +233,17 @@ export enum ValidationStatus {
 ```
 
 ```python
-# Python — dataclass
+# Python — dataclass (Google-style docstring)
 @dataclass
 class ValidationResult:
-    """
-    Outcome of a single email validation attempt.
+    """Outcome of a single email validation attempt.
 
     Represents: the result of one call to validate_email.
     Does not represent: user identity, email history, or send queue state.
 
-    spec_id: SPEC-2
-    req_id: REQ-004, REQ-005
+    Note:
+        spec_id: SPEC-2
+        req_id: REQ-004, REQ-005
     """
     normalized: str
     valid: bool
@@ -263,8 +288,7 @@ The file-level annotation anchors all symbols within to a spec. Individual symbo
 ```
 
 ```python
-"""
-auth/validation.py — Email validation logic for the authentication pipeline.
+"""auth/validation.py — Email validation logic for the authentication pipeline.
 
 Responsibilities:
 - Validate RFC 5321 format compliance
@@ -275,8 +299,9 @@ Not responsible for:
 - User account creation (→ auth/accounts.py)
 - Rate limiting (→ middleware/ratelimit.py)
 
-spec_id: SPEC-2
-req_id: REQ-004, REQ-005, REQ-006
+Note:
+    spec_id: SPEC-2
+    req_id: REQ-004, REQ-005, REQ-006
 """
 ```
 
@@ -424,6 +449,104 @@ Multiple REQs: comma-separate. One test may cover multiple REQs when they share 
 
 ---
 
+## Standard Lifecycle Tags
+
+Apply on top of tier-specific fields when relevant. Not every construct needs all of these — use judgment.
+
+### `@deprecated`
+
+Required when a construct is superseded. Always include a migration path and version.
+
+```typescript
+/** @deprecated Since 2.1.0 — use `validateEmailV2(email, options)` instead. */
+```
+```python
+# Inside the docstring Note: block:
+# Note:
+#     Deprecated since 2.1.0. Use validate_email_v2() instead.
+```
+```go
+// Deprecated: Use ValidateEmailV2 instead. (godoc renders a deprecation badge on pkg.go.dev)
+```
+```rust
+#[deprecated(since = "2.1.0", note = "Use validate_email_v2 instead")]
+```
+```java
+/**
+ * @deprecated Since 2.1.0 — use {@link #validateEmailV2(String)} instead.
+ */
+@Deprecated(since = "2.1.0")
+```
+
+### `@since`
+
+Use for library/API versioning — marks when a construct entered the public API. This is contract documentation, not changelog. Library authors must include it.
+
+```typescript
+/** @since 1.4.0 */
+```
+```python
+# Note:
+#     since: 1.4.0
+```
+```java
+/** @since 1.4.0 */
+```
+
+### `@see` / Cross-references
+
+Link related symbols so documentation is navigable. Required when a construct is part of a family or replaces another.
+
+```typescript
+/** @see {@link ValidationResult} for the return type shape */
+```
+```rust
+/// See also: [`ValidationError`], [`validate_email_v2`]
+```
+```java
+/** @see ValidationResult */
+/** @see #validateEmailV2(String) */
+```
+```python
+# See Also:
+#     validate_email_v2: The successor function.
+```
+```go
+// See also: ValidateEmailV2.
+```
+
+### Generic Type Parameters
+
+Document every type parameter on generic constructs.
+
+```typescript
+/**
+ * @typeParam T - The success value type.
+ * @typeParam E - The error type returned on failure.
+ */
+function parseResult<T, E>(raw: string): Result<T, E>
+```
+
+### Thread Safety
+
+Document concurrency behavior when the construct touches shared state.
+
+```typescript
+/** @remarks Not safe for concurrent use. Callers must synchronize externally. */
+```
+```go
+// Safe for concurrent use.
+```
+```java
+/** This class is thread-safe. Internal state is guarded by the instance lock. */
+```
+```rust
+/// # Thread Safety
+/// Not `Sync` — do not share across threads without a `Mutex`.
+```
+
+---
+
 ## Annotation Format Reference
 
 | Language | doc comment style | spec_id | req_id | validates_req |
@@ -441,11 +564,13 @@ Multiple REQs: comma-separate. One test may cover multiple REQs when they share 
 
 **Pattern:** use whatever comment/docstring syntax the language uses. The field names (`spec_id`, `req_id`, `validates_req`) are constant across all languages.
 
+**Python:** use Google-style docstrings. Place `spec_id`/`req_id` inside a `Note:` section — bare key-value pairs outside a section break Napoleon/mkdocstrings parsing.
+
 ---
 
 ## Checklist (per construct before marking complete)
 
-- [ ] Tier 1 (Callable): summary, params, returns, throws, example, `@spec_id`, `@req_id`
+- [ ] Tier 1 (Callable): summary, params, returns, throws, side effects (if any), example, `@spec_id`, `@req_id`
 - [ ] Tier 2 (Type): purpose, represents, does-not-represent, `@spec_id`, `@req_id`
 - [ ] Tier 3 (Module): purpose, responsibilities, not-responsible-for, `@spec_id`, `@req_id`
 - [ ] Tier 4 (Endpoint): method+path, auth, `@spec_id`, `@req_id`, input, output, side effects
@@ -466,6 +591,6 @@ Multiple REQs: comma-separate. One test may cover multiple REQs when they share 
 ## What NOT to Write
 
 - Multi-paragraph prose explaining the algorithm (design doc → `wiki/`)
-- Change history ("Added in v2.3") → git history
+- Changelog entries ("Fixed bug in v2.3") → git history / CHANGELOG.md; but `@since 1.4.0` marking API availability IS appropriate for library authors
 - Author attribution → git blame
 - Comments that will go stale ("// Replace when we migrate to X")

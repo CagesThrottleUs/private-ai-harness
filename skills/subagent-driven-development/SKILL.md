@@ -248,6 +248,7 @@ Done!
 - Let implementer self-review replace actual review (both are needed)
 - **Start code quality review before spec compliance is ✅** (wrong order)
 - Move to next task while either review has open issues
+- Skip documentation on public constructs — `code-documentation` required before spec compliance review
 
 **If subagent asks questions:**
 - Answer clearly and completely
@@ -274,6 +275,7 @@ Done!
 
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
+- **superpowers:code-documentation** - Document every public construct written before committing (spec_id, req_id, full docstring)
 
 **Alternative workflow:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
