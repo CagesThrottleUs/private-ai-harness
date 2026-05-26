@@ -23,14 +23,20 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
+## Design Principles Check
+
+**Before defining file structure:** invoke the `design-principles` skill and run its **Planning Checklist** against the decomposition. This is mandatory — not a suggestion.
+
+The checklist enforces: DRY (no duplicated logic across tasks), KISS (no abstraction layers with one concrete use), YAGNI (no components without a spec REQ backing them), SoC (no file mixing two concerns), loose coupling, SRP, and correct GoF pattern application.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
 
-- Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
-- You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
-- Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
+- Each file has one clear responsibility (SRP). If you can't state it in one sentence, split the file.
+- Files that change together live together. Split by responsibility, not by technical layer.
+- Dependencies flow through interfaces, not concrete types (DIP). No `new ConcreteX()` at call sites.
+- In existing codebases, follow established patterns. If a file you're modifying has grown unwieldy, include a targeted split in the plan.
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
@@ -118,7 +124,8 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
+- DRY, YAGNI, KISS, SOLID, TDD, frequent commits
+- Design principles are enforced by `design-principles` skill — run its Planning Checklist before finalizing structure
 
 ## Self-Review
 

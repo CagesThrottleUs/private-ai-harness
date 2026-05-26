@@ -22,6 +22,7 @@ Not a product. Optimized for one workflow.
 | `caveman` | `/caveman` | 75% token reduction, full technical accuracy |
 | `code-documentation` | `/code-documentation` | Spec-traceable docs at authorship time |
 | `commit-discipline` | `/commit-discipline` | Conventional Commits + micro-commit rules |
+| `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | Parallel agent patterns for independent tasks |
 | `executing-plans` | `/executing-plans` | Structured plan execution with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |

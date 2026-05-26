@@ -27,7 +27,8 @@ For each task:
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
-4. Mark as completed
+4. Before committing: run the `design-principles` **Review Checklist** — catch violations before they land
+5. Mark as completed
 
 ### Step 3: Complete Development
 
@@ -68,3 +69,4 @@ After all tasks complete and verified:
 - **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **superpowers:design-principles** - Review Checklist run before each task commit (DRY, KISS, YAGNI, SOLID, GoF)

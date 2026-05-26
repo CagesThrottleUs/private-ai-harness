@@ -85,6 +85,25 @@ IF conflicts with your human partner's prior decisions:
 
 **your human partner's rule:** "External feedback - be skeptical, but check carefully"
 
+## Design Principles Check for Suggested Changes
+
+Before implementing any reviewer suggestion that changes structure, adds abstractions, or refactors:
+
+```
+Run design-principles Review Checklist against the suggested change:
+- Does this create an abstraction with one concrete use? (YAGNI / KISS)
+- Does this add an interface without an extensibility REQ? (YAGNI)
+- Does this move logic that belongs where it is? (SoC)
+- Does this introduce a pattern that has no concrete need? (GoF / YAGNI)
+
+IF suggestion fails checklist:
+  Push back with the specific principle it violates
+  Reference design-principles skill if reviewer wants full context
+
+IF suggestion passes checklist:
+  Implement it
+```
+
 ## YAGNI Check for "Professional" Features
 
 ```
@@ -92,7 +111,7 @@ IF reviewer suggests "implementing properly":
   grep codebase for actual usage
 
   IF unused: "This endpoint isn't called. Remove it (YAGNI)?"
-  IF used: Then implement properly
+  IF used: Then implement properly — but still verify against design-principles checklist
 ```
 
 **your human partner's rule:** "You and reviewer both report to me. If we don't need this feature, don't add it."
@@ -115,7 +134,9 @@ FOR multi-item feedback:
 Push back when:
 - Suggestion breaks existing functionality
 - Reviewer lacks full context
-- Violates YAGNI (unused feature)
+- Violates YAGNI (unused feature) — see design-principles skill
+- Violates KISS (adds abstraction with one concrete use)
+- Violates SoC, SRP, or DIP — use design-principles Review Checklist as the argument
 - Technically incorrect for this stack
 - Legacy/compatibility reasons exist
 - Conflicts with your human partner's architectural decisions

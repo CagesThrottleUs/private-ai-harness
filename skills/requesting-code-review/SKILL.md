@@ -92,6 +92,12 @@ Push back if reviewer is wrong — with technical reasoning and evidence.
 
 ---
 
+## Self-Check Before Requesting
+
+Before routing to any review agent, run the `design-principles` **Review Checklist**. Sending a design-violated diff multiplies review cost — fix structural violations first.
+
+See `design-principles/SKILL.md` → Review Checklist.
+
 ## Integration
 
 - **Subagent-driven development:** `/review pr` after each task

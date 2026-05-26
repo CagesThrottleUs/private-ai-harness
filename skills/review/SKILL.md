@@ -37,6 +37,21 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 
 ---
 
+## Pre-Dispatch Self-Check
+
+Before dispatching any review agent, run the `design-principles` **Review Checklist** yourself. Fix violations now — reviewers catch bugs and spec gaps, not design debt.
+
+- [ ] No phantom abstractions (interface with one implementor, no spec REQ for extensibility)
+- [ ] No leaking concerns (business logic in transport layer, UI logic in domain model)
+- [ ] No mid-function `new` (dependencies injected or accessed through interfaces)
+- [ ] No Liskov violations (every subtype satisfies base contract completely)
+- [ ] No fat interfaces (client depends only on methods it uses)
+- [ ] GoF patterns present are justified by a concrete need in the spec
+
+If any item fails → fix, re-verify, then dispatch.
+
+---
+
 ## Execution
 
 ### Step 1 — Collect Shared Inputs

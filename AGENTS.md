@@ -31,6 +31,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `caveman` | `/caveman` | Ultra-compressed comms, ~75% token reduction |
 | `code-documentation` | `/code-documentation` | Writing or modifying any public construct |
 | `commit-discipline` | `/commit-discipline` | Generating compliant commit messages |
+| `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | 2+ independent tasks |
 | `executing-plans` | `/executing-plans` | Running a `.ai/plans/` plan with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
