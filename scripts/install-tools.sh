@@ -72,7 +72,7 @@ info "Running: npx claude-mem install"
 npx claude-mem install && ok "claude-mem installed" || warn "claude-mem install failed — check output above"
 echo ""
 
-# ── 5. UI + Cybersecurity skills ─────────────────────────────────────────────
+# ── 5. UI skills ─────────────────────────────────────────────
 echo "5.  Skills (impeccable, emilkowalski/skill, taste-skill, Anthropic-Cybersecurity-Skills)"
 if ! check_cmd npx; then
   warn "npx not found — skipping skills"
@@ -85,11 +85,6 @@ else
 
   info "npx skills add Leonxlnx/taste-skill"
   npx skills add Leonxlnx/taste-skill && ok "taste-skill" || warn "taste-skill failed"
-
-  # info "npx skills add mukul975/Anthropic-Cybersecurity-Skills"
-  # npx skills add mukul975/Anthropic-Cybersecurity-Skills \
-  #   && ok "Anthropic-Cybersecurity-Skills (754 skills)" \
-  #   || warn "Anthropic-Cybersecurity-Skills failed"
 fi
 echo ""
 
