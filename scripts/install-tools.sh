@@ -73,15 +73,12 @@ npx claude-mem install && ok "claude-mem installed" || warn "claude-mem install 
 echo ""
 
 # ── 5. UI skills ─────────────────────────────────────────────
-echo "5.  Skills (impeccable, emilkowalski/skill, taste-skill, Anthropic-Cybersecurity-Skills)"
+echo "5.  Skills (impeccable, taste-skill)"
 if ! check_cmd npx; then
   warn "npx not found — skipping skills"
 else
   info "npx skills add pbakaus/impeccable"
   npx skills add pbakaus/impeccable && ok "impeccable" || warn "impeccable failed"
-
-  info "npx skills add emilkowalski/skill"
-  npx skills add emilkowalski/skill && ok "emilkowalski/skill" || warn "emilkowalski/skill failed"
 
   info "npx skills add Leonxlnx/taste-skill"
   npx skills add Leonxlnx/taste-skill && ok "taste-skill" || warn "taste-skill failed"
