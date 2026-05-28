@@ -36,7 +36,7 @@ if check_cmd rtk; then
   ok "rtk already installed ($(rtk --version 2>/dev/null || echo 'version unknown'))"
 else
   info "Installing rtk..."
-  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh
+  brew install rtk
   ok "rtk installed"
 fi
 
