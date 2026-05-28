@@ -147,27 +147,8 @@ else
 fi
 echo ""
 
-# ── 8. Understand-Anything ───────────────────────────────────────────────────
-echo "8.  Understand-Anything (multimodal analysis plugin)"
-if ! check_cmd claude; then
-  warn "claude CLI not found — run these manually inside Claude Code:"
-  warn "  /plugin marketplace add Lum1104/Understand-Anything"
-  warn "  /plugin install understand-anything"
-else
-  info "Adding Understand-Anything marketplace..."
-  claude plugin marketplace add Lum1104/Understand-Anything \
-    && ok "marketplace registered" \
-    || warn "marketplace add failed — may already be registered"
-
-  info "Installing understand-anything plugin..."
-  claude plugin install understand-anything \
-    && ok "understand-anything installed" \
-    || warn "install failed — check output above"
-fi
-echo ""
-
-# ── 9. VoiceMode ─────────────────────────────────────────────────────────────
-echo "9.  VoiceMode"
+# ── 8. VoiceMode ─────────────────────────────────────────────────────────────
+echo "8.  VoiceMode"
 if ! check_cmd claude; then
   warn "claude CLI not found — run VoiceMode steps manually inside Claude Code"
 else
@@ -179,8 +160,8 @@ else
 fi
 echo ""
 
-# ── 10. Self-install: private-ai-harness plugin ──────────────────────────────
-echo "10. private-ai-harness plugin (skills + agents)"
+# ── 9. Self-install: private-ai-harness plugin ──────────────────────────────
+echo "9. private-ai-harness plugin (skills + agents)"
 
 # Resolve repo root relative to this script — works from any CWD
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -204,8 +185,8 @@ else
 fi
 echo ""
 
-# ── 11. Caveman mode — global CLAUDE.md ──────────────────────────────────────
-echo "11. Caveman mode (global CLAUDE.md)"
+# ── 10. Caveman mode — global CLAUDE.md ──────────────────────────────────────
+echo "10. Caveman mode (global CLAUDE.md)"
 
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 CAVEMAN_MARKER="## Caveman Mode"
@@ -227,8 +208,8 @@ EOF
 fi
 echo ""
 
-# ── 12. Commit discipline — global CLAUDE.md ─────────────────────────────────
-echo "12. Commit discipline (global CLAUDE.md)"
+# ── 11. Commit discipline — global CLAUDE.md ─────────────────────────────────
+echo "11. Commit discipline (global CLAUDE.md)"
 
 COMMIT_DISCIPLINE_MARKER="## Commit Discipline"
 
@@ -247,8 +228,8 @@ EOF
 fi
 echo ""
 
-# ── 13. Development workflow — global CLAUDE.md ─────────────────────────────
-echo "13. Development workflow (global CLAUDE.md)"
+# ── 12. Development workflow — global CLAUDE.md ─────────────────────────────
+echo "12. Development workflow (global CLAUDE.md)"
 
 WORKFLOW_MARKER="## Development Workflow"
 
@@ -272,8 +253,8 @@ EOF
 fi
 echo ""
 
-# ── 14. commit-msg git hook ──────────────────────────────────────────────────
-echo "14. commit-msg hook"
+# ── 13. commit-msg git hook ──────────────────────────────────────────────────
+echo "13. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
