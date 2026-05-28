@@ -2,10 +2,11 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-14 run automatically. Step 10 self-installs this repo as a Claude plugin.
-# Step 11 injects caveman mode into ~/.claude/CLAUDE.md.
-# Step 12 injects commit discipline into ~/.claude/CLAUDE.md.
-# Step 13 injects development workflow into ~/.claude/CLAUDE.md.
+# Steps 1-14 run automatically. Step 9 self-installs this repo as a Claude plugin.
+# Step 10 injects caveman mode into ~/.claude/CLAUDE.md.
+# Step 11 injects commit discipline into ~/.claude/CLAUDE.md.
+# Step 12 injects development workflow into ~/.claude/CLAUDE.md.
+# Step 13 injects Karpathy guidelines into ~/.claude/CLAUDE.md.
 # Step 14 installs the commit-msg git hook in the current project.
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
@@ -250,8 +251,28 @@ EOF
 fi
 echo ""
 
-# ── 13. commit-msg git hook ──────────────────────────────────────────────────
-echo "13. commit-msg hook"
+# ── 13. Karpathy guidelines — global CLAUDE.md ──────────────────────────────
+echo "13. Karpathy guidelines (global CLAUDE.md)"
+
+KARPATHY_MARKER="## Karpathy Guidelines"
+
+if grep -q "$KARPATHY_MARKER" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
+  ok "karpathy block already present in $GLOBAL_CLAUDE_MD"
+else
+  cat >> "$GLOBAL_CLAUDE_MD" <<EOF
+
+## Karpathy Guidelines
+
+**ALWAYS apply when writing or reviewing code.**
+
+@$REPO_ROOT/skills/karpathy/SKILL.md
+EOF
+  ok "karpathy block added to $GLOBAL_CLAUDE_MD"
+fi
+echo ""
+
+# ── 14. commit-msg git hook ──────────────────────────────────────────────────
+echo "14. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"

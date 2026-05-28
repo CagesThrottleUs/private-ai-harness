@@ -29,6 +29,16 @@ If the spec covers multiple independent subsystems, it should have been broken i
 
 The checklist enforces: DRY (no duplicated logic across tasks), KISS (no abstraction layers with one concrete use), YAGNI (no components without a spec REQ backing them), SoC (no file mixing two concerns), loose coupling, SRP, and correct GoF pattern application.
 
+## Karpathy Anti-Pattern Check
+
+**Before finalizing task list:** apply the `karpathy` skill as a mandatory lens over the plan draft.
+
+Catch these before code is written:
+- **Unstated assumptions** — each task must name what it assumes. If ambiguous, surface the ambiguity in the task text so the implementer asks before coding.
+- **Over-engineering** — no abstractions, flexibility, or error handling not directly required by a spec REQ. If a task has more than one concrete consumer, question the abstraction.
+- **Weak success criteria** — every task's verification step must be a concrete, runnable check (command + expected output). "Make sure it works" is a plan failure.
+- **Blast radius** — each task should touch only what it must. If a step modifies more than 2 files, consider splitting it.
+
 ## File Structure
 
 Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
@@ -128,6 +138,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - Exact commands with expected output
 - DRY, YAGNI, KISS, SOLID, TDD, frequent commits
 - Design principles are enforced by `design-principles` skill — run its Planning Checklist before finalizing structure
+- Karpathy lens is enforced by `karpathy` skill — run its anti-pattern check before finalizing task list
 
 ## Self-Review
 
