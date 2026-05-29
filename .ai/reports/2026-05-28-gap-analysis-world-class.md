@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 7: 6→8/10 (`e2e-testing` + `e2e-reviewer`, 3 of 4 test layers). Overall: 4.0→6.9/10  
+**Last updated:** 2026-05-29 — Phase 0: 2→6/10 (`business-context-intake` + `business-context-reviewer`). Overall: 4.0→7.2/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -21,7 +21,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 0 — Business Context Capture | Score: 2/10
+## Phase 0 — Business Context Capture | Score: 6/10
 
 ### Industry Benchmark
 
@@ -35,11 +35,11 @@ Each phase section has five parts:
 
 **DO-178C aviation standard (world-class process):** System Requirements specification is a mandatory prerequisite. The System Requirements define what the aircraft must do. Software Requirements can only be written to satisfy System Requirements, not invented from scratch. Business context (what the system must do for the aircraft) is the input gate to the entire development lifecycle.
 
-### Harness Score: 2/10
+### Harness Score: 6/10
 
-**Department produces:** PRD/PR/FAQ — committed, versioned artifact with problem statement, user persona, success metrics, and compliance constraints. **Harness produces:** Partial scope negotiation inside a conversation. No committed file. **Verdict:** Absent — a conversation transcript is not a PRD.
+**Department produces:** PRD/PR/FAQ — committed, versioned artifact with problem statement, user persona, success metrics, compliance constraints, stakeholder map. **Harness produces:** `business-context-intake` skill produces `.ai/business-context/YYYY-MM-DD-<feature>.md` via structured 8-question interview: JTBD statement, measurable metrics with baselines, explicit compliance table, minimum 3 non-goals, stakeholder map, optional PR/FAQ. `business-context-reviewer` validates 6 dimensions. `brainstorming` hard-gated: design cannot begin without this document. **Verdict:** Largely indistinguishable in content. Remaining gap: no formal PM review ritual (Amazon readout meeting, leadership signoff).
 
-`brainstorming` does scope negotiation and out-of-scope documentation. The spec has an explicit out-of-scope section. Beyond this, the harness relies on the human dumping context into conversation. No structured intake artifact. No mandatory first gate.
+Synthesizes Amazon Working Backwards PR/FAQ + JTBD framework + PRD best practices. Document committed to `.ai/business-context/` — persists across sessions and is re-read at session start.
 
 ### Precise Gaps
 
@@ -780,7 +780,7 @@ Performance is not addressed at any phase.
 | ✅ **P1 CLOSED** | ~~No integration tests~~ | `integration-testing` skill + `integration-test-reviewer` agent | During TDD GREEN phase — **shipped 2026-05-29** |
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
 | ✅ **P1 CLOSED** | ~~No API contract first~~ | `api-contract-first` skill + `api-contract-reviewer` agent | During `writing-plans`, before handler tasks — **shipped 2026-05-29** |
-| **P2** | No business context intake | `business-context-intake` (new) | Before `brainstorming` |
+| ✅ **P2 CLOSED** | ~~No business context intake~~ | `business-context-intake` skill + `business-context-reviewer` agent | Before `brainstorming` — **shipped 2026-05-29** |
 | **P2** | No performance by design | Enhance HLD + `load-testing` (new) | HLD + `finishing-a-development-branch` |
 | ✅ **P2 CLOSED** | ~~No E2E tests~~ | `e2e-testing` skill + `e2e-reviewer` agent | Before `finishing-a-development-branch` — **shipped 2026-05-29** |
 | **P2** | No runbooks | Enhance `observability-standards` | During `observability-standards` |
@@ -881,21 +881,23 @@ pr-creator → PR opened
 - After Deployment: 6.1/10
 - After Integration Testing: 6.4/10
 - After API Contract First: 6.7/10
-- After E2E Testing: **6.9/10**
+- After E2E Testing: 6.9/10
+- After Business Context Intake: **7.2/10**
 
 **What was shipped (2026-05-29):**
+- Phase 0 (Business Context): **2→6/10** — `business-context-intake` + `business-context-reviewer`. Committed PRD with JTBD, metrics, compliance, non-goals, stakeholders. Hard gate before brainstorming.
 - Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
 - Phase 3 (LLD): **4→7/10** — `api-contract-first` + `api-contract-reviewer`
-- Phase 7 (Testing): **3→8/10** — `integration-testing` + `e2e-testing`. 3 of 4 test layers. Playwright, POM, auth fixtures, staging CI job.
+- Phase 7 (Testing): **3→8/10** — `integration-testing` + `e2e-testing`
 - Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer`
 - Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`
 - Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`
 
 **What remains:**
-- Phase 0 (Business Context): 2/10 — `business-context-intake` skill (P2)
-- Phase 1 (Requirements): 6/10 — NFR enforcement (P1 enhancement)
-- Phase 7 (Testing): 8/10 — performance test layer (`load-testing` P2)
+- Phase 1 (Requirements): 6/10 — NFR enforcement (P1 enhancement to brainstorming + spec-quality-gate)
+- Phase 7 (Testing): 8/10 — performance test layer (`load-testing`)
 - Quality: performance by design (3/10)
+- All phases now produce some artifact. No phase is entirely absent.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
