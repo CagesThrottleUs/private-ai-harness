@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — chaos-engineering skill shipped (T-08, Sprint 2). Phase 7 conditionally improves for resilience NFR services. Score: 8.1/10  
+**Last updated:** 2026-05-29 — visual-regression skill shipped (T-09). Phase 7 now: unit+integration+E2E+accessibility+DAST+load+chaos+VRT. Score: 8.1/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -491,7 +491,7 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8.5/10 | 🟢 Strong — linter gate (Ruff/Biome/golangci-lint/Clippy) + `linter-reviewer` closes idiom gap |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
-| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + accessibility + DAST + load + chaos | 9.5/10 | 🟢 Strong — all layers + WCAG + DAST + chaos (conditional: resilience NFR services). Business logic flaws require manual pen test. |
+| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + accessibility + DAST + load + chaos + VRT | 9.5/10 | 🟢 Strong — all layers + WCAG + DAST + chaos + visual regression (Playwright toHaveScreenshot). Manual pen test still needed. |
 | Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 7/10 | 🟢 Strong — `deployment-workflow` + `deployment-reviewer`; gaps: platform canary config, on-call rotation |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config + incident response | 8.5/10 | 🟢 Strong — `observability-standards` + `incident-response` (SEV matrix, IC role, postmortem, MTTD/MTTR); gap: on-call rotation provisioning |

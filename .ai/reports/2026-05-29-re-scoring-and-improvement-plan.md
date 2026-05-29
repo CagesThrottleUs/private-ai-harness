@@ -62,7 +62,7 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 4: Task Distribution** | EM + Leads | Bite-sized plan with subagent dispatch | **7/10** | Good sprint analog. No dependency DAG, no velocity tracking. |
 | **Phase 5: Implementation** | ICs | TDD code + karpathy + linter gate + docs | **8.5/10** | Linter gate added (Ruff/Biome/golangci-lint/Clippy auto-detected, `linter-reviewer` Sonnet agent). 2025/2026 defect rate research applies to tools without this gate. |
 | **Phase 6: Code Review** | Sr/Staff | 6 specialist Opus reviewer agents | **9/10** | Exceeds typical 1-reviewer teams. Slight gap: codebase coherence across long history. |
-| **Phase 7: Testing** | QA + Sr | Unit + integration + E2E + accessibility + DAST + load + chaos | **9.5/10** | 7 layers. `chaos-engineering` (T-08, conditional: resilience NFR services only). k6 fault injection, Toxiproxy, steady state + hypothesis. |
+| **Phase 7: Testing** | QA + Sr | Unit+integration+E2E+accessibility+DAST+load+chaos+VRT | **9.5/10** | 8 layers. T-09: `visual-regression` (Playwright toHaveScreenshot, zero deps, pinned Docker CI). Conditional for UI features. |
 | **Phase 8: CI/CD** | DevOps | Platform-agnostic spec + 6 platform configs | **7/10** | IaC absent. Feature flags absent. |
 | **Phase 9: Deployment** | DevOps + RM | Rollback procedure + migration checklist + smoke tests | **6.5/10** | *Generates* the runbook. Does not *execute* the deployment. Real release engineering = real-time decision-making. |
 | **Phase 10: Observability** | SRE | OTel + SLOs + runbooks + incident response process | **8.5/10** | `incident-response` adds severity matrix (SEV-1/2/3), IC role, blameless postmortem template (Google SRE), MTTD/MTTR tracking. On-call rotation provisioning remains. |
