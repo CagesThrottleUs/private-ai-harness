@@ -113,124 +113,20 @@ Run `/review all` before presenting merge/PR options. All four agents run in par
 
 This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
 
-**Also run `ci-reviewer` if CI config was modified on this branch:**
+**Dispatch additional reviewers** for changed artifact types — run in parallel with `/review all`:
 
-```bash
-git diff <base-branch>...HEAD --name-only | grep -E "\.github/workflows/|\.gitlab-ci\.yml|Jenkinsfile|\.circleci/|azure-pipelines\.yml|bitbucket-pipelines\.yml|\.ai/ci/"
-```
+| If diff contains | Agent | Key inputs |
+|-----------------|-------|------------|
+| `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
+| `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
+| `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |
+| `tests/integration/` | `integration-test-reviewer` | `TEST_FILES`, `SPEC_PATH` |
+| `.ai/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
+| `.ai/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
+| `.ai/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
+| `tests/e2e/` | `e2e-reviewer` | `TEST_FILES`, `SPEC_PATH` |
 
-If any CI files appear in the diff → dispatch `ci-reviewer` in parallel with `/review all`:
-
-```
-Agent (ci-reviewer):
-  CI_CONFIG_PATH: <detected CI config file>
-  PIPELINE_SPEC_PATH: .ai/ci/YYYY-MM-DD-pipeline-spec.md  ← if exists
-  PROJECT_ROOT: .
-```
-
-Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
-
-**Also run `load-test-reviewer` if performance test files were created or modified:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep -E "tests/performance/|\.perf\."
-```
-
-If performance test files changed → dispatch `load-test-reviewer` in parallel:
-
-```
-Agent (load-test-reviewer):
-  SCRIPT_PATH: tests/performance/load-test.js
-  SPEC_PATH: <matching .ai/specs/*.md>
-  SLO_PATH: <matching .ai/observability/*.md>
-```
-
-Treat `load-test-reviewer` Critical findings (thresholds not tied to NFRs, running against localhost) as blocking.
-
-**Also run `api-contract-reviewer` if API spec files were created or modified:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep -E "^api/|\.proto$|openapi\."
-```
-
-If spec files changed → dispatch `api-contract-reviewer` in parallel:
-
-```
-Agent (api-contract-reviewer):
-  SPEC_PATH: <api/openapi.yaml or proto/**/*.proto>
-  PROTOCOL: rest  # or grpc
-  SPEC_SOURCE_PATH: <matching .ai/specs/*.md>
-```
-
-Treat `api-contract-reviewer` Critical findings (breaking changes, missing auth, missing error responses) as blocking.
-
-**Also run `integration-test-reviewer` if integration test files were created or modified:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep -E "tests/integration/|test/integration/|_integration_test\."
-```
-
-If any integration test files appear → dispatch `integration-test-reviewer` in parallel:
-
-```
-Agent (integration-test-reviewer):
-  TEST_FILES: tests/integration/**
-  SPEC_PATH: <matching .ai/specs/*.md>
-```
-
-Treat `integration-test-reviewer` Critical findings as blocking — a test using mock DB is worse than no integration test (it creates false confidence).
-
-**Also run `deployment-reviewer` if deployment artifacts exist on this branch:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep "\.ai/deployment/"
-```
-
-If deployment artifacts changed → dispatch `deployment-reviewer` in parallel:
-
-```
-Agent (deployment-reviewer):
-  ROLLBACK_PATH: .ai/deployment/<latest>-rollback.md
-  SMOKE_TEST_PATH: .ai/deployment/<latest>-smoke-tests.md
-  RUNBOOK_PATH: .ai/deployment/<latest>-deploy-runbook.md
-  SPEC_PATH: <matching .ai/specs/*.md>
-```
-
-Treat `deployment-reviewer` Critical findings as blocking — a broken rollback procedure discovered during a production incident is too late.
-
-**Also run `observability-reviewer` if observability files were created or modified on this branch:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep -E "\.ai/observability/|wiki/guides/alerts|wiki/guides/runbooks/"
-```
-
-If any observability files appear → dispatch `observability-reviewer` in parallel:
-
-```
-Agent (observability-reviewer):
-  SLO_PATH: .ai/observability/<latest-slos.md>
-  ALERTS_PATH: wiki/guides/alerts.md
-  RUNBOOK_DIR: wiki/guides/runbooks/
-  SPEC_PATH: <matching .ai/specs/*.md>
-```
-
-Treat `observability-reviewer` Critical findings as blocking — a deployed service without valid SLOs and runbooks is an incident risk.
-
-**Also run `hld-reviewer` if HLD files were modified on this branch:**
-
-```bash
-git diff <base-branch>...HEAD --name-only | grep "\.ai/hld/"
-```
-
-If any HLD files appear → dispatch `hld-reviewer` in parallel:
-
-```
-Agent (hld-reviewer):
-  HLD_PATH: <modified .ai/hld/*.md file>
-  SPEC_PATH: <matching .ai/specs/*.md>
-```
-
-HLD changes mid-implementation mean the architecture shifted. Treat Critical findings as blocking.
+Run: `git diff <base-branch>...HEAD --name-only` to detect which artifact types changed. Dispatch matching reviewers in parallel. All Critical findings from all agents block merge.
 
 **If any agent returns Critical:** Stop. Do not present merge/PR options.
 ```

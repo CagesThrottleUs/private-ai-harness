@@ -31,6 +31,9 @@ Produce the deployment artifacts before the PR is opened — not as a post-merge
 
 **Skip** for: documentation-only changes, config-only changes with no runtime effect.
 
+**Infer + confirm:**
+> "This is a config-only change with no behavior impact. Skipping deployment-workflow (no rollback procedure, migration checklist, or smoke tests needed). OK?"
+
 ---
 
 ## Inputs Required

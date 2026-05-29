@@ -144,94 +144,12 @@ func WithTransaction(t *testing.T, db *sqlx.DB, fn func(tx *sqlx.Tx)) {
 }
 ```
 
-**TypeScript — `jest` + `testcontainers`:**
+**TypeScript, Java, Rust:** Same three-part pattern as Python and Go:
+1. Start container with pinned version (`@testcontainers/postgresql` / `@Container PostgreSQLContainer` / `testcontainers` crate)
+2. Run migrations before tests
+3. Wrap each test in a transaction that rolls back in `afterEach` / `@AfterEach` / `defer tx.Rollback()`
 
-```typescript
-// tests/setup/containers.ts
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-
-let container: StartedPostgreSqlContainer;
-
-beforeAll(async () => {
-    container = await new PostgreSqlContainer('postgres:15.2')  // pin version
-        .withDatabase('testdb')
-        .withUsername('test')
-        .withPassword('test')
-        .start();
-    
-    process.env.DATABASE_URL = container.getConnectionUri();
-    // run migrations
-    await runMigrations(container.getConnectionUri());
-}, 60_000);
-
-afterAll(async () => {
-    await container.stop();
-});
-
-// Per-test isolation via transaction rollback
-beforeEach(async () => {
-    await db.query('BEGIN');
-});
-
-afterEach(async () => {
-    await db.query('ROLLBACK');
-});
-```
-
-**Java — `JUnit 5` + `testcontainers`:**
-
-```java
-// Integration test base class
-@Testcontainers
-@SpringBootTest
-abstract class IntegrationTestBase {
-
-    @Container
-    static final PostgreSQLContainer<?> postgres = 
-        new PostgreSQLContainer<>("postgres:15.2")  // pin version
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
-
-    @Autowired
-    protected PlatformTransactionManager transactionManager;
-
-    private TransactionStatus tx;
-
-    @BeforeEach
-    void beginTransaction() {
-        tx = transactionManager.getTransaction(new DefaultTransactionDefinition());
-    }
-
-    @AfterEach
-    void rollbackTransaction() {
-        transactionManager.rollback(tx);  // guaranteed isolation
-    }
-}
-```
-
-**Rust — `#[tokio::test]` + `testcontainers`:**
-
-```rust
-// tests/common/mod.rs
-use testcontainers::{clients::Cli, images::postgres::Postgres, Container};
-
-pub async fn setup_postgres<'d>(docker: &'d Cli) -> (Container<'d, Postgres>, String) {
-    let pg_image = Postgres::default().with_tag("15.2");  // pin version
-    let container = docker.run(pg_image);
-    let port = container.get_host_port_ipv4(5432);
-    let url = format!("postgresql://postgres:postgres@127.0.0.1:{}/postgres", port);
-    sqlx::migrate!("./migrations").run(&pool).await.unwrap();
-    (container, url)
-}
-```
+See testcontainers.com for language-specific API — the isolation and factory patterns are identical.
 
 ---
 

@@ -41,6 +41,9 @@ Engineering without a defined success metric is engineering toward an unknown de
 - Internal refactoring with no user-facing impact
 - Config or environment variable changes
 
+**Infer + confirm:**
+> "This is a bug fix — the expected behavior is clear from the bug description. Skipping business-context-intake and going straight to brainstorming. OK?"
+
 ---
 
 ## Process: Structured Interview
@@ -48,6 +51,8 @@ Engineering without a defined success metric is engineering toward an unknown de
 Ask questions one at a time. Each question builds on the last. Do not proceed to the next question until the current one is answered fully.
 
 **Announce at start:** "I'm using the business-context-intake skill to capture context before we design. I'll ask you a few questions — one at a time. This takes 5-10 minutes and prevents building toward the wrong goal."
+
+**Use `AskUserQuestion`** for questions with discrete options (compliance yes/no, feature type, priority). Use prose for open-ended questions (problem description, user persona). Never combine multiple questions in one tool call during intake — ask one at a time so the human can think clearly.
 
 ### Question sequence:
 

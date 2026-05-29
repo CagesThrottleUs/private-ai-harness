@@ -21,15 +21,14 @@ Instrument a system for production before it reaches production. Observability r
 
 ## When to Use
 
-**Required** immediately after any task that creates:
-- A new API endpoint or HTTP handler
-- A background worker or job processor
-- A new service or process boundary
-- Any component that handles external traffic or user data
+**Required** when a task creates an external-facing component: API endpoint, background worker, service boundary, or anything handling external traffic.
 
-**Invoked from:** `executing-plans` and `subagent-driven-development` — after any task creating an external-facing component.
+**Skip** when: pure refactoring with no new endpoints, internal utility function, config change, documentation-only.
 
-**Do not defer.** Observability added post-deployment is observability added during an incident.
+**Infer + confirm:**
+> "This refactors an existing handler — no new endpoint, no new metrics path. Skipping observability-standards. Right?"
+
+**Do not defer** when it does apply — observability added post-deployment is observability added during an incident.
 
 ---
 
@@ -126,67 +125,7 @@ logger.InfoContext(ctx, "request.received",
 // zerolog ~15x faster than slog under high concurrency
 ```
 
-**TypeScript/Node.js — `pino`:**
-```typescript
-import pino from 'pino';
-
-const log = pino({
-  level: process.env.LOG_LEVEL || 'info',
-  formatters: {
-    level: (label) => ({ severity: label.toUpperCase() }),
-  },
-  timestamp: pino.stdTimeFunctions.isoTime,
-  base: { service_name: 'your-service' },
-});
-
-// Usage — bind trace context per request
-const reqLog = log.child({
-  trace_id: traceId,
-  span_id: spanId,
-  request_id: req.id,
-});
-reqLog.info({ method: req.method, path: req.url }, 'request.received');
-```
-
-**Java — `logback` with `logstash-logback-encoder`:**
-```xml
-<!-- logback.xml -->
-<appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
-  <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-    <customFields>{"service_name":"your-service"}</customFields>
-    <fieldNames>
-      <timestamp>timestamp</timestamp>
-      <level>severity</level>
-    </fieldNames>
-  </encoder>
-</appender>
-```
-```java
-import org.slf4j.MDC;
-// Bind trace context in servlet filter
-MDC.put("trace_id", traceId);
-MDC.put("span_id", spanId);
-log.info("request.received");
-```
-
-**Rust — `tracing` crate:**
-```rust
-use tracing::{info, instrument};
-use tracing_subscriber::fmt;
-
-// Setup
-tracing_subscriber::fmt()
-    .json()
-    .with_target(false)
-    .with_current_span(true)
-    .init();
-
-// Usage
-#[instrument(fields(trace_id = %trace_id, user_id = %user_id))]
-async fn handle_request(trace_id: &str, user_id: &str) {
-    info!(method = "GET", path = "/api/users", "request.received");
-}
-```
+**TypeScript/Node.js, Java, Rust:** Same 6-field pattern using the language's structured logging library (`pino` for Node, `logback+logstash-encoder` for Java, `tracing` crate for Rust). Bind trace_id/span_id via middleware/MDC/instrument macro. Output JSON, not plain text.
 
 ### What NOT to log
 
@@ -253,43 +192,7 @@ def record_request(method: str, path: str, status: int, duration: float):
         request_errors.add(1, attributes=labels)
 ```
 
-**Go:**
-```go
-import "go.opentelemetry.io/otel/metric"
-
-var (
-    requestDuration metric.Float64Histogram
-    requestTotal    metric.Int64Counter
-    requestErrors   metric.Int64Counter
-    activeConns     metric.Int64UpDownCounter
-)
-
-func initMetrics(meter metric.Meter) {
-    requestDuration, _ = meter.Float64Histogram(
-        "http.request.duration",
-        metric.WithUnit("s"),
-        metric.WithDescription("HTTP request duration in seconds"),
-    )
-    requestTotal, _ = meter.Int64Counter("http.requests.total")
-    requestErrors, _ = meter.Int64Counter("http.request.errors.total")
-    activeConns, _ = meter.Int64UpDownCounter("http.active.connections")
-}
-```
-
-**TypeScript/Node.js:**
-```typescript
-import { metrics } from '@opentelemetry/api';
-
-const meter = metrics.getMeter('your-service');
-
-const requestDuration = meter.createHistogram('http.request.duration', {
-  unit: 's',
-  description: 'HTTP request duration in seconds',
-});
-const requestTotal = meter.createCounter('http.requests.total');
-const requestErrors = meter.createCounter('http.request.errors.total');
-const activeConnections = meter.createUpDownCounter('http.active.connections');
-```
+**Go, TypeScript, Java, Rust:** Same four instruments using the OpenTelemetry SDK for your language — `Float64Histogram` for duration, `Int64Counter` for requests and errors, `Int64UpDownCounter` for saturation. API is consistent across languages; only import paths differ.
 
 ### Metric naming convention
 

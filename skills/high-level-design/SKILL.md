@@ -21,19 +21,14 @@ Translate a validated spec into a committed architectural blueprint. Architectur
 
 ## When to Use
 
-**Required** for any change that:
-- Introduces a new service, process, or runtime component
-- Changes data model, storage engine, or schema design
-- Adds or changes an external integration (API, queue, event bus, CDN, LLM provider)
-- Touches security boundaries (auth, permissions, encryption, trust model)
-- Introduces a new traffic-bearing endpoint expected at > 100 RPS
-- Requires capacity planning (new jobs processing large data sets)
+**Required** for new architectural elements: new service/process, new data model, new external integration, security boundary changes, traffic-bearing endpoints with capacity requirements.
 
-**Skip** (go directly to `writing-plans`) for:
-- Bug fixes with no architectural impact
-- Config or environment variable changes
-- Isolated utility functions with no external dependencies
-- Documentation-only changes
+**Skip** for: bug fixes, config changes, isolated utilities, adding a method/parameter/parsing capability to an existing component, new endpoint following an established service pattern.
+
+**Infer + confirm before proceeding.** Don't silently skip — state the inference and ask once:
+> "This adds array parsing to an existing parser — no new service, no data model change, no external dependency. I'm going to skip HLD. Correct, or am I missing something?"
+
+Use `AskUserQuestion` when the scope is ambiguous (feature could be small or large depending on implementation approach).
 
 ---
 

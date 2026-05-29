@@ -104,6 +104,28 @@ digraph brainstorming {
 
 ## The Process
 
+**Using AskUserQuestion for clarifying questions:**
+
+When asking multiple-choice questions, use the `AskUserQuestion` tool — it presents options as a structured UI rather than a free-text prompt. Use it when:
+- There are 2-4 discrete options (approach A vs B vs C)
+- The answer determines a significant branch in the design
+
+Example:
+```
+AskUserQuestion({
+  questions: [{
+    question: "Which storage approach fits best?",
+    header: "Storage",
+    options: [
+      { label: "PostgreSQL", description: "Relational, ACID, good for structured data" },
+      { label: "Redis", description: "In-memory, fast reads, good for ephemeral state" },
+    ]
+  }]
+})
+```
+
+For open-ended questions ("describe your problem"), continue using prose — the tool is for structured choices, not free-form input.
+
 **Understanding the idea:**
 
 - Check out the current project state first (files, docs, recent commits)

@@ -43,6 +43,11 @@ A critical user journey is a sequence of actions that represents a core business
 
 **For API-only services** (no UI): E2E tests are HTTP integration tests covering the full request chain (auth → routing → handler → DB → response). Use Playwright's `request` API or `curl`/`httpx` in a CI test script.
 
+**Skip** for: internal utilities, config changes, refactors with no user-flow change.
+
+**Infer + confirm:**
+> "This adds a backend utility with no user-facing endpoints or UI changes. Skipping e2e-testing. Correct?"
+
 ---
 
 ## Critical Journey Identification

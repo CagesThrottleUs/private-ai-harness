@@ -29,13 +29,12 @@ Do NOT write a handler, controller, route, or gRPC service implementation before
 
 ## When to Use
 
-**Required** when a `writing-plans` task creates:
-- A new HTTP endpoint (GET/POST/PUT/PATCH/DELETE)
-- A new gRPC service or method
-- A new WebSocket or event-driven API
-- A new GraphQL schema (use schema-first equivalent)
+**Required** when a task creates a new externally-visible API surface: HTTP endpoint, gRPC method, WebSocket, GraphQL schema.
 
-**Skip for:** internal helper functions, database queries, background jobs with no external API surface.
+**Skip for:** internal helpers, DB queries, background jobs, adding a parameter to an existing endpoint (spec already exists — update it, don't create a new one).
+
+**Infer + confirm:**
+> "This adds a parameter to `GET /users` — the OpenAPI spec already covers that path. Skipping api-contract-first (I'll note the parameter addition in the existing spec). OK?"
 
 ---
 

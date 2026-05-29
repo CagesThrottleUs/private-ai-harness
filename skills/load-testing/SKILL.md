@@ -33,16 +33,12 @@ Default: **k6**. All templates below are k6. Locust/Gatling templates available 
 
 ## When to Use
 
-**Required** before `finishing-a-development-branch` for any feature where the spec contains:
-- Latency NFRs (e.g., "p99 < 200ms")
-- Throughput NFRs (e.g., "sustain 1,000 RPS")
-- Availability NFRs (e.g., "99.9% uptime")
-- Concurrent user targets (e.g., "handle 500 concurrent users")
+**Required** when the spec has numeric performance NFRs: latency targets, throughput targets, availability targets, concurrent user ceilings.
 
-**Skip** for:
-- Features with no performance NFRs in spec
-- Internal tools with no throughput requirements
-- Bug fixes with no NFR-related changes
+**Skip** when: spec has no NFR section, internal-only change, bug fix, utility function with no user-facing load.
+
+**Infer + confirm:**
+> "The spec has no performance NFRs and this is an internal utility. Skipping load-testing. OK, or did I miss an NFR?"
 
 ---
 

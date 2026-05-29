@@ -6,6 +6,25 @@ user-invocable: true
 
 ## The Basic Workflow
 
+## Complexity Assessment (before every workflow)
+
+**Infer the change type first. Confirm with the user before proceeding.**
+
+| Change type | Signals | Suggested skips |
+|-------------|---------|----------------|
+| **Trivial** | Bug fix, rename, config, docs, dependency bump | business-context-intake, high-level-design, api-contract-first, load-testing, deployment-workflow |
+| **Small** | New utility function, adding a parameter, isolated feature with no new API/DB | high-level-design, load-testing (no NFRs), deployment-workflow (no migration) |
+| **Medium** | New endpoint on existing service, new UI feature, new DB column | high-level-design (if extending existing pattern) |
+| **Large** | New service, new data model, new external integration, new API surface | Full workflow |
+| **Critical** | Auth/payment/PII changes, public API breaking change | Full workflow + extra security gate |
+
+**Always confirm before skipping any step.** Use `AskUserQuestion` when the category is ambiguous. For obvious trivials (fixing a typo, bumping a version), a single inline question is fine.
+
+Example confirm message:
+> "This looks like a **small** change (adding array parsing to an existing parser — no new service, no new API, no NFRs). I suggest skipping: HLD, api-contract-first, business-context-intake, load-testing, deployment-workflow. Should I use the lightweight workflow (brainstorming → spec → plan → implement → review), or do you want the full suite?"
+
+---
+
 0. **Research & Reuse** _(mandatory before any new implementation)_
    - `gh search repos` and `gh search code` first — find existing implementations before writing anything new.
    - Context7 or vendor docs second — confirm API behavior, package usage, version-specific details.
