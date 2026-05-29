@@ -65,12 +65,12 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 7: Testing** | QA + Sr | Unit + integration + E2E + accessibility + DAST + load | **9.5/10** | 6 layers. ZAP baseline (every PR), API scan (staging, OpenAPI spec), Nuclei, SARIF to Security tab. Business logic flaws require manual pen test. |
 | **Phase 8: CI/CD** | DevOps | Platform-agnostic spec + 6 platform configs | **7/10** | IaC absent. Feature flags absent. |
 | **Phase 9: Deployment** | DevOps + RM | Rollback procedure + migration checklist + smoke tests | **6.5/10** | *Generates* the runbook. Does not *execute* the deployment. Real release engineering = real-time decision-making. |
-| **Phase 10: Observability** | SRE | OTel logging + golden signals + SLOs + runbooks | **7/10** | Setup is world-class. Incident *response execution* absent. Postmortem absent. |
+| **Phase 10: Observability** | SRE | OTel + SLOs + runbooks + incident response process | **8.5/10** | `incident-response` adds severity matrix (SEV-1/2/3), IC role, blameless postmortem template (Google SRE), MTTD/MTTR tracking. On-call rotation provisioning remains. |
 | **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + onboarding + runbooks + changelog | **8.5/10** | `onboarding-guide` synthesizes HLD C4, ADRs, OpenAPI, SLOs into 8-section wiki/ONBOARDING.md. Function-level docs strong. API reference pages (Stripe-quality) still absent. |
 
-### Overall: 8.0/10
+### Overall: 8.1/10
 
-*(Phase 11: 6.5→8.5 with onboarding-guide. Sprint 1 complete (7.9). Phase 7: 9.5. Phase 3: 8.5.)*
+*(Phase 10: 7→8.5 with incident-response. Phase 11: 8.5. Phase 7: 9.5. Phase 3: 8.5.)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 
