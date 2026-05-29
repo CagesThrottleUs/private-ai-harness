@@ -57,6 +57,7 @@ user-invocable: true
 | SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
 | API contract (REST) | `api/openapi.yaml` | OpenAPI 3.1 spec — written before handler code |
 | API contract (gRPC) | `proto/<pkg>/v1/<service>.proto` | Protobuf service definition — written before service implementation |
+| Performance baseline | `.ai/performance/YYYY-MM-DD-baseline.md` | k6 results vs NFR targets; committed after load test run |
 | Deployment artifacts | `.ai/deployment/YYYY-MM-DD-*.md` | Rollback procedure, smoke tests, deploy runbook, migration checklist |
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |

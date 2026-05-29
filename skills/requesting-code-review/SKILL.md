@@ -28,6 +28,7 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 | `integration-test-reviewer` | `/review integration` | When integration tests are written. Validates no mocks at boundary, isolation (rollback), factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring — 7 dimensions. Not in `/review all`. |
 | `api-contract-reviewer` | `/review api` | When API spec is written or updated. Validates completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage, naming consistency — 7 dimensions. Not in `/review all`. Run before any handler implementation. |
 | `e2e-reviewer` | `/review e2e` | When E2E tests are written. Validates critical journey coverage, semantic selectors, no hardcoded waits, test independence, POM, auth fixtures, CI integration — 7 dimensions. Not in `/review all`. |
+| `load-test-reviewer` | `/review performance` | When load tests are written. Validates NFR-aligned thresholds, smoke test, realistic traffic, appropriate test types (soak for 99.9% availability), CI integration — 6 dimensions. Not in `/review all`. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
 ---

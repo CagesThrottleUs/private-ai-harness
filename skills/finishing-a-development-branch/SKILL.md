@@ -76,9 +76,15 @@ Stop. Don't proceed to Step 1.5.
 
 **If tests pass:** Continue to Step 1.5.
 
-### Step 1: E2E and Deployment Artifacts Check
+### Step 1: Performance, E2E, and Deployment Artifacts Check
 
 Before running the review gate, verify required artifacts exist.
+
+**Load tests** — required when spec contains performance NFRs (latency, throughput, availability):
+```bash
+ls tests/performance/*.js 2>/dev/null | wc -l
+```
+If zero load tests AND spec has NFR table → invoke `load-testing` skill first.
 
 **E2E tests** — required for any feature with user-facing behavior:
 ```bash
@@ -123,6 +129,23 @@ Agent (ci-reviewer):
 ```
 
 Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
+
+**Also run `load-test-reviewer` if performance test files were created or modified:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep -E "tests/performance/|\.perf\."
+```
+
+If performance test files changed → dispatch `load-test-reviewer` in parallel:
+
+```
+Agent (load-test-reviewer):
+  SCRIPT_PATH: tests/performance/load-test.js
+  SPEC_PATH: <matching .ai/specs/*.md>
+  SLO_PATH: <matching .ai/observability/*.md>
+```
+
+Treat `load-test-reviewer` Critical findings (thresholds not tied to NFRs, running against localhost) as blocking.
 
 **Also run `api-contract-reviewer` if API spec files were created or modified:**
 

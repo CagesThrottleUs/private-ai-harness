@@ -31,6 +31,7 @@ Not a product. Optimized for one workflow.
 | `deployment-workflow` | `/deployment-workflow` | Before PR deployment-ready — deployment strategy, zero-downtime migration checklist, rollback procedure, smoke tests, release notes |
 | `api-contract-first` | `/api-contract-first` | Before any handler/gRPC implementation — OpenAPI 3.1 or .proto spec, Spectral linting, Prism mock server, CI lint job; hard gate before handler code |
 | `e2e-testing` | `/e2e-testing` | Before finishing a user-facing feature — Playwright POM + auth fixtures + semantic locators + CI post-deploy E2E job against staging |
+| `load-testing` | `/load-testing` | Before finishing a feature with NFR targets — k6 smoke/load/stress/spike/soak scripts with thresholds tied to spec NFRs, CI performance job |
 | `integration-testing` | `/integration-testing` | During TDD GREEN for components with external I/O — Testcontainers (real DB/queue/cache), transaction rollback isolation, factory pattern, Pact contract tests |
 | `observability-standards` | `/observability-standards` | After first API endpoint — OTel structured logging, golden signal metrics, SLO doc, alert rules, per-alert runbooks |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
@@ -72,6 +73,7 @@ Not a product. Optimized for one workflow.
 | `integration-test-reviewer` | Integration test quality gate — no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring |
 | `api-contract-reviewer` | API contract quality gate — completeness, error taxonomy, security, breaking changes, schema quality (money-as-float Critical), REQ coverage, naming conventions |
 | `e2e-reviewer` | E2E test quality gate — critical journey coverage, semantic selectors, no hardcoded waits, test independence, POM, auth fixtures, CI integration |
+| `load-test-reviewer` | Load test quality gate — NFR-aligned thresholds, smoke test, realistic traffic, test type coverage (soak for availability NFRs), CI against staging |
 
 ---
 
