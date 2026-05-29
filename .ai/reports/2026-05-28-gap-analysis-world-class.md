@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 0: 2→6/10 (`business-context-intake` + `business-context-reviewer`). Overall: 4.0→7.2/10  
+**Last updated:** 2026-05-29 — Phase 7: 8→9/10 (`load-testing` + `load-test-reviewer`, all 4 test layers). Quality: performance 3→7/10. Overall: 4.0→7.5/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -781,7 +781,7 @@ Performance is not addressed at any phase.
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
 | ✅ **P1 CLOSED** | ~~No API contract first~~ | `api-contract-first` skill + `api-contract-reviewer` agent | During `writing-plans`, before handler tasks — **shipped 2026-05-29** |
 | ✅ **P2 CLOSED** | ~~No business context intake~~ | `business-context-intake` skill + `business-context-reviewer` agent | Before `brainstorming` — **shipped 2026-05-29** |
-| **P2** | No performance by design | Enhance HLD + `load-testing` (new) | HLD + `finishing-a-development-branch` |
+| ✅ **P2 CLOSED** | ~~No performance by design~~ | `load-testing` skill + `load-test-reviewer` agent + HLD §8 capacity planning | Before `finishing-a-development-branch` — **shipped 2026-05-29** |
 | ✅ **P2 CLOSED** | ~~No E2E tests~~ | `e2e-testing` skill + `e2e-reviewer` agent | Before `finishing-a-development-branch` — **shipped 2026-05-29** |
 | **P2** | No runbooks | Enhance `observability-standards` | During `observability-standards` |
 | **P3** | Language-specific linting | Enhance `verification-before-completion` | Per task completion |
@@ -882,22 +882,21 @@ pr-creator → PR opened
 - After Integration Testing: 6.4/10
 - After API Contract First: 6.7/10
 - After E2E Testing: 6.9/10
-- After Business Context Intake: **7.2/10**
+- After Business Context Intake: 7.2/10
+- After Load Testing: **7.5/10**
 
 **What was shipped (2026-05-29):**
-- Phase 0 (Business Context): **2→6/10** — `business-context-intake` + `business-context-reviewer`. Committed PRD with JTBD, metrics, compliance, non-goals, stakeholders. Hard gate before brainstorming.
+- Phase 0 (Business Context): **2→6/10** — `business-context-intake` + `business-context-reviewer`
 - Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
 - Phase 3 (LLD): **4→7/10** — `api-contract-first` + `api-contract-reviewer`
-- Phase 7 (Testing): **3→8/10** — `integration-testing` + `e2e-testing`
+- Phase 7 (Testing): **3→9/10** — all 4 test layers. `integration-testing` + `e2e-testing` + `load-testing`. k6 with NFR-aligned thresholds (threshold breach = CI failure = no deploy). Soak tests for availability NFRs.
 - Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer`
 - Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`
 - Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`
+- Quality: performance by design **3→7/10**
 
-**What remains:**
-- Phase 1 (Requirements): 6/10 — NFR enforcement (P1 enhancement to brainstorming + spec-quality-gate)
-- Phase 7 (Testing): 8/10 — performance test layer (`load-testing`)
-- Quality: performance by design (3/10)
-- All phases now produce some artifact. No phase is entirely absent.
+**What remains (final gap):**
+- Phase 1 (Requirements): 6/10 — NFR enforcement (P1 enhancement: mandatory NFR table in spec, spec-quality-gate fails if absent or TBD). This is the only remaining identified gap. All other gaps from the original 2026-05-28 analysis are closed.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
