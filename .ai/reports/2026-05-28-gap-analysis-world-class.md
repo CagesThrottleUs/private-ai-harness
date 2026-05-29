@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — reflects `language-expert-reviewer` addition (Phase 6), karpathy wired into execution workflows (Phase 5), `code-documentation` checkpoint in `writing-plans` task template (Phase 5)  
+**Last updated:** 2026-05-29 — reflects `high-level-design` skill + `hld-reviewer` agent (Phase 2: 2→7/10), `spec-quality-reviewer` agent (Phase 1 gate), `plan-reviewer` agent (plan gate), `language-expert-reviewer` (Phase 6), karpathy wiring (Phase 5). Overall: 4.0→4.4/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -139,7 +139,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 2 — High Level Design (HLD) | Score: 2/10
+## Phase 2 — High Level Design (HLD) | Score: 7/10
 
 ### Industry Benchmark
 
@@ -157,11 +157,11 @@ Each phase section has five parts:
 
 **ADRs (industry standard — Spotify, SoundCloud, ThoughtWorks, AWS):** Architecture Decision Records — immutable once accepted. Format: context, decision, consequences, status (proposed/accepted/deprecated/superseded). Every significant architectural decision gets its own file. When a decision changes, the old ADR is superseded, not edited.
 
-### Harness Score: 2/10
+### Harness Score: 7/10
 
-**Department produces:** Design doc (C4 diagrams + ADRs + technology selection + security architecture). Committed before any code. **Harness produces:** Component discussion in conversation. No committed document. **Verdict:** Absent — conversation ≠ design doc.
+**Department produces:** Design doc (C4 diagrams + ADRs + technology selection + security architecture). Committed before any code. **Harness produces:** `high-level-design` skill produces `.ai/hld/YYYY-MM-DD-<feature>.md` with C4 Context + Container diagrams (Mermaid), technology selection table with alternatives, STRIDE threat model, failure mode analysis per component, 3-scenario capacity planning with scaling triggers, AWS Well-Architected cross-cutting section, and ADRs committed to `wiki/architecture/`. `hld-reviewer` agent (Opus, 10 dimensions) validates before human approval. **Verdict:** Largely indistinguishable in structure. Remaining gap: architectural correctness depends on human input quality; no IaC or ERD artifact.
 
-`brainstorming` does component decomposition and proposes 2–3 design approaches. `design-principles` enforces SOLID/KISS/YAGNI. `wiki/architecture/` location is defined. That's everything.
+`high-level-design` skill produces all standard HLD sections. `hld-reviewer` validates against C4 model, Google Design Doc, AWS Well-Architected, and Shostack threat modeling standards. `brainstorming` → `spec-quality-gate` → `high-level-design` is now the canonical architectural path.
 
 ### Precise Gaps
 
@@ -768,11 +768,11 @@ Performance is not addressed at any phase.
 
 | Priority | Gap | New Skill/Enhancement | Harness Integration Point |
 |----------|-----|----------------------|--------------------------|
-| **P0** | No HLD artifact | `high-level-design` (new) | After `spec-quality-gate`, before `writing-plans` |
+| ✅ **P0 CLOSED** | ~~No HLD artifact~~ | `high-level-design` skill + `hld-reviewer` agent | After `spec-quality-gate`, before `writing-plans` — **shipped 2026-05-29** |
 | **P0** | No observability | `observability-standards` (new) | During `executing-plans`, per endpoint |
 | **P0** | No CI/CD pipeline | `ci-pipeline-setup` (new) | At `using-git-worktrees` |
 | **P0** | No deployment | `deployment-workflow` (new) | At `finishing-a-development-branch` |
-| **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` | Spec template + quality gate |
+| **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
 | **P1** | No integration tests | `integration-testing` (new) | During `test-driven-development` |
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
 | **P1** | No API contract first | `api-contract-first` (new) | During `writing-plans` per endpoint |
@@ -855,7 +855,14 @@ pr-creator → PR opened
 
 **Corrected question:** Can this harness replace an entire engineering department and produce output **indistinguishable from what that department produces**? The previous framing — "indistinguishable from a senior engineer" — was wrong. A senior engineer produces code. A department produces PRDs, HLD docs, CI pipelines, runbooks, SLOs, release notes, architecture diagrams, API specs, deployment configs. The bar is the full artifact set, at the quality level of the role that owns each artifact.
 
-**Current state (2026-05-29):** The Private AI Harness scores **4.0/10** under the corrected question. Recent additions — `language-expert-reviewer` (10-dimension language-standards review across 6 languages), karpathy wired into all execution workflows, and a `code-documentation` checkpoint in the `writing-plans` task template — strengthen Phase 5 and Phase 6 without changing either phase score. Phase 5 stays at 8/10 because the specific remaining gap (no linter gate) is unchanged; `language-expert-reviewer` partially closes the idiomaticity gap retroactively at review time but doesn't prevent style violations from being written. Phase 6 stays at 9.5/10 because the only gap (enforcement of blocking findings) is unchanged. The overall score is unchanged at 4.0/10 because the absent phases (HLD, CI/CD, Deployment, Observability) are still absent — no new artifact-producing capability was added for those phases. Entire artifact categories remain missing: no HLD document, no CI pipeline configuration, no deployment runbook, no observability setup.
+**Current state (2026-05-29):** The Private AI Harness scores **4.4/10** under the corrected question (up from 4.0/10).
+
+**What changed today:**
+- Phase 2 (HLD): **2/10 → 7/10** — `high-level-design` skill produces a committed HLD with C4 diagrams, STRIDE threat model, technology selection, failure mode analysis, and ADRs. `hld-reviewer` agent validates 10 dimensions before human approval. This was the P0 gap and the most impactful single change.
+- Review architecture: `spec-quality-reviewer` (gates Phase 1 output), `hld-reviewer` (gates Phase 2 output), `plan-reviewer` (gates plan before execution) — the skill→agent pattern now spans spec → design → plan → code. Context isolation at every gate.
+- `language-expert-reviewer`, karpathy wiring, `code-documentation` checkpoint strengthened Phase 5/6 (scores unchanged, quality improved).
+
+**What remains:** Phases 9 (Deployment) and 10 (Observability) are still 0/10. No deployment runbook, no observability setup, no CI pipeline artifact. These are the next P0 gaps. The harness now covers the design-through-implementation lifecycle well; it stops at PR creation.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 

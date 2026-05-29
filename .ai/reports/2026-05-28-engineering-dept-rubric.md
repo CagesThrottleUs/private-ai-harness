@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — reflects `language-expert-reviewer` addition (Phase 6), karpathy wired into execution workflows (Phase 5), `code-documentation` checkpoint added to `writing-plans` (Phase 5)  
+**Last updated:** 2026-05-29 — reflects `high-level-design` skill + `hld-reviewer` agent (Phase 2: 2→7/10), `spec-quality-reviewer` agent (Phase 1 gate), `plan-reviewer` agent (Phase 4/5 gate), `language-expert-reviewer` (Phase 6), karpathy wiring (Phase 5)  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -112,24 +112,25 @@ A real engineering team moves through these phases. Each phase has mandatory del
 
 | Capability | Covered | Gap |
 |-----------|---------|-----|
-| Component decomposition with boundaries | ✅ Partial | `brainstorming` + `design-principles` |
-| Communication pattern selection | ⚠️ Partial | Implied in brainstorming, not structured |
-| Technology selection with rationale | ⚠️ Weak | `brainstorming` proposes options but no formal decision doc |
-| Infrastructure design | ❌ Missing | No infrastructure/hosting skill |
-| ADR authoring | ⚠️ Partial | `wiki/architecture/` location exists, no ADR template/skill |
-| Capacity planning | ❌ Missing | Not addressed |
-| Security architecture design | ⚠️ Weak | `security-reviewer` reviews after code, not at design time |
-| Resilience patterns (circuit breaker, retry) | ❌ Missing | Not addressed |
-| Diagram generation | ❌ Missing | No C4/architecture diagram skill |
-| Data ownership and consistency model | ❌ Missing | Not structured |
+| Component decomposition with boundaries | ✅ Strong | `high-level-design` — C4 Context + Container diagrams in Mermaid |
+| Communication pattern selection | ✅ Strong | `high-level-design` §5 (Actual Design) + technology selection table |
+| Technology selection with rationale | ✅ Strong | `high-level-design` §4 — alternatives table with specific rejection reasons |
+| Infrastructure design | ⚠️ Partial | C4 Container diagram covers topology; no IaC skill |
+| ADR authoring | ✅ Strong | `high-level-design` — one ADR per significant decision, MADR/Nygard format, committed to `wiki/architecture/` |
+| Capacity planning | ✅ Strong | `high-level-design` §8 — 3-scenario (pessimistic/expected/optimistic) with scaling triggers at 70%/80% |
+| Security architecture design | ✅ Strong | `high-level-design` §6 — STRIDE threat model + security controls table + trust boundaries on C4 |
+| Resilience patterns (circuit breaker, retry) | ✅ Strong | `high-level-design` §7 — failure mode analysis per component |
+| Diagram generation | ✅ Strong | `high-level-design` — C4Context + C4Container in Mermaid (exact c4model.com syntax) |
+| Data ownership and consistency model | ✅ Partial | `high-level-design` §5.2 (Data Model) — conceptual; no formal ERD skill |
+| HLD quality gate | ✅ Strong | `hld-reviewer` agent (Opus) — 10 dimensions, blocks on Critical before human review |
 
 **Department artifact:** A reviewed design document (Google Design Doc / Kubernetes KEP / Amazon 6-pager equivalent) containing C4 diagrams, technology selection records, ADRs, security architecture, failure mode analysis, and capacity planning. Produced by a Staff/Principal engineer. Committed before any implementation plan is written.  
-**Harness artifact:** A brainstorming conversation in which component options are discussed. No committed document. No diagrams. No ADRs. The architectural decisions exist only in the LLM's context window and disappear when the session ends.  
-**Verdict:** Immediately and completely distinguishable. The artifact category is absent. A team that skips HLD is not an engineering team — it is a group of individuals writing independent code.
+**Harness artifact:** `high-level-design` skill produces `.ai/hld/YYYY-MM-DD-<feature>.md` with C4 diagrams (Mermaid), technology selection + alternatives, STRIDE threat model, failure mode analysis, 3-scenario capacity planning, AWS Well-Architected cross-cutting section, and ADRs per decision committed to `wiki/architecture/`. `hld-reviewer` agent validates 10 dimensions before human review.  
+**Verdict:** Largely indistinguishable in structure and completeness. The remaining gap is quality dependence on human input — the skill produces all sections, but architectural correctness depends on the knowledge the human brings. A real Staff engineer brings 10 years of systems intuition; the LLM structures what the human provides.
 
-**Score: 2/10**
+**Score: 7/10**
 
-**Critical Gap:** HLD is the most under-served phase. The harness jumps from spec to implementation plan with no formal HLD artifact. The 2/10 (not 0) reflects that `brainstorming` does discuss components and trade-offs — but inside a conversation, not a committed document. A conversation is not an HLD. Architectural decisions made in conversation are forgotten; architectural decisions in an ADR are permanent.
+**Strength:** Phase 2 went from the harness's biggest gap (2/10) to a covered phase (7/10) in one skill. The `high-level-design` skill + `hld-reviewer` agent produces a committed, structured design artifact that is reviewable, versionable, and cross-referenced in `writing-plans`. The 7/10 (not higher) reflects that architectural judgment quality still depends on human input quality — and that no IaC or ERD skill exists yet.
 
 ---
 
@@ -453,12 +454,12 @@ This dimension asks: for the artifacts the harness does produce, are they indist
 | Security by design | Security Eng | ⚠️ Security reviewed post-code, not designed pre-code | 6/10 |
 | Performance by design | Staff + SRE | ❌ No performance design skill | 3/10 |
 | Code idiomaticity | IC | ⚠️ No implementation-time style gate; `language-expert-reviewer` catches idiom violations at PR review | 7/10 |
-| Architecture coherence | Staff/Principal | ⚠️ No HLD artifact means architecture lives only in code | 4/10 |
+| Architecture coherence | Staff/Principal | ✅ `high-level-design` + `hld-reviewer` — C4 diagrams, ADRs, failure modes committed before code | 8/10 |
 | Documentation quality | Tech Writer | ✅ Comprehensive `code-documentation` | 9/10 |
 | Commit hygiene | IC | ✅ `commit-discipline` with enforcement hook | 10/10 |
 | Requirement traceability | PM + IC | ✅ REQ-NNN throughout | 9/10 |
 
-**Quality Score: 7.5/10**
+**Quality Score: 7.9/10**
 
 The harness produces high-quality output *within* the phases it covers. The quality problem is the phases it doesn't cover — the output of missing phases defaults to "LLM makes silent decisions," which is where slop enters.
 
@@ -472,7 +473,7 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 |-------|-------------|--------------------|----|---------|
 | Phase 0: Business Context | PM + EM | PRD / PR/FAQ | 2/10 | 🔴 Absent — no PRD artifact |
 | Phase 1: Requirements | Sr Eng + PM | REQ doc with NFRs + compliance | 6/10 | 🟡 Partial — REQ doc exists; NFRs missing |
-| Phase 2: HLD | Staff/Principal | Design doc + C4 + ADRs | 2/10 | 🔴 Absent — conversation ≠ design doc |
+| Phase 2: HLD | Staff/Principal | Design doc + C4 + ADRs | 7/10 | 🟢 Strong — `high-level-design` + `hld-reviewer`; gap: architectural judgment quality depends on human input |
 | Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD | 4/10 | 🟡 Partial — task plans exist; API/schema artifacts don't |
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8/10 | 🟢 Strong — high quality; no linter gate |
@@ -484,11 +485,11 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 4.0/10**
+**Overall Score: 4.4/10**
 
-> Score computation: (2 + 6 + 2 + 4 + 7 + 8 + 9.5 + 3 + 1 + 0 + 0 + 5) / 12 = 47.5 / 12 ≈ 4.0
+> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 1 + 0 + 0 + 5) / 12 = 52.5 / 12 ≈ 4.4
 >
-> Under the previous (wrong) question — "indistinguishable from a senior engineer" — the score was 5.1/10, because that question measured individual code craft quality. Under the correct question — "indistinguishable from the department" — the score drops to 4.0/10, because entire artifact categories that a department always produces are absent from the harness. The harness is a strong implementation assistant operating inside a partial engineering department simulation.
+> Phase 2 (HLD) moved from 2/10 to 7/10 with the addition of `high-level-design` skill and `hld-reviewer` agent. All other phase scores are unchanged — Phases 9 and 10 remain at 0/10 (no deployment or observability capability). The overall score is still bottlenecked by the absent operational phases. The harness now covers the design-through-implementation lifecycle well; it still stops at PR creation.
 
 ---
 
@@ -529,9 +530,10 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 Within the phases it covers, the harness produces high-quality artifacts that are indistinguishable from department output — or exceed it:
 
 - **Code review (Phase 6):** The only phase where the harness output **exceeds** typical department practice. Six specialist Opus reviewers — including `language-expert-reviewer` covering 10 dimensions across 6 languages — cover more dimensions than most engineering teams provide.
-- **Implementation quality (Phase 5):** `karpathy` + TDD + `design-principles` + `code-documentation` + `commit-discipline` produces IC-quality code that passes senior review.
-- **Requirement engineering (Phase 1):** REQ-NNN + `spec-quality-gate` matches RFC-quality standards. The artifact is partially distinguishable (missing NFRs) but strong in structure.
-- **Task parallelism (Phase 4):** `dispatching-parallel-agents` + `subagent-driven-development` is a genuine analog to team sprint distribution. Mostly indistinguishable in content.
+- **High level design (Phase 2):** `high-level-design` skill produces a committed HLD with C4 diagrams, STRIDE threat model, technology selection records, failure mode analysis, and ADRs. `hld-reviewer` agent validates 10 dimensions before human approval. Phase 2 moved from 2/10 (the harness's biggest gap) to 7/10 in one addition.
+- **Implementation quality (Phase 5):** `karpathy` (wired into all execution skills) + TDD + `design-principles` + `code-documentation` (checkpoint in plan template) + `commit-discipline` produces IC-quality code that passes senior review.
+- **Requirement engineering (Phase 1):** REQ-NNN + `spec-quality-gate` (backed by `spec-quality-reviewer` Opus agent with fresh context) matches RFC-quality standards. Partially distinguishable (missing NFRs) but strong in structure and gate rigor.
+- **Review architecture:** The skill→agent pattern now spans the full lifecycle — `spec-quality-reviewer` gates Phase 1, `hld-reviewer` gates Phase 2, `plan-reviewer` gates Phase 4/5 plans, and six reviewer agents gate Phase 5 code. No phase of artifact production is unreviewed.
 
 These four phases form the harness's defensible core. Everything outside them is either missing entirely (Phases 0, 9, 10) or produces a partial artifact (Phases 2, 3, 7, 8, 11).
 
