@@ -60,7 +60,7 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 2: HLD** | Staff/Principal | C4 diagrams + STRIDE + ADRs + capacity planning | **7/10** | Artifact is comprehensive; correctness depends on human architectural input. |
 | **Phase 3: LLD** | Sr Engineer | OpenAPI 3.1 / .proto spec | **7/10** | API contract strong. Sequence diagrams, ERD, API versioning strategy absent. |
 | **Phase 4: Task Distribution** | EM + Leads | Bite-sized plan with subagent dispatch | **7/10** | Good sprint analog. No dependency DAG, no velocity tracking. |
-| **Phase 5: Implementation** | ICs | TDD code + karpathy + docs | **7.5/10** | *Downgraded from 8 based on 2025/2026 research: 43% of AI code requires debugging, 8× code churn.* |
+| **Phase 5: Implementation** | ICs | TDD code + karpathy + linter gate + docs | **8.5/10** | Linter gate added (Ruff/Biome/golangci-lint/Clippy auto-detected, `linter-reviewer` Sonnet agent). 2025/2026 defect rate research applies to tools without this gate. |
 | **Phase 6: Code Review** | Sr/Staff | 6 specialist Opus reviewer agents | **9/10** | Exceeds typical 1-reviewer teams. Slight gap: codebase coherence across long history. |
 | **Phase 7: Testing** | QA + Sr | Unit + integration + E2E + load tests | **8.5/10** | 4 layers present. DAST, accessibility, chaos, visual regression absent. |
 | **Phase 8: CI/CD** | DevOps | Platform-agnostic spec + 6 platform configs | **7/10** | IaC absent. Feature flags absent. |
@@ -68,7 +68,9 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 10: Observability** | SRE | OTel logging + golden signals + SLOs + runbooks | **7/10** | Setup is world-class. Incident *response execution* absent. Postmortem absent. |
 | **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + runbooks + changelog | **6.5/10** | Function-level docs strong. Onboarding guide, API reference pages, architecture narrative absent. |
 
-### Overall: 7.4/10
+### Overall: 7.5/10
+
+*(Updated after linter gate addition — Phase 5: 7.5→8.5)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 
@@ -101,11 +103,10 @@ Each item is verified: does it have clear industry evidence, can an LLM do it we
 
 ### VERIFIED ✅ — High confidence, high impact
 
-**T-01: Linter Gate in `verification-before-completion`**
-- **Evidence:** Google's style guides enforce automated formatting as a hard gate (checkpatch.pl for Linux kernel, gofmt for Go). GitClear 2024 shows 8× code churn in AI code — linter enforcement directly addresses style inconsistency.
-- **LLM can do it:** Detect `pyproject.toml`/`package.json`/`go.mod`/`Cargo.toml`, run the right tool (`black`, `eslint`, `gofmt`, `rustfmt`), fail if output non-empty. Trivial tooling task.
-- **Score impact:** Phase 5: 7.5→8.5
-- **Effort:** Low — enhancement to existing skill
+**~~T-01: Linter Gate~~** ✅ SHIPPED 2026-05-29
+- Added to `verification-before-completion` with language detection table (Ruff/Biome/golangci-lint/Clippy)
+- `linter-reviewer` (Sonnet) agent validates before every commit
+- **Score impact achieved:** Phase 5: 7.5→8.5, Overall: 7.4→7.5
 
 ---
 
