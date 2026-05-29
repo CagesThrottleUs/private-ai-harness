@@ -127,6 +127,7 @@ This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + secu
 | `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
 | `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
 | `.*github/workflows.*dast.*\.yml`, `.zap/` | `dast-reviewer` | `CI_CONFIG_PATH`, `OPENAPI_PATH` |
+| `wiki/guides/incident-response.md`, `wiki/guides/postmortem-template.md` | `incident-response-reviewer` | `PROCESS_PATH`, `POSTMORTEM_PATH` |
 | `wiki/ONBOARDING.md` | `onboarding-reviewer` | `ONBOARDING_PATH`, `HLD_PATH` |
 | `wiki/architecture/*versioning*`, `wiki/guides/api-versioning*` | `api-versioning-reviewer` | `ADR_PATH`, `POLICY_PATH`, `OPENAPI_PATH` |
 | `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |

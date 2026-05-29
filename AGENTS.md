@@ -50,6 +50,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
+| `incident-response` | `/incident-response` | For any production service — severity matrix (SEV-1/2/3 with SLAs), IC role, declaration process, response playbook, blameless postmortem template, MTTD/MTTR targets; runs `incident-response-reviewer` |
 | `onboarding-guide` | `/onboarding-guide` | On first production release or after major HLD changes — synthesizes HLD C4 diagrams, ADRs, OpenAPI spec, SLOs, runbooks into `wiki/ONBOARDING.md` with 8 required sections; runs `onboarding-reviewer` |
 | `dast-testing` | `/dast-testing` | Before `finishing-a-development-branch` for externally-facing services — ZAP baseline (every PR, passive), ZAP API scan (post-staging, uses OpenAPI spec), Nuclei targeted API scan, SARIF to Security tab, fails on HIGH; runs `dast-reviewer` |
 | `api-versioning` | `/api-versioning` | During api-contract-first or HLD for externally-facing APIs — produces versioning strategy ADR, breaking change policy, deprecation timeline with Sunset headers, migration guide template, CI oasdiff check; runs `api-versioning-reviewer` |
@@ -90,6 +91,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `deployment-reviewer` | opus | Deployment quality gate — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract pattern, dangerous patterns), smoke test coverage, deployment runbook, release notes quality (Keep a Changelog format), strategy-migration alignment. Invoked by `deployment-workflow` skill. |
 | `integration-test-reviewer` | opus | Integration test quality gate — validates no mocks at boundary (cardinal rule), test isolation (transaction rollback), factory pattern, Testcontainers config (pinned versions, dynamic ports), spec AC coverage, contract tests (Pact), CI integration. 7 dimensions. Invoked by `integration-testing` skill. |
 | `api-contract-reviewer` | opus | API contract quality gate — validates OpenAPI 3.1 or .proto completeness, error taxonomy, security definitions, breaking change safety, schema quality (money as float = Critical), REQ-NNN coverage, naming conventions. 7 dimensions. Invoked by `api-contract-first` skill. |
+| `incident-response-reviewer` | **sonnet** | Incident response docs gate — severity matrix (3 levels, SLAs), IC role documented, postmortem template has 7 required sections, MTTD/MTTR targets, communication templates. Invoked by `incident-response` skill. |
 | `onboarding-reviewer` | opus | Onboarding guide quality gate — validates 8 required sections, dev setup has executable commands with verification steps, C4 Container diagram present, ADRs referenced with daily-impact explanations, first contribution path covers harness workflow, ops section actionable. Invoked by `onboarding-guide` skill. |
 | `dast-reviewer` | **sonnet** | DAST configuration gate — validates ZAP baseline on PRs, API scan on staging with OpenAPI spec, HIGH findings fail CI, SARIF uploaded, authentication configured. 5 dimensions. Invoked by `dast-testing` skill. |
 | `accessibility-reviewer` | **sonnet** | Accessibility test gate — validates axe-playwright present on critical pages, correct WCAG tags (wcag21aa, wcag22aa for EU), violations fail CI (not just logged), exclusions documented. 4 dimensions. Invoked by `e2e-testing` skill. |
@@ -111,6 +113,7 @@ E2E test agents (`e2e-reviewer`) require `TEST_FILES`; `SPEC_PATH` optional.
 Load test agents (`load-test-reviewer`) require `SCRIPT_PATH`; `SPEC_PATH` and `SLO_PATH` optional.
 API versioning agents (`api-versioning-reviewer`) require `ADR_PATH` and `POLICY_PATH`; `OPENAPI_PATH` optional.
 Sequence diagram agents (`sequence-diagram-reviewer`) require `DIAGRAM_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
+Incident response agents (`incident-response-reviewer`) require `PROCESS_PATH` and `POSTMORTEM_PATH`; `SLO_PATH` optional.
 Onboarding agents (`onboarding-reviewer`) require `ONBOARDING_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
 DAST agents (`dast-reviewer`) require `CI_CONFIG_PATH`; `OPENAPI_PATH` and `ZAP_RULES_PATH` optional.
 Accessibility agents (`accessibility-reviewer`) require `TEST_FILES`; `SPEC_PATH` and `BUSINESS_CONTEXT_PATH` optional.
@@ -151,6 +154,7 @@ See each `agents/<name>.md` for the full input contract.
 
 | `api-versioning-reviewer` | opus | High — breaking change policy completeness requires API design expertise, sunset header RFC 8594 compliance requires standards knowledge, migration guide adequacy requires consumer empathy | ✅ Correct |
 | `sequence-diagram-reviewer` | opus | High — "is this error path sufficient?" requires systems thinking, auth boundary placement requires security judgment, sync vs async distinction requires architecture knowledge | ✅ Correct |
+| `incident-response-reviewer` | sonnet | Mechanical — severity levels present? (count check), SLAs are numbers not prose? (format check), 7 postmortem sections present? (section count), MTTD/MTTR defined? (pattern match) | ✅ Correct — Sonnet |
 | `onboarding-reviewer` | opus | High — "could a new engineer be productive in one day?" requires genuine newcomer perspective, narrative clarity judgment, cross-checking diagrams against HLD for staleness | ✅ Correct |
 | `dast-reviewer` | sonnet | Mechanical — ZAP action present? (pattern match), fail_action set? (config check), SARIF upload present? (step detection), auth configured? (secret reference check) | ✅ Correct — Sonnet |
 | `accessibility-reviewer` | sonnet | Mechanical — is axe called? (pattern match), correct tags? (set comparison), assertion pattern? (code pattern), exclusion comments? (text search). No accessibility judgment required. | ✅ Correct — Sonnet |
