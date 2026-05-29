@@ -167,6 +167,8 @@ Don't add features, refactor other code, or "improve" beyond the test.
 
 **Before moving to REFACTOR:** document every public construct added — apply `code-documentation` (full docstring, `@spec_id`, `@req_id`).
 
+**If this component has external dependencies (database, queue, cache, external HTTP):** after GREEN, invoke `integration-testing` skill. Unit tests verify logic; integration tests verify the contract with real dependencies. A mock at the DB boundary is a unit test, not an integration test. Write both.
+
 ### Verify GREEN - Watch It Pass
 
 **MANDATORY.**
@@ -339,6 +341,7 @@ Before marking work complete:
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Edge cases and errors covered
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
+- [ ] If component has external dependencies: integration tests written using `integration-testing` skill (Testcontainers, no mocks at boundary, transaction rollback isolation)
 
 Can't check all boxes? You skipped TDD. Start over.
 

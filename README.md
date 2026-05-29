@@ -28,6 +28,7 @@ Not a product. Optimized for one workflow.
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — platform-agnostic pipeline spec + config for GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket |
 | `deployment-workflow` | `/deployment-workflow` | Before PR deployment-ready — deployment strategy, zero-downtime migration checklist, rollback procedure, smoke tests, release notes |
+| `integration-testing` | `/integration-testing` | During TDD GREEN for components with external I/O — Testcontainers (real DB/queue/cache), transaction rollback isolation, factory pattern, Pact contract tests |
 | `observability-standards` | `/observability-standards` | After first API endpoint — OTel structured logging, golden signal metrics, SLO doc, alert rules, per-alert runbooks |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs |
@@ -64,6 +65,7 @@ Not a product. Optimized for one workflow.
 | `ci-reviewer` | CI/CD pipeline quality gate — stage completeness, fail-fast ordering, coverage gate, security hygiene, artifact immutability, DORA readiness. Platform-agnostic. |
 | `observability-reviewer` | Observability quality gate — OTel logging compliance, golden signal coverage, SLO quality, alert design, runbook completeness, distributed tracing, SLO-to-alert alignment |
 | `deployment-reviewer` | Deployment quality gate — rollback procedure, DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes, strategy-migration alignment |
+| `integration-test-reviewer` | Integration test quality gate — no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring |
 
 ---
 

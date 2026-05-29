@@ -116,6 +116,22 @@ Agent (ci-reviewer):
 
 Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
 
+**Also run `integration-test-reviewer` if integration test files were created or modified:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep -E "tests/integration/|test/integration/|_integration_test\."
+```
+
+If any integration test files appear → dispatch `integration-test-reviewer` in parallel:
+
+```
+Agent (integration-test-reviewer):
+  TEST_FILES: tests/integration/**
+  SPEC_PATH: <matching .ai/specs/*.md>
+```
+
+Treat `integration-test-reviewer` Critical findings as blocking — a test using mock DB is worse than no integration test (it creates false confidence).
+
 **Also run `deployment-reviewer` if deployment artifacts exist on this branch:**
 
 ```bash

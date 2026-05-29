@@ -25,6 +25,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review hld` | High-level design review (C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment) |
 | `/review observability` | Observability setup review (structured logging OTel compliance, golden signal coverage, SLO quality, alert design, runbook completeness) |
 | `/review deployment` | Deployment artifacts review (rollback procedure, DB migration safety, smoke test coverage, deployment runbook, release notes quality) |
+| `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -44,6 +45,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `hld-reviewer` | HLD document (`.ai/hld/`) | When HLD is written or updated — validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment. 10 dimensions. Not included in `/review all` (design artifact, not code diff). |
 | `observability-reviewer` | Observability artifacts (`.ai/observability/`, `wiki/guides/alerts.md`, `wiki/guides/runbooks/`) | When observability is set up or updated — validates OTel logging compliance, golden signal coverage, SLO quality vs NFRs, alert design (symptom-based), runbook completeness. 7 dimensions. Not included in `/review all`. |
 | `deployment-reviewer` | Deployment artifacts (`.ai/deployment/`) | When deployment artifacts are created — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes quality. 6 dimensions. Not included in `/review all`. |
+| `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -268,6 +270,25 @@ Note: `/review deployment` is NOT included in `/review all`. Invoked by `deploym
 
 ---
 
+#### `/review integration`
+
+Collect inputs:
+- **TEST_FILES** — glob to integration test files. Auto-detect: `tests/integration/**`, `test/integration/**`, `**/*_integration_test*`
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (optional but recommended)
+
+Dispatch `integration-test-reviewer` agent:
+```
+Agent (integration-test-reviewer):
+  TEST_FILES: <detected glob>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [integration-test-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review integration` is NOT included in `/review all`. Run from `integration-testing` skill or from `finishing-a-development-branch` when integration tests are in the diff.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -346,6 +367,7 @@ These phrases trigger this skill automatically:
 | "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |
 | "review observability" / "check SLOs" / "review runbooks" / "check alerts" / "review my metrics" | `/review observability` |
 | "review deployment" / "check rollback" / "review my deploy plan" / "check migration safety" / "review release notes" | `/review deployment` |
+| "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
 
 ---
 
