@@ -62,15 +62,15 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 4: Task Distribution** | EM + Leads | Bite-sized plan with subagent dispatch | **7/10** | Good sprint analog. No dependency DAG, no velocity tracking. |
 | **Phase 5: Implementation** | ICs | TDD code + karpathy + linter gate + docs | **8.5/10** | Linter gate added (Ruff/Biome/golangci-lint/Clippy auto-detected, `linter-reviewer` Sonnet agent). 2025/2026 defect rate research applies to tools without this gate. |
 | **Phase 6: Code Review** | Sr/Staff | 6 specialist Opus reviewer agents | **9/10** | Exceeds typical 1-reviewer teams. Slight gap: codebase coherence across long history. |
-| **Phase 7: Testing** | QA + Sr | Unit + integration + E2E + accessibility + load tests | **9/10** | 5 layers now. axe-playwright WCAG 2.1/2.2 AA on every critical page + `accessibility-reviewer` (Sonnet). DAST still absent. |
+| **Phase 7: Testing** | QA + Sr | Unit + integration + E2E + accessibility + DAST + load | **9.5/10** | 6 layers. ZAP baseline (every PR), API scan (staging, OpenAPI spec), Nuclei, SARIF to Security tab. Business logic flaws require manual pen test. |
 | **Phase 8: CI/CD** | DevOps | Platform-agnostic spec + 6 platform configs | **7/10** | IaC absent. Feature flags absent. |
 | **Phase 9: Deployment** | DevOps + RM | Rollback procedure + migration checklist + smoke tests | **6.5/10** | *Generates* the runbook. Does not *execute* the deployment. Real release engineering = real-time decision-making. |
 | **Phase 10: Observability** | SRE | OTel logging + golden signals + SLOs + runbooks | **7/10** | Setup is world-class. Incident *response execution* absent. Postmortem absent. |
 | **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + runbooks + changelog | **6.5/10** | Function-level docs strong. Onboarding guide, API reference pages, architecture narrative absent. |
 
-### Overall: 7.8/10
+### Overall: 7.9/10
 
-*(Phase 7: 8.5→9: axe-playwright accessibility; Phase 3: 8.5; Phase 5: 8.5)*
+*(Sprint 1 complete. Phase 7: 9.5 with DAST. Phase 3: 8.5. Phase 5: 8.5. Phase 7 security gap substantially closed.)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 
