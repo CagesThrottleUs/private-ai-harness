@@ -20,6 +20,7 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 | `test-quality-reviewer` | `/review tests` | Tests were added or modified. Checks meaningful assertions, spec TC coverage, mutation resistance, anti-patterns. |
 | `security-reviewer` | `/review security` | PR touches auth, input handling, data access, external communication, config, or adds new endpoints/handlers. |
 | `full-project-reviewer` | `/review full` | Before releases, after major milestones, full codebase audit. Not per-PR. |
+| `language-expert-reviewer` | `/review lang` | When language depth matters: C++/Rust/Go/Python/TS/Java. Checks type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — 10 dimensions. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
 ---
@@ -54,6 +55,12 @@ All four agents. Aggregated report. No merge if any Critical finding.
 /review full
 ```
 Not per-PR. Use after significant milestones or before production releases.
+
+### Language-expert review (on-demand)
+```
+/review lang
+```
+Use when: C++/Rust code with complex ownership; performance-critical code; onboarding to a codebase with unusual language patterns; before a release on safety-critical code. Asks for language + standard, then runs 10 dimensions.
 
 ---
 

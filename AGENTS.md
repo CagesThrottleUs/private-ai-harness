@@ -66,6 +66,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `spec-impl-reviewer` | opus | Verify implementation satisfies each REQ acceptance criterion |
 | `test-quality-reviewer` | opus | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance |
+| `language-expert-reviewer` | opus | Language-veteran review across 10 dimensions: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety. Supports C++, Rust, Python, TypeScript, Go, Java. |
 
 All reviewer agents require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
 See each `agents/<name>.md` for the full input contract.

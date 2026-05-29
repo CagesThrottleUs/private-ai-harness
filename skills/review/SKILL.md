@@ -20,6 +20,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review security` | Adversarial security review (threat model, OWASP, future attack surface) |
 | `/review full` | Full project review (all dimensions, whole codebase) |
 | `/review all` | All PR-scoped agents in parallel (pr + spec + tests + security) |
+| `/review lang` | Language-expert review (10 language-specific dimensions — type system, UB, idioms, ownership, concurrency, etc.) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -34,6 +35,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `test-quality-reviewer` | PR diff (test files) | When tests are added or modified — checks meaningful assertions, TC coverage, mutation resistance |
 | `security-reviewer` | PR diff | Any PR touching auth, input, data access, external comms, config. Always on new endpoints. |
 | `full-project-reviewer` | Entire codebase | Before releases, after major milestones, or for a holistic audit |
+| `language-expert-reviewer` | PR diff or full codebase | When deep language expertise matters: type system, UB, ownership, idioms, concurrency, error handling, performance — 10 dimensions, veteran-level. |
 
 ---
 
@@ -149,6 +151,28 @@ Output: [full project report — 5 dimensions + traceability matrix]
 
 ---
 
+#### `/review lang`
+
+Collect additional inputs:
+- **LANGUAGE** — required. Ask: "Which language? (C++, Rust, Python, TypeScript, Go, Java, other)"
+- **STANDARD** — optional. Ask: "Target standard? (e.g. C++20, Rust 2021, Python 3.12+). Leave blank for latest stable."
+- **SCOPE** — `diff` (default) or `full`. Default to `diff` if SHA range is available.
+
+Dispatch `language-expert-reviewer` agent:
+```
+Agent (language-expert-reviewer):
+  LANGUAGE: <language>
+  STANDARD: <standard or "latest stable">
+  SCOPE: diff | full
+  BASE_SHA: <BASE>      ← diff mode only
+  HEAD_SHA: <HEAD>      ← diff mode only
+  TARGET_FILES: <glob>  ← full mode only, optional
+```
+
+Output: [language-expert report — dimension scores + findings + priority action list]
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -222,6 +246,7 @@ These phrases trigger this skill automatically:
 | "security review" / "check for vulnerabilities" | `/review security` |
 | "full review" / "audit the codebase" | `/review full` |
 | "review everything" / "full suite" | `/review all` |
+| "language review" / "C++ review" / "Rust review" / "expert review" / "check idioms" / "review against standard" | `/review lang` |
 
 ---
 

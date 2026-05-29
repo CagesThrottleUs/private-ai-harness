@@ -53,6 +53,7 @@ Not a product. Optimized for one workflow.
 | `spec-impl-reviewer` | Verify implementation satisfies each REQ statement |
 | `test-quality-reviewer` | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | Holistic audit across quality, security, reliability, performance |
+| `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
 
 ---
 
