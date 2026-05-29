@@ -138,6 +138,7 @@ This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + secu
 | `.ai/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
 | `.ai/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
 | `tests/e2e/` | `e2e-reviewer` + `accessibility-reviewer` | `TEST_FILES`, `SPEC_PATH`, `BUSINESS_CONTEXT_PATH` |
+| `wiki/guides/feature-flag-registry.md` | `feature-flag-reviewer` | `REGISTRY_PATH`, `CODE_PATH` |
 | `infra/` | `iac-reviewer` | `IAC_DIR`, `TOOL` |
 | `.ai/lld/*-schema.md` | `database-erd-reviewer` | `ERD_PATH`, `SPEC_PATH` |
 | `.ai/lld/*-sequences.md` | `sequence-diagram-reviewer` | `DIAGRAM_PATH`, `HLD_PATH`, `SPEC_PATH` |
