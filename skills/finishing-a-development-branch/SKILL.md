@@ -125,7 +125,7 @@ This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + secu
 | `.ai/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
 | `.ai/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
 | `.ai/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
-| `tests/e2e/` | `e2e-reviewer` | `TEST_FILES`, `SPEC_PATH` |
+| `tests/e2e/` | `e2e-reviewer` + `accessibility-reviewer` | `TEST_FILES`, `SPEC_PATH`, `BUSINESS_CONTEXT_PATH` |
 | `.ai/lld/*-sequences.md` | `sequence-diagram-reviewer` | `DIAGRAM_PATH`, `HLD_PATH`, `SPEC_PATH` |
 
 Run: `git diff <base-branch>...HEAD --name-only` to detect which artifact types changed. Dispatch matching reviewers in parallel. All Critical findings from all agents block merge.

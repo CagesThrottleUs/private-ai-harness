@@ -1,7 +1,7 @@
 ---
 name: e2e-testing
 description: >
-  Use before finishing-a-development-branch for any feature with user-facing behavior. Identifies the critical user journeys from spec REQ-NNN acceptance criteria, sets up Playwright (with Page Object Model, auth fixtures, semantic locators), and adds an E2E CI job that runs against staging after deploy. Tests critical paths only — not every page. Runs e2e-reviewer agent before committing.
+  Use before finishing-a-development-branch for any feature with user-facing behavior. Identifies the critical user journeys from spec REQ-NNN acceptance criteria, sets up Playwright (with Page Object Model, auth fixtures, semantic locators), adds WCAG 2.1/2.2 AA accessibility checks via axe-playwright on every critical page, and adds an E2E CI job against staging. Tests critical paths only. Runs e2e-reviewer and accessibility-reviewer agents before committing.
 ---
 
 # E2E Testing
@@ -416,6 +416,130 @@ TEST_ADMIN_PASSWORD=<set in CI secrets>
 ```
 
 Test accounts must exist in staging environment and be dedicated to E2E (not shared with humans — test data gets modified).
+
+---
+
+## Accessibility Testing (WCAG 2.1 AA / 2.2 AA)
+
+**Required for any UI-bearing feature.** The European Accessibility Act (June 2025) mandates WCAG 2.2 AA for EU-serving products. Axe-core catches 57% of WCAG issues automatically — run it on every critical page.
+
+**References:**
+- `@axe-core/playwright` (playwright.dev/docs/accessibility-testing) — official Playwright integration
+- European Accessibility Act (June 2025) — WCAG 2.2 AA now legally required for EU
+- axe-core (deque.com/axe) — 4B+ downloads, W3C ACT implementation
+
+### Setup
+
+```bash
+npm install @axe-core/playwright
+```
+
+### Reusable helper
+
+```typescript
+// tests/e2e/fixtures/accessibility.ts
+import AxeBuilder from '@axe-core/playwright';
+import { type Page } from '@playwright/test';
+
+/**
+ * Run WCAG check on the current page.
+ * @param page - Playwright page
+ * @param wcagLevel - 'AA' for WCAG 2.1 AA (default), '22AA' for WCAG 2.2 AA (EU compliance)
+ * @param include - CSS selector to scope scan (optional — scans full page by default)
+ */
+export async function checkAccessibility(
+  page: Page,
+  wcagLevel: 'AA' | '22AA' = 'AA',
+  include?: string,
+) {
+  const tags = wcagLevel === '22AA'
+    ? ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']  // EU compliance
+    : ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];               // default
+
+  let builder = new AxeBuilder({ page }).withTags(tags);
+  if (include) builder = builder.include(include);
+  return builder.analyze();
+}
+```
+
+### Adding to critical path tests
+
+```typescript
+// tests/e2e/auth/login.spec.ts
+import { test, expect } from '@playwright/test';
+import { checkAccessibility } from '../fixtures/accessibility';
+
+test('login page has no WCAG 2.1 AA violations', async ({ page }) => {
+  await page.goto('/login');
+  const results = await checkAccessibility(page);
+  expect(results.violations).toEqual([]);
+});
+
+test('authenticated dashboard has no WCAG violations', async ({ authenticatedPage }) => {
+  const results = await checkAccessibility(authenticatedPage);
+  // If violations exist, format them for readable output
+  if (results.violations.length > 0) {
+    const formatted = results.violations.map(v => ({
+      id: v.id,
+      impact: v.impact,
+      description: v.description,
+      nodes: v.nodes.map(n => n.html).slice(0, 2),
+    }));
+    expect(formatted).toEqual([]);  // fails with readable diff
+  }
+});
+```
+
+### EU compliance (WCAG 2.2 AA)
+
+If your business-context-intake compliance section includes EU users, use `'22AA'` level:
+
+```typescript
+const results = await checkAccessibility(page, '22AA');
+expect(results.violations).toEqual([]);
+```
+
+### What axe catches (57% of WCAG issues)
+
+✅ Automated: missing alt text, insufficient color contrast, missing form labels, keyboard trap, empty button text, improper heading hierarchy, missing ARIA landmarks.
+
+❌ Requires manual testing: screen reader announcement quality, keyboard navigation flow, cognitive accessibility, animation sensitivity.
+
+### Exclusions
+
+Only exclude elements with documented justification:
+
+```typescript
+let builder = new AxeBuilder({ page })
+  .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+  .exclude('#third-party-widget');  // vendor widget — accessibility outside our control, tracked in #1234
+```
+
+Never exclude entire pages or `body`. Exclusions are flagged by `accessibility-reviewer`.
+
+### CI addition
+
+Add to the E2E CI job (runs post-staging-deploy):
+```yaml
+      - name: Run accessibility checks
+        run: npx playwright test --grep "@a11y"  # tag accessibility tests with @a11y
+```
+
+Or integrate into existing E2E run — no separate job needed if axe assertions are in the E2E specs.
+
+---
+
+## Self-Review: Run both `e2e-reviewer` and `accessibility-reviewer` Agents
+
+```
+Agent(accessibility-reviewer, {
+  TEST_FILES: "tests/e2e/**/*.spec.ts",
+  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
+  BUSINESS_CONTEXT_PATH: ".ai/business-context/YYYY-MM-DD-<feature>.md"  // for EU check
+})
+```
+
+Fix all Critical findings from both agents before committing.
 
 ---
 
