@@ -18,7 +18,9 @@ user-invocable: true
 
 3. **high-level-design** - Activates after spec gate passes for any feature requiring architectural decisions (new services, data models, external integrations, security boundaries). Produces committed HLD document (C4 diagrams, technology selection, threat model via STRIDE, failure mode analysis, capacity planning) and ADRs in `wiki/architecture/`. Runs `hld-reviewer` agent before presenting to human. Human must approve HLD before `writing-plans` activates. **Skip** for bug fixes, config changes, and isolated non-architectural changes.
 
-4. **using-git-worktrees** - Activates after HLD is approved (or after spec gate for non-architectural changes). Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+4. **using-git-worktrees** - Activates after HLD is approved (or after spec gate for non-architectural changes). Creates isolated workspace on new branch, runs project setup, verifies clean test baseline. Immediately triggers `ci-pipeline-setup` if no CI config exists.
+
+4.5. **ci-pipeline-setup** - Activates immediately after worktree creation if no CI configuration exists. Detects platform (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket), generates platform-agnostic pipeline spec and platform-specific config, runs `ci-reviewer` agent. Pipeline commits to branch before first feature commit — CI guards from day one.
 
 5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs. Each task should trace to a container in the HLD's C4 diagram.
 
