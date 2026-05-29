@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — visual-regression skill shipped (T-09). Phase 7 now: unit+integration+E2E+accessibility+DAST+load+chaos+VRT. Score: 8.1/10  
+**Last updated:** 2026-05-29 — Phase 3: 8.5→9/10 (`database-erd` + `database-erd-reviewer`). Sprint 2 complete. Score: 8.2/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -487,7 +487,7 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 0: Business Context | PM + EM | PRD / PR/FAQ | 6/10 | 🟡 Partial — `business-context-intake` produces committed doc; no formal PM review ritual |
 | Phase 1: Requirements | Sr Eng + PM | REQ doc with NFRs + compliance | 8/10 | 🟢 Strong — mandatory NFR section (Performance/Security/Scalability), RFC 2119 enforceability, gate enforces presence |
 | Phase 2: HLD | Staff/Principal | Design doc + C4 + ADRs | 7/10 | 🟢 Strong — `high-level-design` + `hld-reviewer`; gap: architectural judgment quality depends on human input |
-| Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD + sequence diagrams + versioning | 8.5/10 | 🟢 Strong — `api-contract-first` + `sequence-diagram` + `api-versioning`; gap: ERD artifact only |
+| Phase 3: LLD | Sr Engineer | OpenAPI + ERD + sequence diagrams + API versioning | 9/10 | 🟢 Strong — `api-contract-first` + `database-erd` + `sequence-diagram` + `api-versioning`. LLD picture complete. |
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8.5/10 | 🟢 Strong — linter gate (Ruff/Biome/golangci-lint/Clippy) + `linter-reviewer` closes idiom gap |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
@@ -498,7 +498,9 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 8.5/10 | 🟢 Strong — `onboarding-guide` synthesizes HLD/ADRs/SLOs into 8-section wiki/ONBOARDING.md; `onboarding-reviewer` validates |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 8.1/10**
+**Overall Score: 8.2/10**
+
+> Sprint 2 complete. Phase 3: 8.5→9 with database-erd. All Sprint 2 items shipped (onboarding, incident response, chaos, VRT, ERD).
 
 > Phase 10 upgraded 7→8.5 with incident-response (severity matrix, IC role, blameless postmortem, MTTD/MTTR targets) (8-section wiki/ONBOARDING.md from HLD, ADRs, SLOs, OpenAPI spec) (ZAP baseline, API scan, Nuclei, SARIF). All 5 Sprint 1 items shipped. (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
 

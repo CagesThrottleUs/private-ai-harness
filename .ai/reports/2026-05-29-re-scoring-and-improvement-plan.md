@@ -58,7 +58,7 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 0: Business Context** | PM + EM | Business context doc with JTBD, metrics, compliance | **6/10** | Captures what human provides. Cannot generate product intuition or stakeholder relationships. |
 | **Phase 1: Requirements** | Sr Eng + PM | REQ-NNN spec with NFRs + RFC 2119 enforced | **8/10** | Structure is world-class. NFR target *accuracy* still requires human judgment. |
 | **Phase 2: HLD** | Staff/Principal | C4 diagrams + STRIDE + ADRs + capacity planning | **7/10** | Artifact is comprehensive; correctness depends on human architectural input. |
-| **Phase 3: LLD** | Sr Engineer | OpenAPI + sequence diagrams + versioning strategy | **8.5/10** | `sequence-diagram` + `api-versioning` (ADR, breaking change policy, Sunset headers RFC 8594, oasdiff CI). ERD still absent. |
+| **Phase 3: LLD** | Sr Engineer | OpenAPI + ERD + sequence diagrams + API versioning | **9/10** | `database-erd` completes LLD: Mermaid erDiagram with PKs/FKs/cardinality, index strategy, design decisions. Sprint 2 complete.. ERD still absent. |
 | **Phase 4: Task Distribution** | EM + Leads | Bite-sized plan with subagent dispatch | **7/10** | Good sprint analog. No dependency DAG, no velocity tracking. |
 | **Phase 5: Implementation** | ICs | TDD code + karpathy + linter gate + docs | **8.5/10** | Linter gate added (Ruff/Biome/golangci-lint/Clippy auto-detected, `linter-reviewer` Sonnet agent). 2025/2026 defect rate research applies to tools without this gate. |
 | **Phase 6: Code Review** | Sr/Staff | 6 specialist Opus reviewer agents | **9/10** | Exceeds typical 1-reviewer teams. Slight gap: codebase coherence across long history. |
@@ -68,9 +68,9 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 10: Observability** | SRE | OTel + SLOs + runbooks + incident response process | **8.5/10** | `incident-response` adds severity matrix (SEV-1/2/3), IC role, blameless postmortem template (Google SRE), MTTD/MTTR tracking. On-call rotation provisioning remains. |
 | **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + onboarding + runbooks + changelog | **8.5/10** | `onboarding-guide` synthesizes HLD C4, ADRs, OpenAPI, SLOs into 8-section wiki/ONBOARDING.md. Function-level docs strong. API reference pages (Stripe-quality) still absent. |
 
-### Overall: 8.1/10
+### Overall: 8.2/10
 
-*(Phase 10: 7→8.5 with incident-response. Phase 11: 8.5. Phase 7: 9.5. Phase 3: 8.5.)*
+*(Sprint 2 complete. Phase 3: 9/10 with database-erd. Phase 10: 8.5. Phase 11: 8.5. Phase 7: 9.5.)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 
