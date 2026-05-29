@@ -50,6 +50,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
+| `database-erd` | `/database-erd` | During HLD §5.2 or writing-plans for any feature with DB changes — Mermaid erDiagram with entities/FKs/cardinality, index strategy, design decisions section; runs `database-erd-reviewer` |
 | `visual-regression` | `/visual-regression` | For UI-bearing features after E2E setup — Playwright `toHaveScreenshot()`, animations disabled, baselines committed to git, pinned Docker CI job; runs `visual-regression-reviewer` |
 | `chaos-engineering` | `/chaos-engineering` | For services with resilience NFRs (circuit breakers, retries) — k6 fault injection (HTTP errors, timeouts, latency spikes), Toxiproxy for network faults, steady state + hypothesis per scenario, CI chaos job post-staging; runs `chaos-reviewer` |
 | `incident-response` | `/incident-response` | For any production service — severity matrix (SEV-1/2/3 with SLAs), IC role, declaration process, response playbook, blameless postmortem template, MTTD/MTTR targets; runs `incident-response-reviewer` |
@@ -93,6 +94,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `deployment-reviewer` | opus | Deployment quality gate — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract pattern, dangerous patterns), smoke test coverage, deployment runbook, release notes quality (Keep a Changelog format), strategy-migration alignment. Invoked by `deployment-workflow` skill. |
 | `integration-test-reviewer` | opus | Integration test quality gate — validates no mocks at boundary (cardinal rule), test isolation (transaction rollback), factory pattern, Testcontainers config (pinned versions, dynamic ports), spec AC coverage, contract tests (Pact), CI integration. 7 dimensions. Invoked by `integration-testing` skill. |
 | `api-contract-reviewer` | opus | API contract quality gate — validates OpenAPI 3.1 or .proto completeness, error taxonomy, security definitions, breaking change safety, schema quality (money as float = Critical), REQ-NNN coverage, naming conventions. 7 dimensions. Invoked by `api-contract-first` skill. |
+| `database-erd-reviewer` | **sonnet** | Database ERD quality gate — all entities have PK, FK references valid, cardinality with crow's foot notation, no money as float, index strategy documented, design decisions explained. 6 dimensions. Invoked by `database-erd` skill. |
 | `visual-regression-reviewer` | **sonnet** | Visual regression test gate — screenshots on critical pages, animations disabled, baselines committed to git, dynamic content masked, CI uses pinned Docker image. 5 dimensions. Invoked by `visual-regression` skill. |
 | `chaos-reviewer` | **sonnet** | Chaos test gate — steady state + hypothesis defined, scenarios match HLD failure modes, thresholds allow graceful degradation (not zero failures), abort criteria present, CI on staging only. 5 dimensions. Invoked by `chaos-engineering` skill. |
 | `incident-response-reviewer` | **sonnet** | Incident response docs gate — severity matrix (3 levels, SLAs), IC role documented, postmortem template has 7 required sections, MTTD/MTTR targets, communication templates. Invoked by `incident-response` skill. |
@@ -117,6 +119,7 @@ E2E test agents (`e2e-reviewer`) require `TEST_FILES`; `SPEC_PATH` optional.
 Load test agents (`load-test-reviewer`) require `SCRIPT_PATH`; `SPEC_PATH` and `SLO_PATH` optional.
 API versioning agents (`api-versioning-reviewer`) require `ADR_PATH` and `POLICY_PATH`; `OPENAPI_PATH` optional.
 Sequence diagram agents (`sequence-diagram-reviewer`) require `DIAGRAM_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
+Database ERD agents (`database-erd-reviewer`) require `ERD_PATH`; `SPEC_PATH` optional.
 Visual regression agents (`visual-regression-reviewer`) require `TEST_FILES` and `SNAPSHOT_DIR`.
 Chaos agents (`chaos-reviewer`) require `TEST_FILES`; `HLD_PATH` and `SPEC_PATH` optional.
 Incident response agents (`incident-response-reviewer`) require `PROCESS_PATH` and `POSTMORTEM_PATH`; `SLO_PATH` optional.
@@ -160,6 +163,7 @@ See each `agents/<name>.md` for the full input contract.
 
 | `api-versioning-reviewer` | opus | High — breaking change policy completeness requires API design expertise, sunset header RFC 8594 compliance requires standards knowledge, migration guide adequacy requires consumer empathy | ✅ Correct |
 | `sequence-diagram-reviewer` | opus | High — "is this error path sufficient?" requires systems thinking, auth boundary placement requires security judgment, sync vs async distinction requires architecture knowledge | ✅ Correct |
+| `database-erd-reviewer` | sonnet | Mechanical — PK annotation present? (scan), FK references valid? (cross-check), cardinality notation? (symbol match), money as float? (field name + type scan) | ✅ Correct — Sonnet |
 | `visual-regression-reviewer` | sonnet | Mechanical — toHaveScreenshot present? (pattern), animations disabled? (config check), snapshots in git? (.gitignore check), Docker pinned? (image tag check) | ✅ Correct — Sonnet |
 | `chaos-reviewer` | sonnet | Mechanical — hypothesis present? (comment pattern), threshold allows failures? (number check), abort criteria? (documentation check), CI target? (URL pattern) | ✅ Correct — Sonnet |
 | `incident-response-reviewer` | sonnet | Mechanical — severity levels present? (count check), SLAs are numbers not prose? (format check), 7 postmortem sections present? (section count), MTTD/MTTR defined? (pattern match) | ✅ Correct — Sonnet |

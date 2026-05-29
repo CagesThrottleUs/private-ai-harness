@@ -72,6 +72,7 @@ Example confirm message:
 | Business context | `.ai/business-context/YYYY-MM-DD-feature.md` | User problem, JTBD, success metrics, compliance; gate before brainstorming |
 | Feature design specs | `.ai/specs/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
+| Database ERD | `.ai/lld/YYYY-MM-DD-<feature>-schema.md` | Mermaid erDiagram with entities, FKs, index strategy |
 | Sequence diagrams | `.ai/lld/YYYY-MM-DD-<feature>-sequences.md` | Critical flows with error paths, auth boundary, sync/async |
 | CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
 | SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |

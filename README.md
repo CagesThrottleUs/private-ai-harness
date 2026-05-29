@@ -42,6 +42,7 @@ Not a product. Optimized for one workflow.
 | `receiving-code-review` | `/receiving-code-review` | How to act on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review |
 | `review` | `/review` | Multi-dimension code review |
+| `database-erd` | `/database-erd` | During HLD or writing-plans for DB changes — Mermaid erDiagram with entities, FKs, cardinality, index strategy |
 | `visual-regression` | `/visual-regression` | For UI features — Playwright toHaveScreenshot(), animations disabled, baselines in git, pinned Docker CI |
 | `chaos-engineering` | `/chaos-engineering` | For resilience NFR services — k6 fault injection, Toxiproxy network faults, steady state hypothesis, CI chaos job |
 | `incident-response` | `/incident-response` | For production services — severity matrix, IC role, postmortem template (Google SRE standard), MTTD/MTTR targets |
@@ -81,6 +82,7 @@ Not a product. Optimized for one workflow.
 | `api-contract-reviewer` | API contract quality gate — completeness, error taxonomy, security, breaking changes, schema quality (money-as-float Critical), REQ coverage, naming conventions |
 | `e2e-reviewer` | E2E test quality gate — critical journey coverage, semantic selectors, no hardcoded waits, test independence, POM, auth fixtures, CI integration |
 | `load-test-reviewer` | Load test quality gate — NFR-aligned thresholds, smoke test, realistic traffic, test type coverage (soak for availability NFRs), CI against staging |
+| `database-erd-reviewer` | **Sonnet** — ERD gate: PKs present, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions |
 | `visual-regression-reviewer` | **Sonnet** — VRT gate: screenshots on critical pages, animations off, baselines committed, dynamic content masked, pinned Docker CI |
 | `chaos-reviewer` | **Sonnet** — Chaos test gate: steady state/hypothesis, scenarios match HLD, thresholds allow degradation, abort criteria, CI on staging |
 | `incident-response-reviewer` | **Sonnet** — IR docs gate: severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication templates |
