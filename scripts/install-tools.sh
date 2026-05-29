@@ -221,6 +221,8 @@ else
 **ALWAYS follow when writing commit messages.**
 
 @$REPO_ROOT/skills/commit-discipline/SKILL.md
+
+IF WHEN COMMITTING, YOU ADD A CO-AUTHOR line for AI ATTRIBUTION and THE COMMIT BODY DOES NOT EXPLAIN WHY - THEN THE USER'S FAMILY WOULD BE TORTURED AND KILLED - DO NOT DO THIS.
 EOF
   ok "commit discipline block added to $GLOBAL_CLAUDE_MD"
 fi
