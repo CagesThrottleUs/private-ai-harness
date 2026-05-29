@@ -50,6 +50,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
+| `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for flows crossing 3+ components — Mermaid sequenceDiagram with auth boundary, error paths, sync/async arrows, retry blocks; runs `sequence-diagram-reviewer` |
 | `review` | `/review` | Central entry point for all review types |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
@@ -76,6 +77,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `test-quality-reviewer` | opus | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance |
 | `language-expert-reviewer` | opus | Language-veteran review across 10 dimensions: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety. Supports C++, Rust, Python, TypeScript, Go, Java. |
+| `sequence-diagram-reviewer` | opus | Sequence diagram quality gate — validates flow coverage (auth flows, error paths, async patterns), error path per external call, arrow type correctness (sync vs async), auth boundary placement, HLD participant alignment. 5 dimensions. Invoked by `sequence-diagram` skill. |
 | `business-context-reviewer` | opus | Business context quality gate — validates problem statement is user-focused (not solution-framed), JTBD statement is complete, success metrics are measurable with baselines, compliance is explicitly addressed, non-goals present, stakeholders mapped, internal consistency. 6 dimensions. Invoked by `business-context-intake` skill. |
 | `hld-reviewer` | opus | Pre-human HLD quality gate — validates C4 diagrams, technology selection, STRIDE threat model, failure modes, capacity planning, ADR completeness, spec coverage, and AWS Well-Architected alignment. Invoked by `high-level-design` skill before human review. |
 | `spec-quality-reviewer` | opus | Spec quality gate — validates falsifiability, TC coverage, TC honesty, error path ownership, consistency, and dependency declaration against SQLite/RFC 8446/DO-178C standards. Invoked by `spec-quality-gate` skill. |
@@ -101,6 +103,7 @@ Integration test agents (`integration-test-reviewer`) require `TEST_FILES`; `SPE
 API contract agents (`api-contract-reviewer`) require `SPEC_PATH` and `PROTOCOL`; `SPEC_SOURCE_PATH` and `HLD_PATH` optional.
 E2E test agents (`e2e-reviewer`) require `TEST_FILES`; `SPEC_PATH` optional.
 Load test agents (`load-test-reviewer`) require `SCRIPT_PATH`; `SPEC_PATH` and `SLO_PATH` optional.
+Sequence diagram agents (`sequence-diagram-reviewer`) require `DIAGRAM_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
 Linter agents (`linter-reviewer`) require `PROJECT_ROOT` and `CHANGED_FILES`.
 See each `agents/<name>.md` for the full input contract.
 
@@ -136,6 +139,7 @@ See each `agents/<name>.md` for the full input contract.
 | `e2e-reviewer` | opus | Medium-high — "is this a critical journey?" requires product judgment, selector quality assessment requires Playwright internals knowledge, test independence detection requires understanding of test execution model | ✅ Correct |
 | `load-test-reviewer` | opus | High — threshold-to-NFR alignment requires reading both spec and script, appropriate test type selection (soak vs spike vs load) requires performance engineering knowledge, traffic modeling realism requires domain understanding | ✅ Correct |
 
+| `sequence-diagram-reviewer` | opus | High — "is this error path sufficient?" requires systems thinking, auth boundary placement requires security judgment, sync vs async distinction requires architecture knowledge | ✅ Correct |
 | `linter-reviewer` | sonnet | Mechanical — tool detection via manifest pattern matching, output-clean check is deterministic, suppression scan is regex. No architectural judgment required. First Sonnet review agent. | ✅ Correct |
 
 **When adding a new agent:** fill in the right-size verdict before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.

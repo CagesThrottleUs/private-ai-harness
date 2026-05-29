@@ -42,6 +42,7 @@ Not a product. Optimized for one workflow.
 | `receiving-code-review` | `/receiving-code-review` | How to act on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review |
 | `review` | `/review` | Multi-dimension code review |
+| `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
