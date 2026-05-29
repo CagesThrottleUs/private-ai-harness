@@ -86,6 +86,13 @@ ls tests/performance/*.js 2>/dev/null | wc -l
 ```
 If zero load tests AND spec has NFR table → invoke `load-testing` skill first.
 
+**Onboarding guide** — required on first production release or after major HLD changes:
+```bash
+# Check if guide exists and is recent (< 6 months old)
+[ -f wiki/ONBOARDING.md ] && find wiki/ONBOARDING.md -mtime -180 | grep -q . || echo "NEEDS UPDATE"
+```
+If missing or stale AND this is a significant release → invoke `onboarding-guide` skill.
+
 **E2E tests** — required for any feature with user-facing behavior:
 ```bash
 ls tests/e2e/**/*.spec.ts 2>/dev/null | wc -l
@@ -120,6 +127,7 @@ This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + secu
 | `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
 | `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
 | `.*github/workflows.*dast.*\.yml`, `.zap/` | `dast-reviewer` | `CI_CONFIG_PATH`, `OPENAPI_PATH` |
+| `wiki/ONBOARDING.md` | `onboarding-reviewer` | `ONBOARDING_PATH`, `HLD_PATH` |
 | `wiki/architecture/*versioning*`, `wiki/guides/api-versioning*` | `api-versioning-reviewer` | `ADR_PATH`, `POLICY_PATH`, `OPENAPI_PATH` |
 | `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |
 | `tests/integration/` | `integration-test-reviewer` | `TEST_FILES`, `SPEC_PATH` |

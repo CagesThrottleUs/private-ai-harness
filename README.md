@@ -42,6 +42,7 @@ Not a product. Optimized for one workflow.
 | `receiving-code-review` | `/receiving-code-review` | How to act on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review |
 | `review` | `/review` | Multi-dimension code review |
+| `onboarding-guide` | `/onboarding-guide` | On first production release — synthesizes HLD, ADRs, OpenAPI, SLOs into wiki/ONBOARDING.md with 8 required sections |
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
@@ -77,6 +78,7 @@ Not a product. Optimized for one workflow.
 | `api-contract-reviewer` | API contract quality gate — completeness, error taxonomy, security, breaking changes, schema quality (money-as-float Critical), REQ coverage, naming conventions |
 | `e2e-reviewer` | E2E test quality gate — critical journey coverage, semantic selectors, no hardcoded waits, test independence, POM, auth fixtures, CI integration |
 | `load-test-reviewer` | Load test quality gate — NFR-aligned thresholds, smoke test, realistic traffic, test type coverage (soak for availability NFRs), CI against staging |
+| `onboarding-reviewer` | Onboarding guide gate — 8 required sections, executable dev setup, C4 diagram, ADRs, contribution path, actionable ops section |
 | `dast-reviewer` | **Sonnet** — DAST config gate: ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF uploaded, auth configured |
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |

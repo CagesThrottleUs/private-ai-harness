@@ -28,6 +28,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
 | `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
 | `/review e2e` | E2E test review (critical journey coverage, selector quality, no hardcoded waits, test independence, POM, auth fixtures, CI integration) |
+| `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
 | `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
 | `/review accessibility` | Accessibility test review (axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusion documentation) |
 | `/review versioning` | API versioning strategy review (strategy ADR, breaking change policy, Sunset headers, migration guides, CI detection) |
@@ -55,6 +56,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
 | `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
 | `e2e-reviewer` | E2E test files (`tests/e2e/**`) | When E2E tests are written — validates critical journey coverage, selector quality (semantic vs CSS), no hardcoded waits, test independence, POM structure, auth fixtures, CI integration. 7 dimensions. Not included in `/review all`. |
+| `onboarding-reviewer` | `wiki/ONBOARDING.md` | When onboarding guide is written or updated — validates 8 required sections, dev setup commands, C4 diagram present, ADRs referenced, first contribution path complete, ops actionable. Not in `/review all`. |
 | `dast-reviewer` | CI config files (`*dast*.yml`, `.zap/`) | When DAST is configured — validates baseline on PRs, API scan on staging, severity gate, SARIF upload, authentication. 5 dimensions. Not in `/review all`. |
 | `accessibility-reviewer` | E2E test files (`tests/e2e/`) | When UI feature ships — validates axe-playwright on critical pages, correct WCAG tags, violations fail CI, documented exclusions. 4 dimensions. Not in `/review all`. |
 | `api-versioning-reviewer` | Versioning artifacts (`wiki/architecture/*versioning*`) | When versioning strategy is defined — validates ADR, breaking change policy, Sunset headers, migration guide coverage, CI detection. 5 dimensions. Not in `/review all`. |
@@ -468,8 +470,11 @@ These phrases trigger this skill automatically:
 | "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
 | "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
 | "review e2e tests" / "check my playwright tests" / "review my E2E" / "are my e2e tests good" | `/review e2e` |
-| "review DAST" / "check ZAP config" / "review security scan" / "check dynamic security" | `/review dast` |
-| "review accessibility tests" / "check WCAG" / "check a11y" / "accessibility check" | `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
+| "review the onboarding guide" / "check ONBOARDING.md" / "is the onboarding guide complete" | `/review onboarding` |
+| "review DAST" / "check ZAP config" / "review security scan" / "check dynamic security" | `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
+| `/review dast` |
+| "review accessibility tests" / "check WCAG" / "check a11y" / "accessibility check" | `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
+| `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
 | `/review accessibility` |
 | "review my API versioning" / "check the versioning strategy" / "review breaking changes" | `/review versioning` |
 | "review my sequence diagrams" / "check the sequence diagram" / "review flow diagrams" | `/review sequence` |
