@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 2: 2→7/10 (`high-level-design` + `hld-reviewer`), Phase 8: 1→7/10 (`ci-pipeline-setup` + `ci-reviewer`). Overall: 4.0→4.9/10  
+**Last updated:** 2026-05-29 — Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 10: 0→7/10 (`observability-standards` + `observability-reviewer`). Overall: 4.0→5.5/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -395,22 +395,24 @@ A real engineering team moves through these phases. Each phase has mandatory del
 
 | Capability | Covered | Gap |
 |-----------|---------|-----|
-| Structured logging standards | ❌ Missing | Not addressed |
-| Metrics / four golden signals | ❌ Missing | Not addressed |
-| Alerting design | ❌ Missing | Not addressed |
-| Dashboard design | ❌ Missing | Not addressed |
-| Runbook authoring | ❌ Missing | Not addressed |
-| SLO definition | ❌ Missing | Not addressed |
-| Distributed tracing | ❌ Missing | Not addressed |
-| Incident response | ❌ Missing | Not addressed |
+| Structured logging (OTel data model, 6 mandatory fields) | ✅ Strong | `observability-standards` — language-specific config: structlog/pino/log-slog/tracing/logback |
+| Metrics / four golden signals | ✅ Strong | `observability-standards` — latency histogram, traffic/error counters, saturation gauge per endpoint |
+| SLO definition | ✅ Strong | `observability-standards` — `.ai/observability/YYYY-MM-DD-slos.md` with SLI/SLO/error budget tied to spec NFRs |
+| Alerting design (symptom-based) | ✅ Strong | `observability-standards` — burn rate alerts + symptom-based rules → `wiki/guides/alerts.md` |
+| Runbook authoring | ✅ Strong | `observability-standards` — per-alert runbook with 7 required sections → `wiki/guides/runbooks/` |
+| Distributed tracing | ⚠️ Partial | trace_id/span_id in logging standard; no auto-instrumentation middleware guidance |
+| Dashboard design | ⚠️ Partial | Guidance on what to monitor; no dashboard-as-code generation |
+| Incident response severity matrix | ❌ Missing | Not addressed |
+| On-call rotation setup | ❌ Missing | Not addressed |
+| Observability quality gate | ✅ Strong | `observability-reviewer` agent (Opus) — 7 dimensions, blocks on Critical |
 
-**Department artifact (SRE role):** Structured logging configuration, Prometheus/OpenTelemetry metrics instrumentation, SLO definition document, alert rules, per-alert runbooks committed to `wiki/guides/runbooks/`, dashboard definitions, incident response severity matrix, on-call rotation setup.  
-**Harness artifact:** None.  
-**Verdict:** Entirely absent. A system with no observability is not a production system — it is code that happens to be running.
+**Department artifact (SRE role):** Structured logging config, OTel/Prometheus metrics instrumentation, SLO definition, alert rules, per-alert runbooks, dashboard definitions, incident response matrix, on-call rotation.  
+**Harness artifact:** `observability-standards` skill produces OTel-compliant logging setup (language-specific), golden signal metrics instrumentation code per endpoint, SLO definition doc, symptom-based alert rules (Prometheus YAML or generic), per-alert runbooks with 7 required sections. `observability-reviewer` validates 7 dimensions before committing.  
+**Verdict:** Largely indistinguishable for the core observability artifacts. Remaining gaps: dashboard-as-code, incident response severity matrix, on-call rotation setup.
 
-**Score: 0/10**
+**Score: 7/10**
 
-**This phase is entirely absent from the harness.** Not "weak" — absent. No structured logging standard, no metrics, no SLOs, no runbooks, no alerting design. An engineering department that ships without observability is not operating; it is hoping.
+**Strength:** Phase 10 moved from entirely absent (0/10) to covered (7/10). Grounded in Google SRE four golden signals, OTel data model, and PagerDuty alerting principles. The 7/10 (not higher) reflects missing dashboard generation, incident severity matrix, and on-call rotation — artifacts an SRE team would also produce.
 
 ---
 
@@ -483,15 +485,15 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + perf tests | 3/10 | 🔴 Weak — unit tests only; 3 layers absent |
 | Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 0/10 | 🔴 Absent — nothing produced |
-| Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 0/10 | 🔴 Absent — nothing produced |
+| Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 7/10 | 🟢 Strong — `observability-standards` + `observability-reviewer`; gaps: dashboards, incident matrix, on-call rotation |
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 4.9/10**
+**Overall Score: 5.5/10**
 
-> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 7 + 0 + 0 + 5) / 12 = 58.5 / 12 ≈ 4.9
+> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 7 + 0 + 7 + 5) / 12 = 65.5 / 12 ≈ 5.5
 >
-> Phase 8 (CI/CD) moved from 1/10 to 7/10 with `ci-pipeline-setup` skill (platform-agnostic, 6 CI platforms) and `ci-reviewer` agent. Phase 2 (HLD) remains at 7/10 from the previous session. Phases 9 (Deployment) and 10 (Observability) remain at 0/10. The harness now covers the design → spec → plan → implementation → CI pipeline lifecycle. The last two 0/10 phases are the remaining bottleneck.
+> Phase 10 (Observability) moved from 0/10 to 7/10 with `observability-standards` skill and `observability-reviewer` agent. Phase 9 (Deployment) remains at 0/10 — the last P0 gap. The harness now covers design → spec → HLD → plan → implementation → CI → observability. It still stops before deployment runbooks and rollback procedures.
 
 ---
 

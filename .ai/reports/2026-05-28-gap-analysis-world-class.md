@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 2: 2→7/10 (`high-level-design` + `hld-reviewer`), Phase 8: 1→7/10 (`ci-pipeline-setup` + `ci-reviewer`, 6 CI platforms, `.ai/ci/` artifacts). Overall: 4.0→4.9/10  
+**Last updated:** 2026-05-29 — Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 10: 0→7/10 (`observability-standards` + `observability-reviewer`). Overall: 4.0→5.5/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -556,7 +556,7 @@ Phase 9 is entirely absent.
 
 ---
 
-## Phase 10 — Observability & Operations | Score: 0/10
+## Phase 10 — Observability & Operations | Score: 7/10
 
 ### Industry Benchmark
 
@@ -572,9 +572,11 @@ Phase 9 is entirely absent.
 
 **Microsoft (FAANG):** Engineering Fundamentals Playbook requires structured logging on every project: timestamps, severity, correlation IDs, context. "The logging approach should be agreed on and consistent across all team members."
 
-### Harness Score: 0/10
+### Harness Score: 7/10
 
-Phase 10 is entirely absent.
+**Department produces (SRE):** Structured logging config, OTel/Prometheus metrics, SLO definition, alert rules, per-alert runbooks, dashboard definitions, incident response matrix, on-call rotation. **Harness produces:** `observability-standards` skill generates OTel-compliant logging setup (structlog/pino/log-slog/tracing/logback), golden signal metrics instrumentation per endpoint, SLO definition doc tied to spec NFRs, symptom-based alert rules (Prometheus YAML or generic), per-alert runbooks with 7 required sections. `observability-reviewer` validates 7 dimensions. **Verdict:** Largely indistinguishable for core observability. Remaining gaps: dashboard-as-code, incident severity matrix, on-call rotation.
+
+`observability-standards` wired into `executing-plans` and `subagent-driven-development` — instruments each endpoint as it is created, not as an afterthought. Grounded in Google SRE four golden signals (sre.google/sre-book/monitoring-distributed-systems/), OTel data model, and PagerDuty alerting principles (symptom-based, not cause-based).
 
 ### Precise Gaps
 
@@ -769,7 +771,7 @@ Performance is not addressed at any phase.
 | Priority | Gap | New Skill/Enhancement | Harness Integration Point |
 |----------|-----|----------------------|--------------------------|
 | ✅ **P0 CLOSED** | ~~No HLD artifact~~ | `high-level-design` skill + `hld-reviewer` agent | After `spec-quality-gate`, before `writing-plans` — **shipped 2026-05-29** |
-| **P0** | No observability | `observability-standards` (new) | During `executing-plans`, per endpoint |
+| ✅ **P0 CLOSED** | ~~No observability~~ | `observability-standards` skill + `observability-reviewer` agent | During `executing-plans`, per endpoint — **shipped 2026-05-29** |
 | ✅ **P0 CLOSED** | ~~No CI/CD pipeline~~ | `ci-pipeline-setup` skill + `ci-reviewer` agent | At `using-git-worktrees` — **shipped 2026-05-29** |
 | **P0** | No deployment | `deployment-workflow` (new) | At `finishing-a-development-branch` |
 | **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
@@ -860,14 +862,16 @@ pr-creator → PR opened
 **Score history:**
 - Original (corrected question): 4.0/10
 - After HLD + spec/plan reviewers: 4.4/10
-- After CI pipeline setup: **4.9/10**
+- After CI pipeline setup: 4.9/10
+- After Observability: **5.5/10**
 
 **What was shipped (2026-05-29):**
-- Phase 2 (HLD): **2/10 → 7/10** — `high-level-design` skill + `hld-reviewer` agent. C4 diagrams, STRIDE threat model, ADRs, failure modes, capacity planning.
-- Phase 8 (CI/CD): **1/10 → 7/10** — `ci-pipeline-setup` skill + `ci-reviewer` agent. Platform-agnostic spec in `.ai/ci/`, generates platform-specific config for 6 CI systems, 8-dimension review.
-- Review architecture: `spec-quality-reviewer` → `hld-reviewer` → `plan-reviewer` → `ci-reviewer` → 6 code reviewers. Every artifact-producing phase has a dedicated Opus reviewer.
+- Phase 2 (HLD): **2/10 → 7/10** — `high-level-design` + `hld-reviewer`
+- Phase 8 (CI/CD): **1/10 → 7/10** — `ci-pipeline-setup` + `ci-reviewer` (6 CI platforms)
+- Phase 10 (Observability): **0/10 → 7/10** — `observability-standards` + `observability-reviewer`. OTel logging, golden signals, SLOs, symptom-based alerts, runbooks per alert.
+- Review architecture: every artifact-producing phase now has a dedicated Opus reviewer (spec → HLD → plan → CI → observability → code).
 
-**What remains:** Phase 9 (Deployment) 0/10 — no rollback runbook, no zero-downtime migration checklist. Phase 10 (Observability) 0/10 — no structured logging, no golden signal metrics, no SLOs, no runbooks. These are the last two P0 gaps.
+**What remains:** Phase 9 (Deployment) **0/10** — the last P0 gap. No deployment runbook, no zero-downtime migration checklist, no rollback procedure, no post-deploy smoke tests. The harness covers design through observability — it still stops before the deployment gate.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
