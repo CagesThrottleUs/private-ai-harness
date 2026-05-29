@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 10: 0→7/10 (`observability-standards` + `observability-reviewer`). Overall: 4.0→5.5/10  
+**Last updated:** 2026-05-29 — All P0 gaps closed. Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 9: 0→7/10, Phase 10: 0→7/10. Overall: 4.0→6.1/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -497,7 +497,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 9 — Deployment & Release | Score: 0/10
+## Phase 9 — Deployment & Release | Score: 7/10
 
 ### Industry Benchmark
 
@@ -513,9 +513,11 @@ Each phase section has five parts:
 
 **Microsoft (FAANG):** "The main branch should always be shippable" — meaning every commit to main could be deployed to production. Post-deploy smoke tests run automatically to verify core journeys work.
 
-### Harness Score: 0/10
+### Harness Score: 7/10
 
-Phase 9 is entirely absent.
+**Department produces (DevOps + Release Manager):** Deployment runbook, rollback procedure, smoke test script, release notes, blue/green or canary pipeline config. **Harness produces:** `deployment-workflow` skill generates deployment strategy recommendation, expand-contract migration checklist, rollback procedure (7 sections, staging-tested), post-deploy smoke test spec (3 phases), release notes (Keep a Changelog format), deploy runbook. `deployment-reviewer` validates 6 dimensions. **Verdict:** Largely indistinguishable for deployment artifacts. Remaining gaps: platform-specific canary/blue-green pipeline config, on-call rotation setup.
+
+Expand-Contract pattern sourced from Prisma Data Guide. Dangerous migration patterns explicitly flagged (ALTER TABLE NOT NULL on live table, Rolling deploy with Phase 3 migration). Strategy-migration alignment validated by `deployment-reviewer` — a Rolling deployment with a Phase 3 contract migration is a Critical finding.
 
 ### Precise Gaps
 
@@ -773,7 +775,7 @@ Performance is not addressed at any phase.
 | ✅ **P0 CLOSED** | ~~No HLD artifact~~ | `high-level-design` skill + `hld-reviewer` agent | After `spec-quality-gate`, before `writing-plans` — **shipped 2026-05-29** |
 | ✅ **P0 CLOSED** | ~~No observability~~ | `observability-standards` skill + `observability-reviewer` agent | During `executing-plans`, per endpoint — **shipped 2026-05-29** |
 | ✅ **P0 CLOSED** | ~~No CI/CD pipeline~~ | `ci-pipeline-setup` skill + `ci-reviewer` agent | At `using-git-worktrees` — **shipped 2026-05-29** |
-| **P0** | No deployment | `deployment-workflow` (new) | At `finishing-a-development-branch` |
+| ✅ **P0 CLOSED** | ~~No deployment~~ | `deployment-workflow` skill + `deployment-reviewer` agent | At `finishing-a-development-branch` — **shipped 2026-05-29** |
 | **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
 | **P1** | No integration tests | `integration-testing` (new) | During `test-driven-development` |
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
@@ -871,7 +873,20 @@ pr-creator → PR opened
 - Phase 10 (Observability): **0/10 → 7/10** — `observability-standards` + `observability-reviewer`. OTel logging, golden signals, SLOs, symptom-based alerts, runbooks per alert.
 - Review architecture: every artifact-producing phase now has a dedicated Opus reviewer (spec → HLD → plan → CI → observability → code).
 
-**What remains:** Phase 9 (Deployment) **0/10** — the last P0 gap. No deployment runbook, no zero-downtime migration checklist, no rollback procedure, no post-deploy smoke tests. The harness covers design through observability — it still stops before the deployment gate.
+**All P0 gaps closed. Score history:**
+- Original (corrected question): 4.0/10
+- After HLD + reviewers: 4.4/10
+- After CI pipeline: 4.9/10
+- After Observability: 5.5/10
+- After Deployment: **6.1/10**
+
+**What was shipped today (2026-05-29):**
+- Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
+- Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer` (6 platforms)
+- Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`. Rollback procedures, expand-contract migrations, smoke tests, release notes.
+- Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`. OTel logging, golden signals, SLOs, runbooks.
+
+**What remains (P1/P2 gaps):** Phase 0 (Business Context, 2/10) — no PRD intake. Phase 1 (Requirements, 6/10) — NFRs not enforced in spec template. Phase 3 (LLD, 4/10) — no API contract-first skill. Phase 7 (Testing, 3/10) — integration and E2E test layers absent. The harness now covers the complete engineering lifecycle; the remaining gaps degrade quality but do not produce entirely absent artifact categories.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
