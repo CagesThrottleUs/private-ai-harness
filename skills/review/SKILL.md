@@ -24,6 +24,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review ci` | CI/CD pipeline review (stage completeness, security hygiene, coverage gate, artifact immutability, DORA readiness) |
 | `/review hld` | High-level design review (C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment) |
 | `/review observability` | Observability setup review (structured logging OTel compliance, golden signal coverage, SLO quality, alert design, runbook completeness) |
+| `/review deployment` | Deployment artifacts review (rollback procedure, DB migration safety, smoke test coverage, deployment runbook, release notes quality) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -42,6 +43,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `ci-reviewer` | CI/CD config file | When CI config is created or modified — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, branch protection alignment. Not included in `/review all` (different artifact type). |
 | `hld-reviewer` | HLD document (`.ai/hld/`) | When HLD is written or updated — validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment. 10 dimensions. Not included in `/review all` (design artifact, not code diff). |
 | `observability-reviewer` | Observability artifacts (`.ai/observability/`, `wiki/guides/alerts.md`, `wiki/guides/runbooks/`) | When observability is set up or updated — validates OTel logging compliance, golden signal coverage, SLO quality vs NFRs, alert design (symptom-based), runbook completeness. 7 dimensions. Not included in `/review all`. |
+| `deployment-reviewer` | Deployment artifacts (`.ai/deployment/`) | When deployment artifacts are created — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes quality. 6 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -241,6 +243,31 @@ Note: `/review observability` is NOT included in `/review all`. Reviews observab
 
 ---
 
+#### `/review deployment`
+
+Collect inputs:
+- **ROLLBACK_PATH** — check `.ai/deployment/` for `*rollback*.md`
+- **SMOKE_TEST_PATH** — check `.ai/deployment/` for `*smoke*.md`
+- **RUNBOOK_PATH** — check `.ai/deployment/` for `*runbook*.md` or `*deploy*.md`
+- **MIGRATION_CHECKLIST_PATH** — check `.ai/deployment/` for `*migration*.md` (omit if no DB changes)
+- **SPEC_PATH** — check `.ai/specs/` for matching spec
+
+Dispatch `deployment-reviewer` agent:
+```
+Agent (deployment-reviewer):
+  ROLLBACK_PATH: <.ai/deployment/YYYY-MM-DD-rollback.md>
+  SMOKE_TEST_PATH: <.ai/deployment/YYYY-MM-DD-smoke-tests.md>
+  RUNBOOK_PATH: <.ai/deployment/YYYY-MM-DD-deploy-runbook.md>
+  MIGRATION_CHECKLIST_PATH: <.ai/deployment/YYYY-MM-DD-migration.md>  // omit if no DB changes
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [deployment-reviewer report — 6 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review deployment` is NOT included in `/review all`. Invoked by `deployment-workflow` skill or manually when deployment artifacts are created.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -318,6 +345,7 @@ These phrases trigger this skill automatically:
 | "review my pipeline" / "check CI config" / "review CI" / "check my ci" / "review the pipeline" | `/review ci` |
 | "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |
 | "review observability" / "check SLOs" / "review runbooks" / "check alerts" / "review my metrics" | `/review observability` |
+| "review deployment" / "check rollback" / "review my deploy plan" / "check migration safety" / "review release notes" | `/review deployment` |
 
 ---
 

@@ -37,6 +37,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — detects CI platform, generates platform-agnostic pipeline spec + config (GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket), runs `ci-reviewer` before committing |
 | `observability-standards` | `/observability-standards` | After first API endpoint is created — instruments OTel structured logging, golden signal metrics, produces SLO definition doc, alert rules, per-alert runbooks; runs `observability-reviewer` before committing |
+| `deployment-workflow` | `/deployment-workflow` | Before PR is deployment-ready — deployment strategy recommendation, zero-downtime migration checklist, rollback procedure, smoke test spec, release notes draft, deploy runbook; runs `deployment-reviewer` |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
@@ -75,6 +76,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `plan-reviewer` | opus | Implementation plan quality gate — validates spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type/interface consistency, design principle compliance, and commit discipline. Invoked by `writing-plans` skill before execution handoff. |
 | `ci-reviewer` | opus | CI/CD pipeline quality gate — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, and branch protection alignment. Platform-agnostic: GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket. Invoked by `ci-pipeline-setup` skill. |
 | `observability-reviewer` | opus | Observability quality gate — validates OTel logging compliance (6 mandatory fields), golden signal coverage (all 4 signals), SLO quality vs spec NFRs, alert design (symptom-based, burn rate), runbook completeness (7 required sections), distributed tracing, SLO-to-alert alignment. Invoked by `observability-standards` skill. |
+| `deployment-reviewer` | opus | Deployment quality gate — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract pattern, dangerous patterns), smoke test coverage, deployment runbook, release notes quality (Keep a Changelog format), strategy-migration alignment. Invoked by `deployment-workflow` skill. |
 
 Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
 Design agents (`hld-reviewer`) require `HLD_PATH` and `SPEC_PATH`.
@@ -82,6 +84,7 @@ Spec agents (`spec-quality-reviewer`) require `SPEC_PATH`.
 Plan agents (`plan-reviewer`) require `PLAN_PATH` and `SPEC_PATH`; `HLD_PATH` optional.
 CI agents (`ci-reviewer`) require `CI_CONFIG_PATH` and `PROJECT_ROOT`; `PIPELINE_SPEC_PATH` optional.
 Observability agents (`observability-reviewer`) require `SLO_PATH` and `ALERTS_PATH`; `RUNBOOK_DIR` and `SPEC_PATH` optional.
+Deployment agents (`deployment-reviewer`) require `ROLLBACK_PATH` and `SMOKE_TEST_PATH`; `RUNBOOK_PATH`, `MIGRATION_CHECKLIST_PATH`, `SPEC_PATH` optional.
 See each `agents/<name>.md` for the full input contract.
 
 ### Model Right-Sizing Criteria
@@ -109,6 +112,7 @@ See each `agents/<name>.md` for the full input contract.
 | `plan-reviewer` | opus | Medium-high — Karpathy anti-pattern judgment, YAGNI/SOLID violations, type consistency tracking | ✅ Correct |
 | `ci-reviewer` | opus | Medium-high — security hygiene judgment (OIDC vs secrets, pinning), DORA readiness reasoning, environment gate adequacy | ✅ Correct |
 | `observability-reviewer` | opus | Medium-high — SLO quality judgment (are targets meaningful?), alert design (symptom vs cause reasoning), runbook adequacy ("investigate" ≠ remediation) | ✅ Correct |
+| `deployment-reviewer` | opus | High — DB migration safety requires deep judgment (subtle lock patterns, backward-compatibility reasoning), rollback adequacy ("revert" ≠ command), strategy-migration alignment requires systems reasoning | ✅ Correct |
 
 **When adding a new agent:** fill in the right-size verdict before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.
 

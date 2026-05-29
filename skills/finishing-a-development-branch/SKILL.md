@@ -76,6 +76,19 @@ Stop. Don't proceed to Step 1.5.
 
 **If tests pass:** Continue to Step 1.5.
 
+### Step 1: Deployment Artifacts Check
+
+Before running the review gate, verify deployment artifacts exist:
+
+```bash
+ls .ai/deployment/YYYY-MM-DD-rollback.md .ai/deployment/YYYY-MM-DD-smoke-tests.md .ai/deployment/YYYY-MM-DD-deploy-runbook.md 2>/dev/null
+```
+
+**If deployment artifacts are absent AND this branch changes user-facing behavior, endpoints, or DB schema:**
+Invoke `deployment-workflow` skill first. Do NOT proceed to review gate without deployment artifacts.
+
+**If documentation-only or config-only change:** skip.
+
 ### Step 1.5: Review Gate
 
 Run `/review all` before presenting merge/PR options. All four agents run in parallel.
@@ -102,6 +115,24 @@ Agent (ci-reviewer):
 ```
 
 Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
+
+**Also run `deployment-reviewer` if deployment artifacts exist on this branch:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep "\.ai/deployment/"
+```
+
+If deployment artifacts changed → dispatch `deployment-reviewer` in parallel:
+
+```
+Agent (deployment-reviewer):
+  ROLLBACK_PATH: .ai/deployment/<latest>-rollback.md
+  SMOKE_TEST_PATH: .ai/deployment/<latest>-smoke-tests.md
+  RUNBOOK_PATH: .ai/deployment/<latest>-deploy-runbook.md
+  SPEC_PATH: <matching .ai/specs/*.md>
+```
+
+Treat `deployment-reviewer` Critical findings as blocking — a broken rollback procedure discovered during a production incident is too late.
 
 **Also run `observability-reviewer` if observability files were created or modified on this branch:**
 

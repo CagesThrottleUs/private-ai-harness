@@ -52,6 +52,7 @@ user-invocable: true
 | High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
 | SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
+| Deployment artifacts | `.ai/deployment/YYYY-MM-DD-*.md` | Rollback procedure, smoke tests, deploy runbook, migration checklist |
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |
 | Requirement traceability | `.ai/requirements/` | REQ-NNN → TC mapping |
