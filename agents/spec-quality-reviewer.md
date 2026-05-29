@@ -88,6 +88,19 @@ Any missing subsection = FAIL.
 
 `## Out of Scope` section must exist with at least one explicit exclusion. If absent or empty = FAIL.
 
+**1f. Non-Functional Requirements section**
+
+`## Non-Functional Requirements` section must exist. Check:
+
+- Section present?
+- At least one row in the Performance table with a numeric target (not "TBD", not blank)?
+- Security table present with explicit response on Compliance (not blank)?
+- No cell reads "TBD", blank, or missing — each must be either a numeric target or explicit "N/A" with a rationale?
+
+If section is absent entirely = FAIL.
+If any NFR cell reads "TBD" or is blank (not even "N/A") = FAIL.
+If Compliance row is blank = FAIL (compliance discovered post-implementation forces rework).
+
 ---
 
 ### Section 2 — Quality Checks
@@ -139,6 +152,36 @@ Every failure mode, error condition, or edge case mentioned anywhere in the spec
 - Listed in Out of Scope with a rationale
 
 An error path that falls through to unspecified behavior = FAIL.
+
+#### 2e. NFR Measurability and Enforceability
+
+For each row in the `## Non-Functional Requirements` section, apply the same north star: *can this NFR be proven satisfied or violated by a test?*
+
+**Performance NFR checks:**
+- Response time target is a specific number at a specific percentile under a specific load (not "fast", "< 1s" without context, or "acceptable")
+- Throughput target is a specific RPS value (not "scalable" or "handles growth")
+- Availability target is a percentage with a window (not "highly available" or "99%+" without the specific value)
+- Load condition is stated for each metric (concurrent users OR RPS, not absent)
+
+**Security NFR checks:**
+- Auth mechanism is named specifically (not "secure authentication")
+- Compliance row names the specific regulation AND states its implication (not just "GDPR: yes" — what does GDPR require for this feature?)
+- Encryption at rest: if "N/A", rationale must state why (e.g., "N/A — no PII or sensitive data persisted")
+
+**RFC 2119 enforceability:**
+- Each row uses MUST, SHOULD, or MAY — not "will", "needs to", "wants to"
+- Downgrading a requirement from MUST to SHOULD requires explicit rationale
+
+| NFR Failing | NFR Passing |
+|------------|------------|
+| "Response time: fast" | "p99 < 200ms under 100 concurrent requests" |
+| "Availability: high" | "99.9% over 30-day rolling window" |
+| "Secure" | "Auth: MUST — JWT RS256; Encryption: MUST — TLS 1.3 in transit, N/A at rest (no PII)" |
+| "GDPR: yes" | "GDPR: MUST — user data export (GET /users/{id}/export) and deletion (DELETE /users/{id}) required" |
+
+**Critical:** Performance NFR has no numeric target. Availability NFR says "high availability" without a percentage. Compliance cell lists "GDPR" with no implication stated.
+**Important:** Load condition absent from performance NFR (can't know if target is for 1 user or 10,000). Enforceability column says "will" instead of MUST/SHOULD/MAY.
+**Advisory:** p95 target absent (only p99 — missing early warning signal). Scalability NFRs absent when the spec describes a new traffic-bearing endpoint.
 
 ---
 
