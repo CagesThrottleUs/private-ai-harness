@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 8: 7→8.5/10 (`infrastructure-as-code` + `iac-reviewer`). Sprint 3 complete. Score: 8.3/10  
+**Last updated:** 2026-05-29 — Phase 8: 8.5→9/10 (`feature-flags` + `feature-flag-reviewer`). Score: 8.4/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -492,15 +492,15 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 5: Implementation | ICs | Code + tests + commits | 8.5/10 | 🟢 Strong — linter gate (Ruff/Biome/golangci-lint/Clippy) + `linter-reviewer` closes idiom gap |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
 | Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + accessibility + DAST + load + chaos + VRT | 9.5/10 | 🟢 Strong — all layers + WCAG + DAST + chaos + visual regression (Playwright toHaveScreenshot). Manual pen test still needed. |
-| Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline + IaC | 8.5/10 | 🟢 Strong — `ci-pipeline-setup` + `infrastructure-as-code` (Terraform/Pulumi, remote state, tfsec scan). Feature flags still absent. |
+| Phase 8: CI/CD | DevOps | CI pipeline + IaC + feature flags | 9/10 | 🟢 Strong — `ci-pipeline-setup` + `infrastructure-as-code` + `feature-flags` (OpenFeature, registry, CI hygiene, progressive rollout). Deployment execution gap remains (Phase 9). |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 7/10 | 🟢 Strong — `deployment-workflow` + `deployment-reviewer`; gaps: platform canary config, on-call rotation |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config + incident response | 8.5/10 | 🟢 Strong — `observability-standards` + `incident-response` (SEV matrix, IC role, postmortem, MTTD/MTTR); gap: on-call rotation provisioning |
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 8.5/10 | 🟢 Strong — `onboarding-guide` synthesizes HLD/ADRs/SLOs into 8-section wiki/ONBOARDING.md; `onboarding-reviewer` validates |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 8.3/10**
+**Overall Score: 8.4/10**
 
-> Sprint 3 complete. Phase 8: 7→8.5 with infrastructure-as-code (Terraform/Pulumi, remote state+locking, tfsec CI scan).. All Sprint 2 items shipped (onboarding, incident response, chaos, VRT, ERD).
+> Phase 8: 8.5→9 with feature-flags (OpenFeature, naming conventions, registry, CI hygiene, progressive rollout 1%→100%). (Terraform/Pulumi, remote state+locking, tfsec CI scan).. All Sprint 2 items shipped (onboarding, incident response, chaos, VRT, ERD).
 
 > Phase 10 upgraded 7→8.5 with incident-response (severity matrix, IC role, blameless postmortem, MTTD/MTTR targets) (8-section wiki/ONBOARDING.md from HLD, ADRs, SLOs, OpenAPI spec) (ZAP baseline, API scan, Nuclei, SARIF). All 5 Sprint 1 items shipped. (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
 
