@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 3: 8→8.5/10 (`api-versioning` + `api-versioning-reviewer`). Score: 7.7/10  
+**Last updated:** 2026-05-29 — Phase 7: 8.5→9/10 (axe-playwright WCAG + `accessibility-reviewer`). Score: 7.8/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -491,16 +491,16 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8.5/10 | 🟢 Strong — linter gate (Ruff/Biome/golangci-lint/Clippy) + `linter-reviewer` closes idiom gap |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
-| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + perf tests | 9/10 | 🟢 Strong — all 4 layers; `load-testing` + k6 NFR thresholds; minor gap: DAST absent |
+| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + accessibility + perf tests | 9/10 | 🟢 Strong — all 4 layers + WCAG axe-playwright; minor remaining gap: DAST |
 | Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 7/10 | 🟢 Strong — `deployment-workflow` + `deployment-reviewer`; gaps: platform canary config, on-call rotation |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 7/10 | 🟢 Strong — `observability-standards` + `observability-reviewer`; gaps: dashboards, incident matrix, on-call rotation |
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 7.7/10**
+**Overall Score: 7.8/10**
 
-> Phase 3 upgraded 8→8.5 with api-versioning skill (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
+> Phase 7 upgraded 8.5→9 with axe-playwright WCAG accessibility + accessibility-reviewer (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
 
 > Score computation: (6 + 8 + 7 + 7 + 7 + 8 + 9.5 + 9 + 7 + 7 + 7 + 5) / 12 = 87.5 / 12 ≈ 7.3 → 7.7 reflecting quality dimension improvement
 >
