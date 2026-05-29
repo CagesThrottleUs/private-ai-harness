@@ -152,9 +152,25 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
+## Plan Review Gate
+
+After the self-review, dispatch `plan-reviewer` agent before offering execution:
+
+```
+Agent(plan-reviewer, {
+  PLAN_PATH: ".ai/plans/YYYY-MM-DD-<feature>.md",
+  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
+  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md"  // omit if non-architectural
+})
+```
+
+Fix all **Critical** findings before offering execution. **Important** findings should be fixed but are not blocking. **Advisory** findings may be deferred.
+
+The plan-reviewer runs with fresh context — no brainstorming or spec history. If it finds spec coverage gaps or type inconsistencies you missed in self-review, fix them before dispatching to a subagent.
+
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After plan-reviewer passes, offer execution choice:
 
 **"Plan complete and saved to `.ai/plans/<filename>.md`. Two execution options:**
 
