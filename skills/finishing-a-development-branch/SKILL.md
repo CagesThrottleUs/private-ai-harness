@@ -103,6 +103,24 @@ Agent (ci-reviewer):
 
 Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
 
+**Also run `observability-reviewer` if observability files were created or modified on this branch:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep -E "\.ai/observability/|wiki/guides/alerts|wiki/guides/runbooks/"
+```
+
+If any observability files appear → dispatch `observability-reviewer` in parallel:
+
+```
+Agent (observability-reviewer):
+  SLO_PATH: .ai/observability/<latest-slos.md>
+  ALERTS_PATH: wiki/guides/alerts.md
+  RUNBOOK_DIR: wiki/guides/runbooks/
+  SPEC_PATH: <matching .ai/specs/*.md>
+```
+
+Treat `observability-reviewer` Critical findings as blocking — a deployed service without valid SLOs and runbooks is an incident risk.
+
 **Also run `hld-reviewer` if HLD files were modified on this branch:**
 
 ```bash

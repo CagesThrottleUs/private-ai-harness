@@ -23,6 +23,7 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 | `language-expert-reviewer` | `/review lang` | When language depth matters: C++/Rust/Go/Python/TS/Java. Checks type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — 10 dimensions. |
 | `ci-reviewer` | `/review ci` | When CI config is created or modified. Validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, DORA readiness. Not in `/review all`. |
 | `hld-reviewer` | `/review hld` | When HLD is written or updated. Validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs — 10 dimensions. Not in `/review all`. |
+| `observability-reviewer` | `/review observability` | When observability is set up or updated. Validates OTel logging, golden signals, SLO quality, alert design (symptom-based, burn rate), runbook completeness — 7 dimensions. Not in `/review all`. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
 ---

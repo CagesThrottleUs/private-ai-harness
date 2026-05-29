@@ -24,7 +24,7 @@ user-invocable: true
 
 5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs. Each task should trace to a container in the HLD's C4 diagram.
 
-6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
+6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints. After any task that creates an API endpoint or service component, triggers `observability-standards` to instrument logging, metrics, SLOs, alerts, and runbooks.
 
 7. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
 
@@ -51,6 +51,7 @@ user-invocable: true
 | Feature design specs | `.ai/specs/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
+| SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |
 | Requirement traceability | `.ai/requirements/` | REQ-NNN → TC mapping |

@@ -23,6 +23,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review lang` | Language-expert review (10 language-specific dimensions — type system, UB, idioms, ownership, concurrency, etc.) |
 | `/review ci` | CI/CD pipeline review (stage completeness, security hygiene, coverage gate, artifact immutability, DORA readiness) |
 | `/review hld` | High-level design review (C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment) |
+| `/review observability` | Observability setup review (structured logging OTel compliance, golden signal coverage, SLO quality, alert design, runbook completeness) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -40,6 +41,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `language-expert-reviewer` | PR diff or full codebase | When deep language expertise matters: type system, UB, ownership, idioms, concurrency, error handling, performance — 10 dimensions, veteran-level. |
 | `ci-reviewer` | CI/CD config file | When CI config is created or modified — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, branch protection alignment. Not included in `/review all` (different artifact type). |
 | `hld-reviewer` | HLD document (`.ai/hld/`) | When HLD is written or updated — validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment. 10 dimensions. Not included in `/review all` (design artifact, not code diff). |
+| `observability-reviewer` | Observability artifacts (`.ai/observability/`, `wiki/guides/alerts.md`, `wiki/guides/runbooks/`) | When observability is set up or updated — validates OTel logging compliance, golden signal coverage, SLO quality vs NFRs, alert design (symptom-based), runbook completeness. 7 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -212,7 +214,30 @@ Agent (hld-reviewer):
 
 Output: [hld-reviewer report — 10 dimensions + PASS/NEEDS WORK/BLOCKED]
 
-Note: `/review hld` is NOT included in `/review all`. It reviews a design artifact, not the code diff. Run it when an HLD is written or modified — typically from within `high-level-design` skill, or manually if the HLD is updated mid-implementation.
+Note: `/review hld` is NOT included in `/review all`. Design artifact, not code diff. Run from within `high-level-design` skill or manually when HLD is updated mid-implementation.
+
+---
+
+#### `/review observability`
+
+Collect inputs:
+- **SLO_PATH** — check `.ai/observability/` for most recent `*slos*.md`. Ask if ambiguous.
+- **ALERTS_PATH** — check `wiki/guides/alerts.md`.
+- **RUNBOOK_DIR** — check `wiki/guides/runbooks/`.
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (for NFR cross-check).
+
+Dispatch `observability-reviewer` agent:
+```
+Agent (observability-reviewer):
+  SLO_PATH: <.ai/observability/YYYY-MM-DD-slos.md>
+  ALERTS_PATH: wiki/guides/alerts.md
+  RUNBOOK_DIR: wiki/guides/runbooks/
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [observability-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review observability` is NOT included in `/review all`. Reviews observability artifacts, not code diff. Run from within `observability-standards` skill or manually when observability setup is updated.
 
 ---
 
@@ -292,6 +317,7 @@ These phrases trigger this skill automatically:
 | "language review" / "C++ review" / "Rust review" / "expert review" / "check idioms" / "review against standard" | `/review lang` |
 | "review my pipeline" / "check CI config" / "review CI" / "check my ci" / "review the pipeline" | `/review ci` |
 | "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |
+| "review observability" / "check SLOs" / "review runbooks" / "check alerts" / "review my metrics" | `/review observability` |
 
 ---
 

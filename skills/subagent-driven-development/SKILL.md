@@ -250,6 +250,7 @@ Done!
 - Move to next task while either review has open issues
 - Skip documentation on public constructs — `code-documentation` required before spec compliance review
 - Skip karpathy lens before committing — catches speculative code, over-engineering, and weak success criteria
+- Skip `observability-standards` after a task that creates an API endpoint or service component — a deployed endpoint without metrics and a runbook is a production liability
 
 **If subagent asks questions:**
 - Answer clearly and completely
@@ -278,6 +279,7 @@ Done!
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 - **superpowers:karpathy** - Anti-pattern lens applied before committing: no speculative code, surgical changes, verifiable success criteria
 - **superpowers:code-documentation** - Document every public construct written before committing (spec_id, req_id, full docstring)
+- **observability-standards** - After any task that creates an API endpoint or service component: instrument structured logging, golden signal metrics, SLOs, alert rules, and runbooks
 
 **Alternative workflow:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
