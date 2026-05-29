@@ -49,7 +49,7 @@ You MUST create a task for each of these items and complete them in order:
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill; fix all FAIL items before proceeding
 9. **User reviews written spec** — ask user to review the spec file before proceeding
-10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+10. **Transition to architecture or implementation** — for architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
 
 ## Process Flow
 
@@ -86,7 +86,7 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is invoking high-level-design (for architectural changes) or writing-plans (for non-architectural changes).** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The only valid next skills after brainstorming are `high-level-design` and `writing-plans`.
 
 ## The Process
 
@@ -239,8 +239,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- For architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. It produces C4 diagrams, technology selection records, threat model, failure modes, capacity planning, and ADRs before `writing-plans` activates.
+- For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
 
 ## Key Principles
 

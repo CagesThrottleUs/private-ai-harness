@@ -27,6 +27,7 @@ Not a product. Optimized for one workflow.
 | `executing-plans` | `/executing-plans` | Structured plan execution with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
+| `high-level-design` | `/high-level-design` | After spec-quality-gate — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs |
 | `karpathy` | `/karpathy` | Anti-LLM-coding-pitfall guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs with compliant messages |
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/ast before LLM |
@@ -54,6 +55,7 @@ Not a product. Optimized for one workflow.
 | `test-quality-reviewer` | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | Holistic audit across quality, security, reliability, performance |
 | `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
+| `hld-reviewer` | Pre-human HLD quality gate — validates C4 diagrams, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment |
 
 ---
 

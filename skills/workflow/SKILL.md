@@ -16,19 +16,21 @@ user-invocable: true
 
 2. **spec-quality-gate** - Activates after spec is written. Lints spec for vague language, missing REQ-NNN structure, unmeasurable criteria, undeclared dependencies. FAIL = fix spec, re-run. PASS = proceed.
 
-3. **using-git-worktrees** - Activates after spec gate passes and user approves. Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
+3. **high-level-design** - Activates after spec gate passes for any feature requiring architectural decisions (new services, data models, external integrations, security boundaries). Produces committed HLD document (C4 diagrams, technology selection, threat model via STRIDE, failure mode analysis, capacity planning) and ADRs in `wiki/architecture/`. Runs `hld-reviewer` agent before presenting to human. Human must approve HLD before `writing-plans` activates. **Skip** for bug fixes, config changes, and isolated non-architectural changes.
 
-4. **writing-plans** - Activates with approved spec. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs.
+4. **using-git-worktrees** - Activates after HLD is approved (or after spec gate for non-architectural changes). Creates isolated workspace on new branch, runs project setup, verifies clean test baseline.
 
-5. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
+5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs. Each task should trace to a container in the HLD's C4 diagram.
 
-6. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
+6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints.
 
-7. **code-documentation** - Activates for every public function, class, or API endpoint written. Full docstring, params, returns, throws, example. Wiki updated in same commit for API changes.
+7. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
 
-8. **requesting-code-review** - Activates between tasks. Reviews against plan and spec REQ-NNN IDs, reports issues by severity. Critical issues block progress.
+8. **code-documentation** - Activates for every public function, class, or API endpoint written. Full docstring, params, returns, throws, example. Wiki updated in same commit for API changes.
 
-9. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
+9. **requesting-code-review** - Activates between tasks. Reviews against plan and spec REQ-NNN IDs, reports issues by severity. Critical issues block progress.
+
+10. **finishing-a-development-branch** - Activates when tasks complete. Verifies tests, presents options (merge/PR/keep/discard), cleans up worktree.
 
 **The agent checks for relevant skills before any task.** Mandatory workflows, not suggestions.
 

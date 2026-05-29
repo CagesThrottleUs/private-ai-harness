@@ -36,6 +36,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `executing-plans` | `/executing-plans` | Running a `.ai/plans/` plan with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
+| `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
@@ -67,8 +68,10 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `test-quality-reviewer` | opus | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance |
 | `language-expert-reviewer` | opus | Language-veteran review across 10 dimensions: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety. Supports C++, Rust, Python, TypeScript, Go, Java. |
+| `hld-reviewer` | opus | Pre-human HLD quality gate — validates C4 diagrams, technology selection, STRIDE threat model, failure modes, capacity planning, ADR completeness, spec coverage, and AWS Well-Architected alignment. Invoked by `high-level-design` skill before human review. |
 
-All reviewer agents require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
+Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
+Design agents (`hld-reviewer`) require `HLD_PATH` and `SPEC_PATH`.
 See each `agents/<name>.md` for the full input contract.
 
 ---
