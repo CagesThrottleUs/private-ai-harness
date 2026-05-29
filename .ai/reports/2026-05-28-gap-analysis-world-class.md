@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — reflects `high-level-design` skill + `hld-reviewer` agent (Phase 2: 2→7/10), `spec-quality-reviewer` agent (Phase 1 gate), `plan-reviewer` agent (plan gate), `language-expert-reviewer` (Phase 6), karpathy wiring (Phase 5). Overall: 4.0→4.4/10  
+**Last updated:** 2026-05-29 — Phase 2: 2→7/10 (`high-level-design` + `hld-reviewer`), Phase 8: 1→7/10 (`ci-pipeline-setup` + `ci-reviewer`, 6 CI platforms, `.ai/ci/` artifacts). Overall: 4.0→4.9/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -437,7 +437,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 8 — CI/CD | Score: 1/10
+## Phase 8 — CI/CD | Score: 7/10
 
 ### Industry Benchmark
 
@@ -453,11 +453,11 @@ Each phase section has five parts:
 
 **PostgreSQL (world-class product):** CFbot runs CI on every proposed patch across 4+ operating systems before any human reviewer sees it. A patch that fails CFbot is not reviewed. Automated gate before human gate.
 
-### Harness Score: 1/10
+### Harness Score: 7/10
 
-**Department produces (DevOps):** Working `.github/workflows/ci.yml` + staging deploy pipeline + IaC configuration. **Harness produces:** `github-workflows` skill with GH Actions patterns and guidance — no pipeline file generated. **Verdict:** Clearly distinguishable — guidance is not an artifact. A DevOps engineer who produces only a document explaining CI/CD principles has not done their job.
+**Department produces (DevOps):** Working platform-specific CI config + staging deploy pipeline + IaC configuration. **Harness produces:** `ci-pipeline-setup` skill generates `.ai/ci/YYYY-MM-DD-pipeline-spec.md` (platform-agnostic spec, DORA targets, stage table, coverage thresholds, security tools, branch protection rules) + platform-specific CI config file for whichever system is in use (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket). `ci-reviewer` agent validates 8 dimensions before committing. **Verdict:** Largely indistinguishable for CI pipeline artifact. Remaining gap: IaC, feature flags, rollback procedure (belongs in `deployment-workflow`).
 
-`github-workflows` covers GH Actions patterns. `finishing-a-development-branch` guides post-implementation options. The harness ends at code merge.
+`ci-pipeline-setup` generates lint, type check, unit tests + coverage gate, integration tests, SAST + SCA security scan, build artifact, staging deploy, health check, and smoke test stages. Grounded in CRAFTS principles and DORA elite thresholds from dora.dev.
 
 ### Precise Gaps
 
@@ -770,7 +770,7 @@ Performance is not addressed at any phase.
 |----------|-----|----------------------|--------------------------|
 | ✅ **P0 CLOSED** | ~~No HLD artifact~~ | `high-level-design` skill + `hld-reviewer` agent | After `spec-quality-gate`, before `writing-plans` — **shipped 2026-05-29** |
 | **P0** | No observability | `observability-standards` (new) | During `executing-plans`, per endpoint |
-| **P0** | No CI/CD pipeline | `ci-pipeline-setup` (new) | At `using-git-worktrees` |
+| ✅ **P0 CLOSED** | ~~No CI/CD pipeline~~ | `ci-pipeline-setup` skill + `ci-reviewer` agent | At `using-git-worktrees` — **shipped 2026-05-29** |
 | **P0** | No deployment | `deployment-workflow` (new) | At `finishing-a-development-branch` |
 | **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
 | **P1** | No integration tests | `integration-testing` (new) | During `test-driven-development` |
@@ -857,12 +857,17 @@ pr-creator → PR opened
 
 **Current state (2026-05-29):** The Private AI Harness scores **4.4/10** under the corrected question (up from 4.0/10).
 
-**What changed today:**
-- Phase 2 (HLD): **2/10 → 7/10** — `high-level-design` skill produces a committed HLD with C4 diagrams, STRIDE threat model, technology selection, failure mode analysis, and ADRs. `hld-reviewer` agent validates 10 dimensions before human approval. This was the P0 gap and the most impactful single change.
-- Review architecture: `spec-quality-reviewer` (gates Phase 1 output), `hld-reviewer` (gates Phase 2 output), `plan-reviewer` (gates plan before execution) — the skill→agent pattern now spans spec → design → plan → code. Context isolation at every gate.
-- `language-expert-reviewer`, karpathy wiring, `code-documentation` checkpoint strengthened Phase 5/6 (scores unchanged, quality improved).
+**Score history:**
+- Original (corrected question): 4.0/10
+- After HLD + spec/plan reviewers: 4.4/10
+- After CI pipeline setup: **4.9/10**
 
-**What remains:** Phases 9 (Deployment) and 10 (Observability) are still 0/10. No deployment runbook, no observability setup, no CI pipeline artifact. These are the next P0 gaps. The harness now covers the design-through-implementation lifecycle well; it stops at PR creation.
+**What was shipped (2026-05-29):**
+- Phase 2 (HLD): **2/10 → 7/10** — `high-level-design` skill + `hld-reviewer` agent. C4 diagrams, STRIDE threat model, ADRs, failure modes, capacity planning.
+- Phase 8 (CI/CD): **1/10 → 7/10** — `ci-pipeline-setup` skill + `ci-reviewer` agent. Platform-agnostic spec in `.ai/ci/`, generates platform-specific config for 6 CI systems, 8-dimension review.
+- Review architecture: `spec-quality-reviewer` → `hld-reviewer` → `plan-reviewer` → `ci-reviewer` → 6 code reviewers. Every artifact-producing phase has a dedicated Opus reviewer.
+
+**What remains:** Phase 9 (Deployment) 0/10 — no rollback runbook, no zero-downtime migration checklist. Phase 10 (Observability) 0/10 — no structured logging, no golden signal metrics, no SLOs, no runbooks. These are the last two P0 gaps.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 

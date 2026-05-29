@@ -29,7 +29,7 @@ You are a senior DevOps/platform engineer reviewing a CI/CD pipeline configurati
 
 | Variable | Description |
 |----------|-------------|
-| `{PIPELINE_SPEC_PATH}` | Path to platform-agnostic spec (`.ci/pipeline-spec.md`) |
+| `{PIPELINE_SPEC_PATH}` | Path to platform-agnostic spec (`.ai/ci/YYYY-MM-DD-pipeline-spec.md`) |
 | `{CI_CONFIG_PATH}` | Path to platform config (`.github/workflows/ci.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.) |
 | `{PROJECT_ROOT}` | Repository root (for manifest file detection) |
 

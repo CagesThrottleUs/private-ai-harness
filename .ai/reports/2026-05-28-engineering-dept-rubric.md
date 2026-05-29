@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — reflects `high-level-design` skill + `hld-reviewer` agent (Phase 2: 2→7/10), `spec-quality-reviewer` agent (Phase 1 gate), `plan-reviewer` agent (Phase 4/5 gate), `language-expert-reviewer` (Phase 6), karpathy wiring (Phase 5)  
+**Last updated:** 2026-05-29 — Phase 2: 2→7/10 (`high-level-design` + `hld-reviewer`), Phase 8: 1→7/10 (`ci-pipeline-setup` + `ci-reviewer`). Overall: 4.0→4.9/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -323,22 +323,24 @@ A real engineering team moves through these phases. Each phase has mandatory del
 
 | Capability | Covered | Gap |
 |-----------|---------|-----|
-| GH Actions workflow patterns | ✅ Partial | `github-workflows` skill |
-| Build + test + lint pipeline | ⚠️ Partial | `github-workflows`; not comprehensive |
-| Deployment pipeline | ❌ Missing | No deployment skill |
-| Environment management | ❌ Missing | Not addressed |
-| Secrets management | ❌ Missing | Not addressed |
+| Platform-agnostic pipeline spec | ✅ Strong | `ci-pipeline-setup` — `.ai/ci/YYYY-MM-DD-pipeline-spec.md` with DORA targets, stage table, coverage thresholds |
+| Platform-specific config generation | ✅ Strong | `ci-pipeline-setup` — generates config for GitHub Actions / GitLab CI / Jenkins / CircleCI / Azure DevOps / Bitbucket |
+| Build + test + lint pipeline | ✅ Strong | `ci-pipeline-setup` — lint, type check, unit tests, integration tests, security scan (SAST + SCA), coverage gate ≥80% |
+| Deployment pipeline (staging) | ✅ Strong | `ci-pipeline-setup` — staging deploy + health check + smoke tests on merge to main |
+| Dependency scanning config | ✅ Strong | `ci-pipeline-setup` — Dependabot / Renovate config generated |
+| Coverage gate enforcement | ✅ Strong | `ci-pipeline-setup` — language-specific threshold enforcement (pytest-cov, jest, go cover, tarpaulin) |
+| CI quality gate | ✅ Strong | `ci-reviewer` agent (Opus) — 8 dimensions: stage completeness, fail-fast ordering, security hygiene, DORA readiness |
+| Environment management | ❌ Missing | No IaC skill; environment provisioning not addressed |
 | Feature flags | ❌ Missing | Not addressed |
-| Rollback strategy | ❌ Missing | Not addressed |
-| Coverage gate enforcement | ❌ Missing | Not addressed |
+| Rollback strategy | ⚠️ Partial | Health check in staging pipeline; full rollback procedure in `deployment-workflow` (not yet built) |
 
-**Department artifact (DevOps role):** A working `.github/workflows/ci.yml` (or equivalent) that runs on every PR: lint, format check, type check, unit tests, integration tests, coverage gate, security scan. A staging deployment pipeline. Infrastructure-as-Code for environment provisioning.  
-**Harness artifact:** `github-workflows` skill provides patterns and guidance. No actual pipeline file is generated. The developer must write the CI config themselves from guidance, rather than receiving a working file.  
-**Verdict:** Clearly distinguishable. Guidance about CI/CD ≠ a CI/CD pipeline. A DevOps engineer who produces only a document explaining CI/CD principles and no `ci.yml` has not done their job.
+**Department artifact (DevOps role):** A working platform-specific CI config that runs on every PR: lint, type check, unit tests, integration tests, coverage gate, security scan. A staging deployment pipeline. IaC for environment provisioning.  
+**Harness artifact:** `ci-pipeline-setup` skill generates a platform-agnostic spec (`.ai/ci/YYYY-MM-DD-pipeline-spec.md`) plus the platform-specific config file for whichever CI system the project uses — validated by `ci-reviewer` agent across 8 dimensions before committing. Grounded in CRAFTS principles and DORA elite thresholds.  
+**Verdict:** Largely indistinguishable for CI pipeline artifact. Remaining gap: no IaC skill (environment provisioning), no feature flags, no explicit rollback procedure document (that belongs in `deployment-workflow`).
 
-**Score: 1/10**
+**Score: 7/10**
 
-**Critical Gap:** CI/CD is almost entirely absent. The 1/10 (not 0) reflects that `github-workflows` provides genuine, correct guidance about GH Actions patterns. But guidance is not an artifact. The harness produces no `.github/workflows/` directory, no pipeline configuration, and no deployment automation — only prose describing what those would look like.
+**Strength:** Phase 8 moved from "guidance only" (1/10) to "generates the actual artifact" (7/10). The skill is platform-agnostic — it works for any of the 6 major CI platforms, not just GitHub Actions. The 7/10 (not higher) reflects missing IaC and feature flag support, which a full DevOps platform engineer would also produce.
 
 ---
 
@@ -479,17 +481,17 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 5: Implementation | ICs | Code + tests + commits | 8/10 | 🟢 Strong — high quality; no linter gate |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
 | Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + perf tests | 3/10 | 🔴 Weak — unit tests only; 3 layers absent |
-| Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 1/10 | 🔴 Guidance only — no pipeline artifact |
+| Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 0/10 | 🔴 Absent — nothing produced |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 0/10 | 🔴 Absent — nothing produced |
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 4.4/10**
+**Overall Score: 4.9/10**
 
-> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 1 + 0 + 0 + 5) / 12 = 52.5 / 12 ≈ 4.4
+> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 7 + 0 + 0 + 5) / 12 = 58.5 / 12 ≈ 4.9
 >
-> Phase 2 (HLD) moved from 2/10 to 7/10 with the addition of `high-level-design` skill and `hld-reviewer` agent. All other phase scores are unchanged — Phases 9 and 10 remain at 0/10 (no deployment or observability capability). The overall score is still bottlenecked by the absent operational phases. The harness now covers the design-through-implementation lifecycle well; it still stops at PR creation.
+> Phase 8 (CI/CD) moved from 1/10 to 7/10 with `ci-pipeline-setup` skill (platform-agnostic, 6 CI platforms) and `ci-reviewer` agent. Phase 2 (HLD) remains at 7/10 from the previous session. Phases 9 (Deployment) and 10 (Observability) remain at 0/10. The harness now covers the design → spec → plan → implementation → CI pipeline lifecycle. The last two 0/10 phases are the remaining bottleneck.
 
 ---
 

@@ -49,6 +49,8 @@ user-invocable: true
 | Developer guides / runbooks | `wiki/guides/` | How-tos, operational procedures |
 | Changelog / release notes / news | `wiki/changelog/` | One file per release or sprint |
 | Feature design specs | `.ai/specs/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
+| High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
+| CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |
 | Requirement traceability | `.ai/requirements/` | REQ-NNN → TC mapping |
