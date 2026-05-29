@@ -28,6 +28,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
 | `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
 | `/review e2e` | E2E test review (critical journey coverage, selector quality, no hardcoded waits, test independence, POM, auth fixtures, CI integration) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
 | `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
 | `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
 | `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
@@ -58,6 +59,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
 | `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
 | `e2e-reviewer` | E2E test files (`tests/e2e/**`) | When E2E tests are written — validates critical journey coverage, selector quality (semantic vs CSS), no hardcoded waits, test independence, POM structure, auth fixtures, CI integration. 7 dimensions. Not included in `/review all`. |
+| `visual-regression-reviewer` | `tests/visual/` | When visual regression tests are written — screenshots on critical pages, animations off, baselines committed, masked dynamic content, pinned Docker. 5 dims. Not in `/review all`. |
 | `chaos-reviewer` | `tests/chaos/` | When chaos tests are written — steady state + hypothesis, scenarios match HLD failure modes, thresholds allow degradation, abort criteria, CI staging only. 5 dims. Not in `/review all`. |
 | `incident-response-reviewer` | `wiki/guides/incident-response.md` | When IR docs are created/updated — severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication. 5 dimensions. Not in `/review all`. |
 | `onboarding-reviewer` | `wiki/ONBOARDING.md` | When onboarding guide is written or updated — validates 8 required sections, dev setup commands, C4 diagram present, ADRs referenced, first contribution path complete, ops actionable. Not in `/review all`. |
@@ -474,17 +476,23 @@ These phrases trigger this skill automatically:
 | "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
 | "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
 | "review e2e tests" / "check my playwright tests" / "review my E2E" / "are my e2e tests good" | `/review e2e` |
-| "review chaos tests" / "check chaos engineering" / "review resilience tests" | `/review chaos` |
-| "review incident response" / "check postmortem template" / "review IR process" | `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| "review visual regression" / "check screenshot tests" / "review VRT" / "check visual tests" | `/review visual` |
+| "review chaos tests" / "check chaos engineering" / "review resilience tests" | `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` |
+| "review incident response" / "check postmortem template" / "review IR process" | `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
 | `/review incident` |
-| "review the onboarding guide" / "check ONBOARDING.md" / "is the onboarding guide complete" | `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| "review the onboarding guide" / "check ONBOARDING.md" / "is the onboarding guide complete" | `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
 | `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
 | `/review onboarding` |
-| "review DAST" / "check ZAP config" / "review security scan" / "check dynamic security" | `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| "review DAST" / "check ZAP config" / "review security scan" / "check dynamic security" | `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
 | `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
 | `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
 | `/review dast` |
-| "review accessibility tests" / "check WCAG" / "check a11y" / "accessibility check" | `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| "review accessibility tests" / "check WCAG" / "check a11y" / "accessibility check" | `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
 | `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
 | `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
 | `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
