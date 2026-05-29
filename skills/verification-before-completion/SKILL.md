@@ -42,7 +42,7 @@ Skip any step = lying, not verifying
 | Claim | Requires | Not Sufficient |
 |-------|----------|----------------|
 | Tests pass | Test command output: 0 failures | Previous run, "should pass" |
-| Linter clean | Linter output: 0 errors | Partial check, extrapolation |
+| Linter clean | Linter output: 0 errors AND type checker: 0 errors | Partial check, extrapolation, "I didn't add any new code so linter is fine" |
 | Build succeeds | Build command: exit 0 | Linter passing, logs look good |
 | Bug fixed | Test original symptom: passes | Code changed, assumed fixed |
 | Regression test works | Red-green cycle verified | Test passes once |
@@ -113,6 +113,56 @@ From 24 failure memories:
 - Missing requirements shipped - incomplete features
 - Time wasted on false completion → redirect → rework
 - Violates: "Honesty is a core value. If you lie, you'll be replaced."
+
+## Language Linter Gate
+
+**Required before every commit that creates or modifies source code files.**
+
+Detect the project's language from manifest files, run the correct tool in check mode (never auto-fix — just fail if changes needed), and run the type checker. Zero issues required.
+
+**References:**
+- Ruff replaces black + isort + flake8 for Python (2024/2025 standard — same speed advantage, single tool)
+- Biome replaces ESLint + Prettier for TypeScript/JS (2025, Rust-based, ~35× faster)
+- golangci-lint is the Go standard; gofmt is mandatory
+- clippy + rustfmt are the Rust standard
+
+### Detection and Command Table
+
+| Manifest found | Language | Format check | Lint check | Type check |
+|---------------|---------|-------------|-----------|-----------|
+| `pyproject.toml` / `setup.py` | Python | `ruff format --check .` | `ruff check .` | `mypy . --ignore-missing-imports` |
+| `package.json` with `biome.json` | TypeScript/JS (Biome) | `npx biome format --diagnostic-level error .` | `npx biome lint --diagnostic-level error .` | `npx tsc --noEmit` |
+| `package.json` without `biome.json` | TypeScript/JS (ESLint) | `npx prettier --check .` | `npx eslint .` | `npx tsc --noEmit` |
+| `go.mod` | Go | `gofmt -l . \| grep . && exit 1 \|\| true` | `golangci-lint run ./...` | *(included in golangci-lint)* |
+| `Cargo.toml` | Rust | `cargo fmt --check` | `cargo clippy -- -D warnings` | *(included in clippy)* |
+| `pom.xml` | Java | `mvn checkstyle:check -q` | `mvn spotbugs:check -q` | `mvn compile -q` |
+| `build.gradle` | Java (Gradle) | `./gradlew checkstyleMain -q` | `./gradlew spotbugsMain -q` | `./gradlew compileJava -q` |
+| `Gemfile` | Ruby | `bundle exec rubocop --format quiet` | *(rubocop covers both)* | *(N/A)* |
+
+**Run all three columns where applicable. Any non-zero exit = do not commit.**
+
+### Failure handling
+
+If the linter produces output:
+1. Show the exact output
+2. Fix the violations (do NOT add ignore comments or suppressions to pass)
+3. Re-run to confirm clean
+4. Only then: proceed to commit
+
+**Never add `# noqa`, `// eslint-disable`, or `#[allow(clippy::...)]` to silence linter output unless the finding is a confirmed false positive with a documented reason.**
+
+### Self-review: Run `linter-reviewer` agent
+
+After running the linter gate manually, before committing, dispatch the agent to validate:
+
+```
+Agent(linter-reviewer, {
+  PROJECT_ROOT: ".",
+  CHANGED_FILES: "$(git diff --name-only HEAD)"
+})
+```
+
+---
 
 ## When To Apply
 

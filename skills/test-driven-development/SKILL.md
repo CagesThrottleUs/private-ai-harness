@@ -341,6 +341,7 @@ Before marking work complete:
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Edge cases and errors covered
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
+- [ ] Linter gate passed: format check + lint + type check for this language — zero issues, no new suppressions (run `verification-before-completion` linter gate, dispatch `linter-reviewer`)
 - [ ] If component has external dependencies: integration tests written using `integration-testing` skill (Testcontainers, no mocks at boundary, transaction rollback isolation)
 
 Can't check all boxes? You skipped TDD. Start over.
