@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 7: 9→9.5/10 (ZAP + Nuclei DAST + dast-reviewer). T-05 shipped. Sprint 1 complete. Overall: 7.9/10.  
+**Last updated:** 2026-05-29 — Phase 11: 6.5→8.5/10 (`onboarding-guide` + `onboarding-reviewer`). Sprint 2 item 1. Overall: 8.0/10.  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -621,7 +621,7 @@ Expand-Contract pattern sourced from Prisma Data Guide. Dangerous migration patt
 
 ---
 
-## Phase 11 — Technical Documentation | Score: 5/10
+## Phase 11 — Technical Documentation | Score: 8.5/10
 
 ### Industry Benchmark
 

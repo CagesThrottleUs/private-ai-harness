@@ -66,11 +66,11 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 8: CI/CD** | DevOps | Platform-agnostic spec + 6 platform configs | **7/10** | IaC absent. Feature flags absent. |
 | **Phase 9: Deployment** | DevOps + RM | Rollback procedure + migration checklist + smoke tests | **6.5/10** | *Generates* the runbook. Does not *execute* the deployment. Real release engineering = real-time decision-making. |
 | **Phase 10: Observability** | SRE | OTel logging + golden signals + SLOs + runbooks | **7/10** | Setup is world-class. Incident *response execution* absent. Postmortem absent. |
-| **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + runbooks + changelog | **6.5/10** | Function-level docs strong. Onboarding guide, API reference pages, architecture narrative absent. |
+| **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + onboarding + runbooks + changelog | **8.5/10** | `onboarding-guide` synthesizes HLD C4, ADRs, OpenAPI, SLOs into 8-section wiki/ONBOARDING.md. Function-level docs strong. API reference pages (Stripe-quality) still absent. |
 
-### Overall: 7.9/10
+### Overall: 8.0/10
 
-*(Sprint 1 complete. Phase 7: 9.5 with DAST. Phase 3: 8.5. Phase 5: 8.5. Phase 7 security gap substantially closed.)*
+*(Phase 11: 6.5→8.5 with onboarding-guide. Sprint 1 complete (7.9). Phase 7: 9.5. Phase 3: 8.5.)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 

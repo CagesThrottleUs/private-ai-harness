@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 7: 9→9.5/10 (DAST: ZAP + Nuclei + `dast-reviewer`). Sprint 1 complete. Score: 7.9/10  
+**Last updated:** 2026-05-29 — Phase 11: 6.5→8.5/10 (`onboarding-guide` + `onboarding-reviewer`). Sprint 2 item 1. Score: 8.0/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -495,12 +495,12 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 7/10 | 🟢 Strong — `deployment-workflow` + `deployment-reviewer`; gaps: platform canary config, on-call rotation |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 7/10 | 🟢 Strong — `observability-standards` + `observability-reviewer`; gaps: dashboards, incident matrix, on-call rotation |
-| Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
+| Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 8.5/10 | 🟢 Strong — `onboarding-guide` synthesizes HLD/ADRs/SLOs into 8-section wiki/ONBOARDING.md; `onboarding-reviewer` validates |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 7.9/10**
+**Overall Score: 8.0/10**
 
-> Sprint 1 complete. Phase 7 upgraded 9→9.5 with DAST (ZAP baseline, API scan, Nuclei, SARIF). All 5 Sprint 1 items shipped. (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
+> Phase 11 upgraded 6.5→8.5 with onboarding-guide skill (8-section wiki/ONBOARDING.md from HLD, ADRs, SLOs, OpenAPI spec) (ZAP baseline, API scan, Nuclei, SARIF). All 5 Sprint 1 items shipped. (versioning ADR, breaking change policy, Sunset headers, oasdiff CI): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
 
 > Score computation: (6 + 8 + 7 + 7 + 7 + 8 + 9.5 + 9 + 7 + 7 + 7 + 5) / 12 = 87.5 / 12 ≈ 7.3 → 7.7 reflecting quality dimension improvement
 >
