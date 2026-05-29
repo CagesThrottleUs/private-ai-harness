@@ -41,7 +41,7 @@ Stage only the files for one logical change, commit, then move on.
 ## What Never Goes In
 
 - "This commit does X", "I", "we", "now", "currently" — diff says what
-- "As requested by..." — use Co-authored-by trailer
+- "As requested by..." — BANNED FROM USING THIS!
 - AI attribution of any kind
 - Emoji (unless project requires)
 - File names when scope already says it
