@@ -116,6 +116,23 @@ Agent (ci-reviewer):
 
 Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
 
+**Also run `api-contract-reviewer` if API spec files were created or modified:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep -E "^api/|\.proto$|openapi\."
+```
+
+If spec files changed → dispatch `api-contract-reviewer` in parallel:
+
+```
+Agent (api-contract-reviewer):
+  SPEC_PATH: <api/openapi.yaml or proto/**/*.proto>
+  PROTOCOL: rest  # or grpc
+  SPEC_SOURCE_PATH: <matching .ai/specs/*.md>
+```
+
+Treat `api-contract-reviewer` Critical findings (breaking changes, missing auth, missing error responses) as blocking.
+
 **Also run `integration-test-reviewer` if integration test files were created or modified:**
 
 ```bash

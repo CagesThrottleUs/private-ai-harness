@@ -26,6 +26,7 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 | `observability-reviewer` | `/review observability` | When observability is set up or updated. Validates OTel logging, golden signals, SLO quality, alert design (symptom-based, burn rate), runbook completeness — 7 dimensions. Not in `/review all`. |
 | `deployment-reviewer` | `/review deployment` | When deployment artifacts are created. Validates rollback procedure, DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes — 6 dimensions. Not in `/review all`. |
 | `integration-test-reviewer` | `/review integration` | When integration tests are written. Validates no mocks at boundary, isolation (rollback), factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring — 7 dimensions. Not in `/review all`. |
+| `api-contract-reviewer` | `/review api` | When API spec is written or updated. Validates completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage, naming consistency — 7 dimensions. Not in `/review all`. Run before any handler implementation. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
 ---

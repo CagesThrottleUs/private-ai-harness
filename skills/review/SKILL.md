@@ -26,6 +26,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review observability` | Observability setup review (structured logging OTel compliance, golden signal coverage, SLO quality, alert design, runbook completeness) |
 | `/review deployment` | Deployment artifacts review (rollback procedure, DB migration safety, smoke test coverage, deployment runbook, release notes quality) |
 | `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
+| `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -46,6 +47,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `observability-reviewer` | Observability artifacts (`.ai/observability/`, `wiki/guides/alerts.md`, `wiki/guides/runbooks/`) | When observability is set up or updated — validates OTel logging compliance, golden signal coverage, SLO quality vs NFRs, alert design (symptom-based), runbook completeness. 7 dimensions. Not included in `/review all`. |
 | `deployment-reviewer` | Deployment artifacts (`.ai/deployment/`) | When deployment artifacts are created — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes quality. 6 dimensions. Not included in `/review all`. |
 | `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
+| `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -289,6 +291,29 @@ Note: `/review integration` is NOT included in `/review all`. Run from `integrat
 
 ---
 
+#### `/review api`
+
+Collect inputs:
+- **SPEC_PATH** — check `api/openapi.yaml`, `api/*.yaml`, `proto/**/*.proto`. Ask if ambiguous.
+- **PROTOCOL** — auto-detect: `.yaml`/`.json` = `rest`, `.proto` = `grpc`
+- **SPEC_SOURCE_PATH** — check `.ai/specs/` for matching spec (optional)
+- **HLD_PATH** — check `.ai/hld/` for matching HLD (optional)
+
+Dispatch `api-contract-reviewer` agent:
+```
+Agent (api-contract-reviewer):
+  SPEC_PATH: <api/openapi.yaml or proto/**/*.proto>
+  PROTOCOL: <rest | grpc>
+  SPEC_SOURCE_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+  HLD_PATH: <.ai/hld/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [api-contract-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review api` is NOT included in `/review all`. Run from `api-contract-first` skill before handler implementation, or from `finishing-a-development-branch` when API spec files are in the diff.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -368,6 +393,7 @@ These phrases trigger this skill automatically:
 | "review observability" / "check SLOs" / "review runbooks" / "check alerts" / "review my metrics" | `/review observability` |
 | "review deployment" / "check rollback" / "review my deploy plan" / "check migration safety" / "review release notes" | `/review deployment` |
 | "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
+| "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
 
 ---
 

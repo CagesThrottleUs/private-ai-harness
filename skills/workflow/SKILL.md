@@ -52,6 +52,8 @@ user-invocable: true
 | High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
 | SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
+| API contract (REST) | `api/openapi.yaml` | OpenAPI 3.1 spec — written before handler code |
+| API contract (gRPC) | `proto/<pkg>/v1/<service>.proto` | Protobuf service definition — written before service implementation |
 | Deployment artifacts | `.ai/deployment/YYYY-MM-DD-*.md` | Rollback procedure, smoke tests, deploy runbook, migration checklist |
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |

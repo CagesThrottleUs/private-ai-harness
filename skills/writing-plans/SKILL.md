@@ -152,6 +152,23 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
+## API Contract Gate
+
+**Before defining tasks for any HTTP endpoint or gRPC service:** invoke `api-contract-first` skill.
+
+The handler task must not appear in the plan until:
+1. The API spec (`api/openapi.yaml` or `proto/**/*.proto`) exists
+2. Spectral lint passes
+3. `api-contract-reviewer` passes (no Critical findings)
+4. Human approves the spec
+
+Reference the spec in every handler task:
+```markdown
+- [ ] Implement handler per spec: `api/openapi.yaml#paths/~1resources/get`
+```
+
+A plan task that says "write the GET /resources endpoint" without a spec reference is a plan failure.
+
 ## Plan Review Gate
 
 After the self-review, dispatch `plan-reviewer` agent before offering execution:

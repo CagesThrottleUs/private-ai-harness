@@ -431,3 +431,5 @@ After explicit human approval:
 3. Invoke `writing-plans` skill
 
 The HLD becomes the authoritative reference for implementation task design. If a `writing-plans` task cannot be traced to a component in the Container diagram, either add the component to the HLD or remove the task from the plan.
+
+**API surface note:** §5.1 defines the API surface conceptually. Before any handler task is defined in `writing-plans`, invoke `api-contract-first` skill to produce the formal OpenAPI 3.1 or `.proto` contract. The handler task references the spec — not the HLD — as its implementation contract.
