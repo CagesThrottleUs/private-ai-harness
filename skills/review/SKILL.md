@@ -28,6 +28,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
 | `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
 | `/review e2e` | E2E test review (critical journey coverage, selector quality, no hardcoded waits, test independence, POM, auth fixtures, CI integration) |
+| `/review versioning` | API versioning strategy review (strategy ADR, breaking change policy, Sunset headers, migration guides, CI detection) |
 | `/review sequence` | Sequence diagram review (flow coverage, error paths, auth boundary, arrow types, HLD participant alignment) |
 | `/review performance` | Load test review (NFR-aligned thresholds, smoke test present, realistic traffic, test type coverage, CI integration against staging) |
 
@@ -52,6 +53,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
 | `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
 | `e2e-reviewer` | E2E test files (`tests/e2e/**`) | When E2E tests are written — validates critical journey coverage, selector quality (semantic vs CSS), no hardcoded waits, test independence, POM structure, auth fixtures, CI integration. 7 dimensions. Not included in `/review all`. |
+| `api-versioning-reviewer` | Versioning artifacts (`wiki/architecture/*versioning*`) | When versioning strategy is defined — validates ADR, breaking change policy, Sunset headers, migration guide coverage, CI detection. 5 dimensions. Not in `/review all`. |
 | `sequence-diagram-reviewer` | Sequence diagram files (`.ai/lld/`) | When sequence diagrams are written — validates critical flow coverage, error paths per external call, sync vs async arrows, auth boundary placement, HLD alignment. 5 dimensions. Not included in `/review all`. |
 | `load-test-reviewer` | Performance test scripts (`tests/performance/**`) | When load tests are written — validates NFR-aligned thresholds, smoke test, realistic traffic mix, appropriate test types (soak for 99.9% availability), CI integration against staging. 6 dimensions. Not included in `/review all`. |
 
@@ -462,6 +464,7 @@ These phrases trigger this skill automatically:
 | "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
 | "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
 | "review e2e tests" / "check my playwright tests" / "review my E2E" / "are my e2e tests good" | `/review e2e` |
+| "review my API versioning" / "check the versioning strategy" / "review breaking changes" | `/review versioning` |
 | "review my sequence diagrams" / "check the sequence diagram" / "review flow diagrams" | `/review sequence` |
 | "review load tests" / "check my k6 script" / "review performance tests" / "check my thresholds" | `/review performance` |
 

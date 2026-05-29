@@ -21,6 +21,8 @@ Write the contract before the code. The API shape is the most important architec
 
 ## The Iron Law
 
+**Versioning gate:** For externally-facing APIs, confirm a versioning strategy ADR exists in `wiki/architecture/`. If not, invoke `api-versioning` skill first. The OpenAPI spec must reference the chosen versioning scheme.
+
 <HARD-GATE>
 Do NOT write a handler, controller, route, or gRPC service implementation before the API spec exists and has been reviewed. The spec defines the contract. The handler implements the contract. Writing the handler first inverts this — the API becomes whatever was convenient to implement, not whatever consumers need.
 </HARD-GATE>

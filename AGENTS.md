@@ -50,6 +50,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
+| `api-versioning` | `/api-versioning` | During api-contract-first or HLD for externally-facing APIs — produces versioning strategy ADR, breaking change policy, deprecation timeline with Sunset headers, migration guide template, CI oasdiff check; runs `api-versioning-reviewer` |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for flows crossing 3+ components — Mermaid sequenceDiagram with auth boundary, error paths, sync/async arrows, retry blocks; runs `sequence-diagram-reviewer` |
 | `review` | `/review` | Central entry point for all review types |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
@@ -103,6 +104,7 @@ Integration test agents (`integration-test-reviewer`) require `TEST_FILES`; `SPE
 API contract agents (`api-contract-reviewer`) require `SPEC_PATH` and `PROTOCOL`; `SPEC_SOURCE_PATH` and `HLD_PATH` optional.
 E2E test agents (`e2e-reviewer`) require `TEST_FILES`; `SPEC_PATH` optional.
 Load test agents (`load-test-reviewer`) require `SCRIPT_PATH`; `SPEC_PATH` and `SLO_PATH` optional.
+API versioning agents (`api-versioning-reviewer`) require `ADR_PATH` and `POLICY_PATH`; `OPENAPI_PATH` optional.
 Sequence diagram agents (`sequence-diagram-reviewer`) require `DIAGRAM_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
 Linter agents (`linter-reviewer`) require `PROJECT_ROOT` and `CHANGED_FILES`.
 See each `agents/<name>.md` for the full input contract.
@@ -139,6 +141,7 @@ See each `agents/<name>.md` for the full input contract.
 | `e2e-reviewer` | opus | Medium-high — "is this a critical journey?" requires product judgment, selector quality assessment requires Playwright internals knowledge, test independence detection requires understanding of test execution model | ✅ Correct |
 | `load-test-reviewer` | opus | High — threshold-to-NFR alignment requires reading both spec and script, appropriate test type selection (soak vs spike vs load) requires performance engineering knowledge, traffic modeling realism requires domain understanding | ✅ Correct |
 
+| `api-versioning-reviewer` | opus | High — breaking change policy completeness requires API design expertise, sunset header RFC 8594 compliance requires standards knowledge, migration guide adequacy requires consumer empathy | ✅ Correct |
 | `sequence-diagram-reviewer` | opus | High — "is this error path sufficient?" requires systems thinking, auth boundary placement requires security judgment, sync vs async distinction requires architecture knowledge | ✅ Correct |
 | `linter-reviewer` | sonnet | Mechanical — tool detection via manifest pattern matching, output-clean check is deterministic, suppression scan is regex. No architectural judgment required. First Sonnet review agent. | ✅ Correct |
 

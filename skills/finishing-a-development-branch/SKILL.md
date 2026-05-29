@@ -119,6 +119,7 @@ This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + secu
 |-----------------|-------|------------|
 | `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
 | `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
+| `wiki/architecture/*versioning*`, `wiki/guides/api-versioning*` | `api-versioning-reviewer` | `ADR_PATH`, `POLICY_PATH`, `OPENAPI_PATH` |
 | `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |
 | `tests/integration/` | `integration-test-reviewer` | `TEST_FILES`, `SPEC_PATH` |
 | `.ai/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
