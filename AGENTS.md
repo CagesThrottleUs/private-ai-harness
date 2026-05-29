@@ -69,9 +69,11 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance |
 | `language-expert-reviewer` | opus | Language-veteran review across 10 dimensions: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety. Supports C++, Rust, Python, TypeScript, Go, Java. |
 | `hld-reviewer` | opus | Pre-human HLD quality gate — validates C4 diagrams, technology selection, STRIDE threat model, failure modes, capacity planning, ADR completeness, spec coverage, and AWS Well-Architected alignment. Invoked by `high-level-design` skill before human review. |
+| `spec-quality-reviewer` | opus | Spec quality gate — validates falsifiability, TC coverage, TC honesty, error path ownership, consistency, and dependency declaration against SQLite/RFC 8446/DO-178C standards. Invoked by `spec-quality-gate` skill. |
 
 Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
 Design agents (`hld-reviewer`) require `HLD_PATH` and `SPEC_PATH`.
+Spec agents (`spec-quality-reviewer`) require `SPEC_PATH`.
 See each `agents/<name>.md` for the full input contract.
 
 ---

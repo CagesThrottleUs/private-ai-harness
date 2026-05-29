@@ -47,7 +47,7 @@ You MUST create a task for each of these items and complete them in order:
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
 6. **Write design doc** — save to `.ai/specs/YYYY-MM-DD-<topic>-design.md` using requirement format (see below); commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill; fix all FAIL items before proceeding
+8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill, which dispatches `spec-quality-reviewer` agent with fresh context; fix all FAIL items before proceeding
 9. **User reviews written spec** — ask user to review the spec file before proceeding
 10. **Transition to architecture or implementation** — for architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
 
@@ -228,7 +228,7 @@ After writing the spec document, check before running the formal quality gate:
 7. **Test Coverage Matrix:** Present and every REQ has at least one TC.
 8. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
 
-Fix inline, then invoke the `spec-quality-gate` skill for the formal pass.
+Fix inline, then invoke `spec-quality-gate` skill (which dispatches `spec-quality-reviewer` agent) for the formal pass.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
