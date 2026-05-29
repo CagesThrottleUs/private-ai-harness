@@ -58,7 +58,7 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 0: Business Context** | PM + EM | Business context doc with JTBD, metrics, compliance | **6/10** | Captures what human provides. Cannot generate product intuition or stakeholder relationships. |
 | **Phase 1: Requirements** | Sr Eng + PM | REQ-NNN spec with NFRs + RFC 2119 enforced | **8/10** | Structure is world-class. NFR target *accuracy* still requires human judgment. |
 | **Phase 2: HLD** | Staff/Principal | C4 diagrams + STRIDE + ADRs + capacity planning | **7/10** | Artifact is comprehensive; correctness depends on human architectural input. |
-| **Phase 3: LLD** | Sr Engineer | OpenAPI 3.1 / .proto spec + sequence diagrams | **8/10** | `sequence-diagram` skill + `sequence-diagram-reviewer`. Mermaid sequenceDiagram with auth, error paths, sync/async. ERD still absent. |
+| **Phase 3: LLD** | Sr Engineer | OpenAPI + sequence diagrams + versioning strategy | **8.5/10** | `sequence-diagram` + `api-versioning` (ADR, breaking change policy, Sunset headers RFC 8594, oasdiff CI). ERD still absent. |
 | **Phase 4: Task Distribution** | EM + Leads | Bite-sized plan with subagent dispatch | **7/10** | Good sprint analog. No dependency DAG, no velocity tracking. |
 | **Phase 5: Implementation** | ICs | TDD code + karpathy + linter gate + docs | **8.5/10** | Linter gate added (Ruff/Biome/golangci-lint/Clippy auto-detected, `linter-reviewer` Sonnet agent). 2025/2026 defect rate research applies to tools without this gate. |
 | **Phase 6: Code Review** | Sr/Staff | 6 specialist Opus reviewer agents | **9/10** | Exceeds typical 1-reviewer teams. Slight gap: codebase coherence across long history. |
@@ -68,9 +68,9 @@ Missing artifact = 0. Present but inferior = partial score.
 | **Phase 10: Observability** | SRE | OTel logging + golden signals + SLOs + runbooks | **7/10** | Setup is world-class. Incident *response execution* absent. Postmortem absent. |
 | **Phase 11: Documentation** | Tech Writers | Code docs + ADRs + runbooks + changelog | **6.5/10** | Function-level docs strong. Onboarding guide, API reference pages, architecture narrative absent. |
 
-### Overall: 7.6/10
+### Overall: 7.7/10
 
-*(Phase 3: 7→8 with sequence diagrams; Phase 5: 7.5→8.5 with linter gate)*
+*(Phase 3: 7→8.5: sequence diagrams + API versioning; Phase 5: 7.5→8.5: linter gate)*
 
 *(2026 research-calibrated — honest downward revision from 7.7)*
 
@@ -122,7 +122,12 @@ Each item is verified: does it have clear industry evidence, can an LLM do it we
 
 ---
 
-**T-03: API Versioning Strategy**
+**~~T-03: API Versioning Strategy~~** ✅ SHIPPED 2026-05-29
+- `api-versioning` skill + `api-versioning-reviewer` agent
+- Versioning ADR, breaking change policy, RFC 8594 Sunset headers, oasdiff CI detection
+- **Score impact achieved:** Phase 3: 8→8.5, Overall: 7.6→7.7
+
+**T-03 details (archived):**
 - **Evidence:** Stripe's API versioning is the industry standard — version pinned per customer, never breaking changes on existing consumers. Kubernetes resource versioning (v1alpha1 → v1beta1 → v1) is the CNCF standard. "Undetected API schema drift" is top-3 production incident cause (World Quality Report 2025). Current `api-contract-reviewer` detects breaking changes but there's no versioning *strategy* skill.
 - **LLM can do it:** Produce a versioning strategy ADR (semver policy, sunset timeline, migration guide template, header-based vs URL-path versioning decision). Reference Stripe/Kubernetes patterns with explicit trade-off analysis.
 - **Score impact:** Phase 3: toward 9
