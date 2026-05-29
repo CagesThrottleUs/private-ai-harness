@@ -21,6 +21,25 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review full` | Full project review (all dimensions, whole codebase) |
 | `/review all` | All PR-scoped agents in parallel (pr + spec + tests + security) |
 | `/review lang` | Language-expert review (10 language-specific dimensions — type system, UB, idioms, ownership, concurrency, etc.) |
+| `/review ci` | CI/CD pipeline review (stage completeness, security hygiene, coverage gate, artifact immutability, DORA readiness) |
+| `/review hld` | High-level design review (C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment) |
+| `/review observability` | Observability setup review (structured logging OTel compliance, golden signal coverage, SLO quality, alert design, runbook completeness) |
+| `/review deployment` | Deployment artifacts review (rollback procedure, DB migration safety, smoke test coverage, deployment runbook, release notes quality) |
+| `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
+| `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
+| `/review e2e` | E2E test review (critical journey coverage, selector quality, no hardcoded waits, test independence, POM, auth fixtures, CI integration) |
+| `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
+| `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
+| `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
+| `/review accessibility` | Accessibility test review (axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusion documentation) |
+| `/review versioning` | API versioning strategy review (strategy ADR, breaking change policy, Sunset headers, migration guides, CI detection) |
+| `/review sequence` | Sequence diagram review (flow coverage, error paths, auth boundary, arrow types, HLD participant alignment) |
+| `/review performance` | Load test review (NFR-aligned thresholds, smoke test present, realistic traffic, test type coverage, CI integration against staging) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -36,6 +55,25 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `security-reviewer` | PR diff | Any PR touching auth, input, data access, external comms, config. Always on new endpoints. |
 | `full-project-reviewer` | Entire codebase | Before releases, after major milestones, or for a holistic audit |
 | `language-expert-reviewer` | PR diff or full codebase | When deep language expertise matters: type system, UB, ownership, idioms, concurrency, error handling, performance — 10 dimensions, veteran-level. |
+| `ci-reviewer` | CI/CD config file | When CI config is created or modified — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, branch protection alignment. Not included in `/review all` (different artifact type). |
+| `hld-reviewer` | HLD document (`.ai/hld/`) | When HLD is written or updated — validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment. 10 dimensions. Not included in `/review all` (design artifact, not code diff). |
+| `observability-reviewer` | Observability artifacts (`.ai/observability/`, `wiki/guides/alerts.md`, `wiki/guides/runbooks/`) | When observability is set up or updated — validates OTel logging compliance, golden signal coverage, SLO quality vs NFRs, alert design (symptom-based), runbook completeness. 7 dimensions. Not included in `/review all`. |
+| `deployment-reviewer` | Deployment artifacts (`.ai/deployment/`) | When deployment artifacts are created — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes quality. 6 dimensions. Not included in `/review all`. |
+| `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
+| `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
+| `e2e-reviewer` | E2E test files (`tests/e2e/**`) | When E2E tests are written — validates critical journey coverage, selector quality (semantic vs CSS), no hardcoded waits, test independence, POM structure, auth fixtures, CI integration. 7 dimensions. Not included in `/review all`. |
+| `feature-flag-reviewer` | `wiki/guides/feature-flag-registry.md` | When feature flags are added or changed — naming conventions, registry completeness, CI hygiene check, safe defaults, cleanup queue. 5 dims. Not in `/review all`. |
+| `iac-reviewer` | `infra/` | When IaC is added or changed — pinned versions, remote state with locking, sensitive vars, environment separation, security scan, no secrets. 6 dims. Not in `/review all`. |
+| `database-erd-reviewer` | `.ai/lld/*-schema.md` | When ERD is written or updated — PKs, FK validity, cardinality, no float money, index strategy, design decisions. 6 dims. Not in `/review all`. |
+| `visual-regression-reviewer` | `tests/visual/` | When visual regression tests are written — screenshots on critical pages, animations off, baselines committed, masked dynamic content, pinned Docker. 5 dims. Not in `/review all`. |
+| `chaos-reviewer` | `tests/chaos/` | When chaos tests are written — steady state + hypothesis, scenarios match HLD failure modes, thresholds allow degradation, abort criteria, CI staging only. 5 dims. Not in `/review all`. |
+| `incident-response-reviewer` | `wiki/guides/incident-response.md` | When IR docs are created/updated — severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication. 5 dimensions. Not in `/review all`. |
+| `onboarding-reviewer` | `wiki/ONBOARDING.md` | When onboarding guide is written or updated — validates 8 required sections, dev setup commands, C4 diagram present, ADRs referenced, first contribution path complete, ops actionable. Not in `/review all`. |
+| `dast-reviewer` | CI config files (`*dast*.yml`, `.zap/`) | When DAST is configured — validates baseline on PRs, API scan on staging, severity gate, SARIF upload, authentication. 5 dimensions. Not in `/review all`. |
+| `accessibility-reviewer` | E2E test files (`tests/e2e/`) | When UI feature ships — validates axe-playwright on critical pages, correct WCAG tags, violations fail CI, documented exclusions. 4 dimensions. Not in `/review all`. |
+| `api-versioning-reviewer` | Versioning artifacts (`wiki/architecture/*versioning*`) | When versioning strategy is defined — validates ADR, breaking change policy, Sunset headers, migration guide coverage, CI detection. 5 dimensions. Not in `/review all`. |
+| `sequence-diagram-reviewer` | Sequence diagram files (`.ai/lld/`) | When sequence diagrams are written — validates critical flow coverage, error paths per external call, sync vs async arrows, auth boundary placement, HLD alignment. 5 dimensions. Not included in `/review all`. |
+| `load-test-reviewer` | Performance test scripts (`tests/performance/**`) | When load tests are written — validates NFR-aligned thresholds, smoke test, realistic traffic mix, appropriate test types (soak for 99.9% availability), CI integration against staging. 6 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -173,6 +211,196 @@ Output: [language-expert report — dimension scores + findings + priority actio
 
 ---
 
+#### `/review ci`
+
+Collect inputs:
+- **CI_CONFIG_PATH** — required. Auto-detect from: `.github/workflows/ci.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`. Ask if ambiguous.
+- **PIPELINE_SPEC_PATH** — optional. Check `.ai/ci/` for a `*pipeline-spec.md` file.
+
+Dispatch `ci-reviewer` agent:
+```
+Agent (ci-reviewer):
+  CI_CONFIG_PATH: <detected or provided path>
+  PIPELINE_SPEC_PATH: <.ai/ci/YYYY-MM-DD-pipeline-spec.md or omit if absent>
+  PROJECT_ROOT: .
+```
+
+Output: [ci-reviewer report — 8 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review ci` is NOT included in `/review all` because it reviews CI config files, not the application code diff. Run it separately when CI config is created or modified.
+
+---
+
+#### `/review hld`
+
+Collect inputs:
+- **HLD_PATH** — required. Check `.ai/hld/` for the most recent `*hld*.md` file. Ask if ambiguous.
+- **SPEC_PATH** — required. Check `.ai/specs/` for the matching spec.
+
+Dispatch `hld-reviewer` agent:
+```
+Agent (hld-reviewer):
+  HLD_PATH: <.ai/hld/YYYY-MM-DD-<feature>.md>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [hld-reviewer report — 10 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review hld` is NOT included in `/review all`. Design artifact, not code diff. Run from within `high-level-design` skill or manually when HLD is updated mid-implementation.
+
+---
+
+#### `/review observability`
+
+Collect inputs:
+- **SLO_PATH** — check `.ai/observability/` for most recent `*slos*.md`. Ask if ambiguous.
+- **ALERTS_PATH** — check `wiki/guides/alerts.md`.
+- **RUNBOOK_DIR** — check `wiki/guides/runbooks/`.
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (for NFR cross-check).
+
+Dispatch `observability-reviewer` agent:
+```
+Agent (observability-reviewer):
+  SLO_PATH: <.ai/observability/YYYY-MM-DD-slos.md>
+  ALERTS_PATH: wiki/guides/alerts.md
+  RUNBOOK_DIR: wiki/guides/runbooks/
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [observability-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review observability` is NOT included in `/review all`. Reviews observability artifacts, not code diff. Run from within `observability-standards` skill or manually when observability setup is updated.
+
+---
+
+#### `/review deployment`
+
+Collect inputs:
+- **ROLLBACK_PATH** — check `.ai/deployment/` for `*rollback*.md`
+- **SMOKE_TEST_PATH** — check `.ai/deployment/` for `*smoke*.md`
+- **RUNBOOK_PATH** — check `.ai/deployment/` for `*runbook*.md` or `*deploy*.md`
+- **MIGRATION_CHECKLIST_PATH** — check `.ai/deployment/` for `*migration*.md` (omit if no DB changes)
+- **SPEC_PATH** — check `.ai/specs/` for matching spec
+
+Dispatch `deployment-reviewer` agent:
+```
+Agent (deployment-reviewer):
+  ROLLBACK_PATH: <.ai/deployment/YYYY-MM-DD-rollback.md>
+  SMOKE_TEST_PATH: <.ai/deployment/YYYY-MM-DD-smoke-tests.md>
+  RUNBOOK_PATH: <.ai/deployment/YYYY-MM-DD-deploy-runbook.md>
+  MIGRATION_CHECKLIST_PATH: <.ai/deployment/YYYY-MM-DD-migration.md>  // omit if no DB changes
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [deployment-reviewer report — 6 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review deployment` is NOT included in `/review all`. Invoked by `deployment-workflow` skill or manually when deployment artifacts are created.
+
+---
+
+#### `/review integration`
+
+Collect inputs:
+- **TEST_FILES** — glob to integration test files. Auto-detect: `tests/integration/**`, `test/integration/**`, `**/*_integration_test*`
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (optional but recommended)
+
+Dispatch `integration-test-reviewer` agent:
+```
+Agent (integration-test-reviewer):
+  TEST_FILES: <detected glob>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [integration-test-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review integration` is NOT included in `/review all`. Run from `integration-testing` skill or from `finishing-a-development-branch` when integration tests are in the diff.
+
+---
+
+#### `/review api`
+
+Collect inputs:
+- **SPEC_PATH** — check `api/openapi.yaml`, `api/*.yaml`, `proto/**/*.proto`. Ask if ambiguous.
+- **PROTOCOL** — auto-detect: `.yaml`/`.json` = `rest`, `.proto` = `grpc`
+- **SPEC_SOURCE_PATH** — check `.ai/specs/` for matching spec (optional)
+- **HLD_PATH** — check `.ai/hld/` for matching HLD (optional)
+
+Dispatch `api-contract-reviewer` agent:
+```
+Agent (api-contract-reviewer):
+  SPEC_PATH: <api/openapi.yaml or proto/**/*.proto>
+  PROTOCOL: <rest | grpc>
+  SPEC_SOURCE_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+  HLD_PATH: <.ai/hld/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [api-contract-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review api` is NOT included in `/review all`. Run from `api-contract-first` skill before handler implementation, or from `finishing-a-development-branch` when API spec files are in the diff.
+
+---
+
+#### `/review e2e`
+
+Collect inputs:
+- **TEST_FILES** — glob to E2E test files. Auto-detect: `tests/e2e/**/*.spec.ts`, `e2e/**/*.spec.*`
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (optional)
+
+Dispatch `e2e-reviewer` agent:
+```
+Agent (e2e-reviewer):
+  TEST_FILES: <tests/e2e/**/*.spec.ts>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [e2e-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review e2e` is NOT included in `/review all`. Run from `e2e-testing` skill or from `finishing-a-development-branch` when E2E tests are in the diff.
+
+---
+
+#### `/review sequence`
+
+Collect inputs:
+- **DIAGRAM_PATH** — check `.ai/lld/` for `*sequences*.md`
+- **HLD_PATH** — check `.ai/hld/` for matching HLD (optional)
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (optional)
+
+Dispatch `sequence-diagram-reviewer` agent:
+```
+Agent (sequence-diagram-reviewer):
+  DIAGRAM_PATH: <.ai/lld/YYYY-MM-DD-<feature>-sequences.md>
+  HLD_PATH: <.ai/hld/YYYY-MM-DD-<feature>.md>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [sequence-diagram-reviewer report — 5 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: Not in `/review all`. Run from `sequence-diagram` skill or from `finishing-a-development-branch` when `.ai/lld/` files are in the diff.
+
+---
+
+#### `/review performance`
+
+Collect inputs:
+- **SCRIPT_PATH** — check `tests/performance/` for `*.js`, `*.py` (Locust), `*.scala` (Gatling)
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (for NFR cross-check)
+- **SLO_PATH** — check `.ai/observability/` for SLO document
+
+Dispatch `load-test-reviewer` agent:
+```
+Agent (load-test-reviewer):
+  SCRIPT_PATH: <tests/performance/load-test.js>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+  SLO_PATH: <.ai/observability/YYYY-MM-DD-slos.md>
+```
+
+Output: [load-test-reviewer report — 6 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review performance` is NOT included in `/review all`. Run from `load-testing` skill or from `finishing-a-development-branch` when performance test files are in the diff.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -247,6 +475,61 @@ These phrases trigger this skill automatically:
 | "full review" / "audit the codebase" | `/review full` |
 | "review everything" / "full suite" | `/review all` |
 | "language review" / "C++ review" / "Rust review" / "expert review" / "check idioms" / "review against standard" | `/review lang` |
+| "review my pipeline" / "check CI config" / "review CI" / "check my ci" / "review the pipeline" | `/review ci` |
+| "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |
+| "review observability" / "check SLOs" / "review runbooks" / "check alerts" / "review my metrics" | `/review observability` |
+| "review deployment" / "check rollback" / "review my deploy plan" / "check migration safety" / "review release notes" | `/review deployment` |
+| "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
+| "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
+| "review e2e tests" / "check my playwright tests" / "review my E2E" / "are my e2e tests good" | `/review e2e` |
+| "review feature flags" / "check flag registry" / "review flags" / "check feature flag setup" | `/review flags` |
+| "review terraform" / "check IaC" / "review infrastructure code" / "check infra" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` |
+| "review the ERD" / "check the schema" / "review database design" / "check the entity diagram" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` |
+| "review visual regression" / "check screenshot tests" / "review VRT" / "check visual tests" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` |
+| "review chaos tests" / "check chaos engineering" / "review resilience tests" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` |
+| "review incident response" / "check postmortem template" / "review IR process" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| `/review incident` |
+| "review the onboarding guide" / "check ONBOARDING.md" / "is the onboarding guide complete" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
+| `/review onboarding` |
+| "review DAST" / "check ZAP config" / "review security scan" / "check dynamic security" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
+| `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
+| `/review dast` |
+| "review accessibility tests" / "check WCAG" / "check a11y" / "accessibility check" | `/review flags` | Feature flag review (naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue) |
+| `/review iac` | IaC configuration review (provider versions pinned, remote state+locking, sensitive variables, environment separation, tfsec scan, no secrets in code) |
+| `/review schema` | Database ERD review (entities with PKs, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions) |
+| `/review visual` | Visual regression test review (screenshots on critical pages, animations disabled, baselines in git, dynamic content masked, pinned Docker CI) |
+| `/review chaos` | Chaos engineering review (steady state/hypothesis, HLD failure mode alignment, graceful degradation thresholds, abort criteria, staging CI only) |
+| `/review incident` | Incident response docs review (severity matrix, IC role, postmortem template 7 sections, MTTD/MTTR targets) |
+| `/review onboarding` | Onboarding guide review (8 required sections, executable dev setup, C4 diagram, ADR references, harness workflow, actionable ops section) |
+| `/review dast` | DAST configuration review (ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth configured) |
+| `/review accessibility` |
+| "review my API versioning" / "check the versioning strategy" / "review breaking changes" | `/review versioning` |
+| "review my sequence diagrams" / "check the sequence diagram" / "review flow diagrams" | `/review sequence` |
+| "review load tests" / "check my k6 script" / "review performance tests" / "check my thresholds" | `/review performance` |
 
 ---
 

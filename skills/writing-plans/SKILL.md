@@ -152,9 +152,48 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
+## Sequence Diagram Gate
+
+**Before defining tasks for any flow crossing 3+ components:** confirm that `.ai/lld/YYYY-MM-DD-<feature>-sequences.md` exists. If absent and the flow has auth, async, or retry behavior → invoke `sequence-diagram` skill.
+
+Sequence diagrams answer "what does the implementer do when the external service times out?" — a question that cannot be answered from the Container diagram alone.
+
+## API Contract Gate
+
+**Before defining tasks for any HTTP endpoint or gRPC service:** invoke `api-contract-first` skill.
+
+The handler task must not appear in the plan until:
+1. The API spec (`api/openapi.yaml` or `proto/**/*.proto`) exists
+2. Spectral lint passes
+3. `api-contract-reviewer` passes (no Critical findings)
+4. Human approves the spec
+
+Reference the spec in every handler task:
+```markdown
+- [ ] Implement handler per spec: `api/openapi.yaml#paths/~1resources/get`
+```
+
+A plan task that says "write the GET /resources endpoint" without a spec reference is a plan failure.
+
+## Plan Review Gate
+
+After the self-review, dispatch `plan-reviewer` agent before offering execution:
+
+```
+Agent(plan-reviewer, {
+  PLAN_PATH: ".ai/plans/YYYY-MM-DD-<feature>.md",
+  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
+  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md"  // omit if non-architectural
+})
+```
+
+Fix all **Critical** findings before offering execution. **Important** findings should be fixed but are not blocking. **Advisory** findings may be deferred.
+
+The plan-reviewer runs with fresh context — no brainstorming or spec history. If it finds spec coverage gaps or type inconsistencies you missed in self-review, fix them before dispatching to a subagent.
+
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After plan-reviewer passes, offer execution choice:
 
 **"Plan complete and saved to `.ai/plans/<filename>.md`. Two execution options:**
 

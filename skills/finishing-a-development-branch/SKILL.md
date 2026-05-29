@@ -76,6 +76,40 @@ Stop. Don't proceed to Step 1.5.
 
 **If tests pass:** Continue to Step 1.5.
 
+### Step 1: Performance, E2E, and Deployment Artifacts Check
+
+Before running the review gate, verify required artifacts exist.
+
+**Load tests** — required when spec contains performance NFRs (latency, throughput, availability):
+```bash
+ls tests/performance/*.js 2>/dev/null | wc -l
+```
+If zero load tests AND spec has NFR table → invoke `load-testing` skill first.
+
+**Onboarding guide** — required on first production release or after major HLD changes:
+```bash
+# Check if guide exists and is recent (< 6 months old)
+[ -f wiki/ONBOARDING.md ] && find wiki/ONBOARDING.md -mtime -180 | grep -q . || echo "NEEDS UPDATE"
+```
+If missing or stale AND this is a significant release → invoke `onboarding-guide` skill.
+
+**E2E tests** — required for any feature with user-facing behavior:
+```bash
+ls tests/e2e/**/*.spec.ts 2>/dev/null | wc -l
+```
+If zero E2E tests AND feature has user-facing behavior → invoke `e2e-testing` skill first.
+
+**Deployment artifacts** — required for any feature changing user-facing behavior:
+
+```bash
+ls .ai/deployment/YYYY-MM-DD-rollback.md .ai/deployment/YYYY-MM-DD-smoke-tests.md .ai/deployment/YYYY-MM-DD-deploy-runbook.md 2>/dev/null
+```
+
+**If deployment artifacts are absent AND this branch changes user-facing behavior, endpoints, or DB schema:**
+Invoke `deployment-workflow` skill first. Do NOT proceed to review gate without deployment artifacts.
+
+**If documentation-only or config-only change:** skip.
+
 ### Step 1.5: Review Gate
 
 Run `/review all` before presenting merge/PR options. All four agents run in parallel.
@@ -85,6 +119,31 @@ Run `/review all` before presenting merge/PR options. All four agents run in par
 ```
 
 This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
+
+**Dispatch additional reviewers** for changed artifact types — run in parallel with `/review all`:
+
+| If diff contains | Agent | Key inputs |
+|-----------------|-------|------------|
+| `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
+| `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
+| `tests/visual/` | `visual-regression-reviewer` | `TEST_FILES`, `SNAPSHOT_DIR` |
+| `tests/chaos/` | `chaos-reviewer` | `TEST_FILES`, `HLD_PATH` |
+| `.*github/workflows.*dast.*\.yml`, `.zap/` | `dast-reviewer` | `CI_CONFIG_PATH`, `OPENAPI_PATH` |
+| `wiki/guides/incident-response.md`, `wiki/guides/postmortem-template.md` | `incident-response-reviewer` | `PROCESS_PATH`, `POSTMORTEM_PATH` |
+| `wiki/ONBOARDING.md` | `onboarding-reviewer` | `ONBOARDING_PATH`, `HLD_PATH` |
+| `wiki/architecture/*versioning*`, `wiki/guides/api-versioning*` | `api-versioning-reviewer` | `ADR_PATH`, `POLICY_PATH`, `OPENAPI_PATH` |
+| `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |
+| `tests/integration/` | `integration-test-reviewer` | `TEST_FILES`, `SPEC_PATH` |
+| `.ai/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
+| `.ai/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
+| `.ai/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
+| `tests/e2e/` | `e2e-reviewer` + `accessibility-reviewer` | `TEST_FILES`, `SPEC_PATH`, `BUSINESS_CONTEXT_PATH` |
+| `wiki/guides/feature-flag-registry.md` | `feature-flag-reviewer` | `REGISTRY_PATH`, `CODE_PATH` |
+| `infra/` | `iac-reviewer` | `IAC_DIR`, `TOOL` |
+| `.ai/lld/*-schema.md` | `database-erd-reviewer` | `ERD_PATH`, `SPEC_PATH` |
+| `.ai/lld/*-sequences.md` | `sequence-diagram-reviewer` | `DIAGRAM_PATH`, `HLD_PATH`, `SPEC_PATH` |
+
+Run: `git diff <base-branch>...HEAD --name-only` to detect which artifact types changed. Dispatch matching reviewers in parallel. All Critical findings from all agents block merge.
 
 **If any agent returns Critical:** Stop. Do not present merge/PR options.
 ```

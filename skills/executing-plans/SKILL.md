@@ -30,7 +30,10 @@ For each task:
 4. Before committing: run the `design-principles` **Review Checklist** — catch violations before they land
 5. Before committing: apply `karpathy` lens — no speculative code, surgical changes only, every changed line traces to the spec
 6. Before committing: apply `code-documentation` to every public construct written — full docstring, `@spec_id`, `@req_id`
-6. Mark as completed
+7. Run linter gate: detect language from manifest, run format check + lint + type check. Zero issues required. Dispatch `linter-reviewer` agent to validate.
+8. If task creates a component with external dependencies (DB, queue, cache, external HTTP): invoke `integration-testing` skill — write Testcontainers-based integration tests alongside unit tests
+8. If task created a new API endpoint or service component: invoke `observability-standards` — instrument logging, metrics, SLOs, alerts, runbooks before this endpoint is deployed
+9. Mark as completed
 
 ### Step 3: Complete Development
 
@@ -74,3 +77,5 @@ After all tasks complete and verified:
 - **superpowers:design-principles** - Review Checklist run before each task commit (DRY, KISS, YAGNI, SOLID, GoF)
 - **superpowers:karpathy** - Anti-pattern lens run before each task commit (no speculation, surgical changes, verifiable criteria)
 - **superpowers:code-documentation** - Document every public construct before committing (spec_id, req_id, full docstring)
+- **integration-testing** - After any task creating a component with external dependencies — Testcontainers-based integration tests alongside unit tests
+- **observability-standards** - After any task that creates an API endpoint or service component — instrument logging, golden signal metrics, SLOs, alert rules, and runbooks

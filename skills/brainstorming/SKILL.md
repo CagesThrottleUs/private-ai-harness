@@ -36,20 +36,34 @@ Do NOT invoke any implementation skill, write any code, scaffold any project, or
 
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
 
+## Pre-Condition: Business Context Document
+
+<HARD-GATE>
+Before asking any design questions, check if a business context document exists:
+
+```bash
+ls .ai/business-context/*.md 2>/dev/null
+```
+
+If absent AND this is a feature/enhancement (not a bug fix or config change): stop and invoke `business-context-intake` skill. Do NOT proceed with brainstorming without a completed business context document. The LLM cannot know the user's business context — a human must provide it.
+
+If present: read it. Every design question must be anchored to the problem, persona, and success metrics in that document.
+</HARD-GATE>
+
 ## Checklist
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context** — check files, docs, recent commits; read `.ai/business-context/` if exists
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
 6. **Write design doc** — save to `.ai/specs/YYYY-MM-DD-<topic>-design.md` using requirement format (see below); commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
-8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill; fix all FAIL items before proceeding
+8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill, which dispatches `spec-quality-reviewer` agent with fresh context; fix all FAIL items before proceeding
 9. **User reviews written spec** — ask user to review the spec file before proceeding
-10. **Transition to implementation** — invoke writing-plans skill to create implementation plan
+10. **Transition to architecture or implementation** — for architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
 
 ## Process Flow
 
@@ -86,9 +100,31 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
+**The terminal state is invoking high-level-design (for architectural changes) or writing-plans (for non-architectural changes).** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The only valid next skills after brainstorming are `high-level-design` and `writing-plans`.
 
 ## The Process
+
+**Using AskUserQuestion for clarifying questions:**
+
+When asking multiple-choice questions, use the `AskUserQuestion` tool — it presents options as a structured UI rather than a free-text prompt. Use it when:
+- There are 2-4 discrete options (approach A vs B vs C)
+- The answer determines a significant branch in the design
+
+Example:
+```
+AskUserQuestion({
+  questions: [{
+    question: "Which storage approach fits best?",
+    header: "Storage",
+    options: [
+      { label: "PostgreSQL", description: "Relational, ACID, good for structured data" },
+      { label: "Redis", description: "In-memory, fast reads, good for ephemeral state" },
+    ]
+  }]
+})
+```
+
+For open-ended questions ("describe your problem"), continue using prose — the tool is for structured choices, not free-form input.
 
 **Understanding the idea:**
 
@@ -192,6 +228,49 @@ One TC per AC minimum. Each TC must state inputs and exact expected output.
 
 ---
 
+## Non-Functional Requirements
+
+*NFRs define HOW the system must behave, not WHAT it does. Each entry MUST have a numeric target — "fast" is not an NFR, "p99 < 200ms under 500 RPS" is.*
+
+*Use RFC 2119 enforceability (IETF RFC 2119): **MUST** = absolute requirement (any conforming implementation satisfies it), **SHOULD** = strongly recommended (deviation requires explicit justification), **MAY** = optional.*
+
+*Mark any row "N/A" with a one-line rationale if genuinely not applicable. A blank row = not considered = spec-quality-gate FAIL.*
+
+### Performance
+
+| NFR | Enforceability | Target | Measurement | Load condition |
+|-----|---------------|--------|-------------|---------------|
+| Response time (p99) | MUST | < [N]ms | APM/histogram | [N] concurrent users, normal load |
+| Response time (p95) | SHOULD | < [N]ms | APM/histogram | Normal load |
+| Throughput (sustained) | MUST | [N] RPS | Load test | Normal load |
+| Throughput (peak) | SHOULD handle | [N] RPS | Load test | Peak load |
+| Availability | MUST | [99.X%] | Uptime monitoring | 30-day rolling |
+
+### Security
+
+| NFR | Enforceability | Target |
+|-----|---------------|--------|
+| Authentication | MUST | [JWT RS256 / OAuth2 / API key / mTLS / N/A] |
+| Authorization | MUST | [RBAC / ABAC / public endpoint] |
+| Encryption at rest | MUST/N/A | [AES-256 via managed key / N/A — reason] |
+| Encryption in transit | MUST | TLS 1.3 minimum |
+| Compliance | MUST | [GDPR / PCI DSS / HIPAA / SOC 2 / None — explicit response required] |
+
+### Scalability
+
+| NFR | Enforceability | Target |
+|-----|---------------|--------|
+| Concurrent users | MUST handle | [N] concurrent users at p99 target |
+| Data volume ceiling | SHOULD handle | [N] records at target latency |
+| Horizontal scalability | MAY | [stateless / requires session affinity] |
+
+*Performance NFRs feed directly into:*
+- *HLD §8 (capacity planning) — scaling triggers and thresholds*
+- *observability-standards — SLO targets*
+- *load-testing — k6 threshold values (threshold must match NFR target)*
+
+---
+
 ## Assumptions
 
 | ID | Assumption | Impact if Wrong | Verified By |
@@ -225,10 +304,11 @@ After writing the spec document, check before running the formal quality gate:
 4. **Ambiguity check:** Any requirement interpretable two different ways? Pick one, state it.
 5. **Requirement completeness:** Every REQ-NNN has Statement, Acceptance Criteria, Dependencies, Test Cases.
 6. **Emotional language scan:** Any "intuitive", "clean", "fast", "good"? Replace with measurable equivalents.
+7. **NFR completeness:** Does the `## Non-Functional Requirements` section exist? Are performance, security, and scalability tables filled with numeric targets? Are any cells "TBD" or blank? Is compliance explicitly addressed? If any cell is blank or "TBD", fix it now — spec-quality-gate will fail.
 7. **Test Coverage Matrix:** Present and every REQ has at least one TC.
 8. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
 
-Fix inline, then invoke the `spec-quality-gate` skill for the formal pass.
+Fix inline, then invoke `spec-quality-gate` skill (which dispatches `spec-quality-reviewer` agent) for the formal pass.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
@@ -239,8 +319,8 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 **Implementation:**
 
-- Invoke the writing-plans skill to create a detailed implementation plan
-- Do NOT invoke any other skill. writing-plans is the next step.
+- For architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. It produces C4 diagrams, technology selection records, threat model, failure modes, capacity planning, and ADRs before `writing-plans` activates.
+- For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
 
 ## Key Principles
 

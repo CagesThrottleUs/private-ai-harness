@@ -143,11 +143,24 @@ npm test / cargo test / pytest / go test ./...
 
 **If tests pass:** Report ready.
 
+### Step 5: CI Pipeline Check
+
+After baseline passes, check if a CI config already exists:
+
+```bash
+ls .github/workflows/*.yml .gitlab-ci.yml Jenkinsfile .circleci/config.yml azure-pipelines.yml bitbucket-pipelines.yml 2>/dev/null
+```
+
+**If no CI config found:** Invoke `ci-pipeline-setup` skill immediately. CI must exist before the first feature commit, not as a pre-merge afterthought.
+
+**If CI config exists:** Skip. No action needed.
+
 ### Report
 
 ```
 Worktree ready at <full-path>
 Tests passing (<N> tests, 0 failures)
+CI: [found at <path> | ci-pipeline-setup invoked]
 Ready to implement <feature-name>
 ```
 
