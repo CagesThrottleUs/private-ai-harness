@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 3: 4→7/10 (`api-contract-first` + `api-contract-reviewer`). Overall: 4.0→6.7/10  
+**Last updated:** 2026-05-29 — Phase 7: 6→8/10 (`e2e-testing` + `e2e-reviewer`, 3 of 4 test layers). Overall: 4.0→6.9/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -367,7 +367,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 7 — Integration & Testing | Score: 6/10
+## Phase 7 — Integration & Testing | Score: 8/10
 
 ### Industry Benchmark
 
@@ -385,11 +385,11 @@ Each phase section has five parts:
 
 **Microsoft (FAANG):** Engineering Fundamentals Playbook requires E2E tests for every critical user journey. "The main branch should always be shippable" — which requires E2E tests verifying the critical paths in CI.
 
-### Harness Score: 6/10
+### Harness Score: 8/10
 
-**Department produces (QA role):** Unit + integration + E2E + performance tests, coverage gate enforced. **Harness produces:** Unit test suite (TDD-enforced) + integration test suite (Testcontainers real dependencies, transaction rollback isolation, factory pattern, Pact contract tests). E2E and performance layers still absent. **Verdict:** Partially distinguishable — 2 of 4 test layers present.
+**Department produces (QA role):** Unit + integration + E2E + performance tests, coverage gate enforced. **Harness produces:** Unit test suite (TDD-enforced) + integration test suite (Testcontainers, `integration-test-reviewer`) + E2E test suite (Playwright, POM, auth fixtures, `e2e-reviewer`, runs against staging post-deploy in CI). Performance layer absent. **Verdict:** Largely indistinguishable — 3 of 4 test layers present.
 
-`test-driven-development` enforces TDD for unit tests. `integration-testing` adds Testcontainers-based integration tests (Python/Go/TypeScript/Java/Rust) with transaction rollback isolation, factory pattern, and Pact consumer-driven contracts. `test-quality-reviewer` validates both layers. `integration-test-reviewer` validates no mocks at boundary. Remaining absent: E2E test layer and performance test layer.
+`test-driven-development` + `integration-testing` + `e2e-testing` cover three layers. `e2e-testing` targets critical user journeys only (5-10 per feature) — not every page. Per Microsoft Engineering Fundamentals: E2E tests for every critical user journey, main branch always shippable. Remaining absent: performance test layer (load testing validating NFR targets).
 
 ### Precise Gaps
 
@@ -782,7 +782,7 @@ Performance is not addressed at any phase.
 | ✅ **P1 CLOSED** | ~~No API contract first~~ | `api-contract-first` skill + `api-contract-reviewer` agent | During `writing-plans`, before handler tasks — **shipped 2026-05-29** |
 | **P2** | No business context intake | `business-context-intake` (new) | Before `brainstorming` |
 | **P2** | No performance by design | Enhance HLD + `load-testing` (new) | HLD + `finishing-a-development-branch` |
-| **P2** | No E2E tests | `e2e-testing` (new) | Before `finishing-a-development-branch` |
+| ✅ **P2 CLOSED** | ~~No E2E tests~~ | `e2e-testing` skill + `e2e-reviewer` agent | Before `finishing-a-development-branch` — **shipped 2026-05-29** |
 | **P2** | No runbooks | Enhance `observability-standards` | During `observability-standards` |
 | **P3** | Language-specific linting | Enhance `verification-before-completion` | Per task completion |
 | **P3** | No task dependency graph | Enhance `writing-plans` format | Plan authoring |
@@ -880,21 +880,22 @@ pr-creator → PR opened
 - After Observability: 5.5/10
 - After Deployment: 6.1/10
 - After Integration Testing: 6.4/10
-- After API Contract First: **6.7/10**
+- After API Contract First: 6.7/10
+- After E2E Testing: **6.9/10**
 
 **What was shipped (2026-05-29):**
 - Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
-- Phase 3 (LLD): **4→7/10** — `api-contract-first` + `api-contract-reviewer`. OpenAPI 3.1/gRPC spec before handler, Spectral lint, Prism mock, hard gate in `writing-plans`.
-- Phase 7 (Testing): **3→6/10** — `integration-testing` + `integration-test-reviewer`
+- Phase 3 (LLD): **4→7/10** — `api-contract-first` + `api-contract-reviewer`
+- Phase 7 (Testing): **3→8/10** — `integration-testing` + `e2e-testing`. 3 of 4 test layers. Playwright, POM, auth fixtures, staging CI job.
 - Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer`
 - Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`
 - Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`
 
-**What remains (P2 gaps):**
-- Phase 0 (Business Context): 2/10 — no PRD/business-context-intake skill
-- Phase 1 (Requirements): 6/10 — NFRs not enforced in spec template
-- Phase 7 (Testing): 6/10 — E2E test layer and performance test layer absent
-- Quality: performance by design (3/10), security at design time (6/10)
+**What remains:**
+- Phase 0 (Business Context): 2/10 — `business-context-intake` skill (P2)
+- Phase 1 (Requirements): 6/10 — NFR enforcement (P1 enhancement)
+- Phase 7 (Testing): 8/10 — performance test layer (`load-testing` P2)
+- Quality: performance by design (3/10)
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
