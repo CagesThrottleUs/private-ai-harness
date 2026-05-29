@@ -33,6 +33,8 @@ Default: **k6**. All templates below are k6. Locust/Gatling templates available 
 
 ## When to Use
 
+**See also:** `chaos-engineering` skill — extends load testing with fault injection scenarios for services with resilience NFRs (circuit breakers, retries, graceful degradation).
+
 **Required** when the spec has numeric performance NFRs: latency targets, throughput targets, availability targets, concurrent user ceilings.
 
 **Skip** when: spec has no NFR section, internal-only change, bug fix, utility function with no user-facing load.
