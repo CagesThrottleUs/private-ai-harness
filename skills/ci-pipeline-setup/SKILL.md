@@ -25,6 +25,8 @@ Generate a CI/CD pipeline that gates every merge — before any feature code exi
 - No CI configuration exists in the repository yet
 - Existing CI configuration is missing required stages (lint, coverage gate, security scan)
 
+**See also:** `infrastructure-as-code` skill — generates the `infra/` Terraform structure and adds `terraform plan` + `tfsec` CI jobs. Run `infrastructure-as-code` before `ci-pipeline-setup` if the feature needs new infrastructure.
+
 **Skip if:** a comprehensive CI pipeline already exists and passes `ci-reviewer` with no Critical findings.
 
 **Infer + confirm:**
