@@ -21,6 +21,8 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review full` | Full project review (all dimensions, whole codebase) |
 | `/review all` | All PR-scoped agents in parallel (pr + spec + tests + security) |
 | `/review lang` | Language-expert review (10 language-specific dimensions — type system, UB, idioms, ownership, concurrency, etc.) |
+| `/review ci` | CI/CD pipeline review (stage completeness, security hygiene, coverage gate, artifact immutability, DORA readiness) |
+| `/review hld` | High-level design review (C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -36,6 +38,8 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `security-reviewer` | PR diff | Any PR touching auth, input, data access, external comms, config. Always on new endpoints. |
 | `full-project-reviewer` | Entire codebase | Before releases, after major milestones, or for a holistic audit |
 | `language-expert-reviewer` | PR diff or full codebase | When deep language expertise matters: type system, UB, ownership, idioms, concurrency, error handling, performance — 10 dimensions, veteran-level. |
+| `ci-reviewer` | CI/CD config file | When CI config is created or modified — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, branch protection alignment. Not included in `/review all` (different artifact type). |
+| `hld-reviewer` | HLD document (`.ai/hld/`) | When HLD is written or updated — validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment. 10 dimensions. Not included in `/review all` (design artifact, not code diff). |
 
 ---
 
@@ -173,6 +177,45 @@ Output: [language-expert report — dimension scores + findings + priority actio
 
 ---
 
+#### `/review ci`
+
+Collect inputs:
+- **CI_CONFIG_PATH** — required. Auto-detect from: `.github/workflows/ci.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`. Ask if ambiguous.
+- **PIPELINE_SPEC_PATH** — optional. Check `.ai/ci/` for a `*pipeline-spec.md` file.
+
+Dispatch `ci-reviewer` agent:
+```
+Agent (ci-reviewer):
+  CI_CONFIG_PATH: <detected or provided path>
+  PIPELINE_SPEC_PATH: <.ai/ci/YYYY-MM-DD-pipeline-spec.md or omit if absent>
+  PROJECT_ROOT: .
+```
+
+Output: [ci-reviewer report — 8 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review ci` is NOT included in `/review all` because it reviews CI config files, not the application code diff. Run it separately when CI config is created or modified.
+
+---
+
+#### `/review hld`
+
+Collect inputs:
+- **HLD_PATH** — required. Check `.ai/hld/` for the most recent `*hld*.md` file. Ask if ambiguous.
+- **SPEC_PATH** — required. Check `.ai/specs/` for the matching spec.
+
+Dispatch `hld-reviewer` agent:
+```
+Agent (hld-reviewer):
+  HLD_PATH: <.ai/hld/YYYY-MM-DD-<feature>.md>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [hld-reviewer report — 10 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review hld` is NOT included in `/review all`. It reviews a design artifact, not the code diff. Run it when an HLD is written or modified — typically from within `high-level-design` skill, or manually if the HLD is updated mid-implementation.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -247,6 +290,8 @@ These phrases trigger this skill automatically:
 | "full review" / "audit the codebase" | `/review full` |
 | "review everything" / "full suite" | `/review all` |
 | "language review" / "C++ review" / "Rust review" / "expert review" / "check idioms" / "review against standard" | `/review lang` |
+| "review my pipeline" / "check CI config" / "review CI" / "check my ci" / "review the pipeline" | `/review ci` |
+| "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |
 
 ---
 

@@ -21,6 +21,8 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 | `security-reviewer` | `/review security` | PR touches auth, input handling, data access, external communication, config, or adds new endpoints/handlers. |
 | `full-project-reviewer` | `/review full` | Before releases, after major milestones, full codebase audit. Not per-PR. |
 | `language-expert-reviewer` | `/review lang` | When language depth matters: C++/Rust/Go/Python/TS/Java. Checks type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — 10 dimensions. |
+| `ci-reviewer` | `/review ci` | When CI config is created or modified. Validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, DORA readiness. Not in `/review all`. |
+| `hld-reviewer` | `/review hld` | When HLD is written or updated. Validates C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs — 10 dimensions. Not in `/review all`. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
 ---

@@ -86,6 +86,39 @@ Run `/review all` before presenting merge/PR options. All four agents run in par
 
 This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
 
+**Also run `ci-reviewer` if CI config was modified on this branch:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep -E "\.github/workflows/|\.gitlab-ci\.yml|Jenkinsfile|\.circleci/|azure-pipelines\.yml|bitbucket-pipelines\.yml|\.ai/ci/"
+```
+
+If any CI files appear in the diff → dispatch `ci-reviewer` in parallel with `/review all`:
+
+```
+Agent (ci-reviewer):
+  CI_CONFIG_PATH: <detected CI config file>
+  PIPELINE_SPEC_PATH: .ai/ci/YYYY-MM-DD-pipeline-spec.md  ← if exists
+  PROJECT_ROOT: .
+```
+
+Treat `ci-reviewer` Critical findings as blocking, same as any other reviewer.
+
+**Also run `hld-reviewer` if HLD files were modified on this branch:**
+
+```bash
+git diff <base-branch>...HEAD --name-only | grep "\.ai/hld/"
+```
+
+If any HLD files appear → dispatch `hld-reviewer` in parallel:
+
+```
+Agent (hld-reviewer):
+  HLD_PATH: <modified .ai/hld/*.md file>
+  SPEC_PATH: <matching .ai/specs/*.md>
+```
+
+HLD changes mid-implementation mean the architecture shifted. Treat Critical findings as blocking.
+
 **If any agent returns Critical:** Stop. Do not present merge/PR options.
 ```
 Review gate failed — Critical issues found.
