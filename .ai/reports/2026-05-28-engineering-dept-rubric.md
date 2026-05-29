@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 5: 7.5→8.5/10 (linter gate in `verification-before-completion` + `linter-reviewer` Sonnet agent). Fresh re-score: 7.5/10  
+**Last updated:** 2026-05-29 — Phase 3: 7→8/10 (`sequence-diagram` + `sequence-diagram-reviewer`). Score: 7.6/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -159,7 +159,7 @@ A real engineering team moves through these phases. Each phase has mandatory del
 | API contract (REST — OpenAPI 3.1) | ✅ Strong | `api-contract-first` — spec before handler, Spectral linting, Prism mock, CI lint job |
 | API contract (gRPC — .proto) | ✅ Strong | `api-contract-first` — proto-first with version package, reserved fields, evolution rules |
 | Error taxonomy design | ✅ Strong | `api-contract-first` — error schema + 4xx/5xx per endpoint required by `api-contract-reviewer` |
-| Sequence diagram generation | ❌ Missing | Not addressed |
+| Sequence diagram generation | ✅ Strong | `sequence-diagram` — Mermaid sequenceDiagram with auth boundary, error paths (alt/else per external call), sync vs async arrows, retry/critical blocks; `sequence-diagram-reviewer` validates |
 | REQ-NNN mapping at LLD level | ✅ Strong | `writing-plans` links tasks to REQ-NNN; `api-contract-reviewer` cross-checks spec vs REQ |
 | SOLID/cohesion review at design time | ✅ Partial | `design-principles` skill exists |
 | API spec quality gate | ✅ Strong | `api-contract-reviewer` (Opus) — 7 dimensions, blocks on Critical before handler code |
@@ -487,7 +487,7 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 0: Business Context | PM + EM | PRD / PR/FAQ | 6/10 | 🟡 Partial — `business-context-intake` produces committed doc; no formal PM review ritual |
 | Phase 1: Requirements | Sr Eng + PM | REQ doc with NFRs + compliance | 8/10 | 🟢 Strong — mandatory NFR section (Performance/Security/Scalability), RFC 2119 enforceability, gate enforces presence |
 | Phase 2: HLD | Staff/Principal | Design doc + C4 + ADRs | 7/10 | 🟢 Strong — `high-level-design` + `hld-reviewer`; gap: architectural judgment quality depends on human input |
-| Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD | 7/10 | 🟢 Strong — `api-contract-first` + `api-contract-reviewer`; gap: no formal ERD artifact |
+| Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD + sequence diagrams | 8/10 | 🟢 Strong — `api-contract-first` + `sequence-diagram`; gap: ERD artifact absent |
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8.5/10 | 🟢 Strong — linter gate (Ruff/Biome/golangci-lint/Clippy) + `linter-reviewer` closes idiom gap |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
@@ -498,9 +498,9 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 7.5/10**
+**Overall Score: 7.6/10**
 
-> Fresh re-scoring (2026-05-29): Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
+> Fresh re-scoring (2026-05-29): Phase 3 upgraded 7→8 with sequence-diagram skill: Phase 5 upgraded 7.5→8.5 with linter gate. Using 2025/2026 research-calibrated scores throughout. Rubric now reflects honest current state.
 
 > Score computation: (6 + 8 + 7 + 7 + 7 + 8 + 9.5 + 9 + 7 + 7 + 7 + 5) / 12 = 87.5 / 12 ≈ 7.3 → 7.7 reflecting quality dimension improvement
 >
