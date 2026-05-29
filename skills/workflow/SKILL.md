@@ -12,6 +12,8 @@ user-invocable: true
    - Check npm/PyPI/crates.io/etc. for battle-tested libraries before writing utility code.
    - Prefer adopting or porting a proven approach over net-new code when it meets the requirement.
 
+0.5. **business-context-intake** — Activates before brainstorming for any new feature or enhancement. Produces `.ai/business-context/YYYY-MM-DD-<feature>.md` with user problem, JTBD statement, measurable success metrics, compliance constraints, non-goals, and stakeholder map. Runs `business-context-reviewer` agent. Brainstorming MUST NOT activate without this document. **Skip** for bug fixes, config changes, and refactoring with no user-facing impact.
+
 1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves spec to `.ai/specs/` using REQ-NNN requirement format with test case mappings.
 
 2. **spec-quality-gate** - Activates after spec is written. Lints spec for vague language, missing REQ-NNN structure, unmeasurable criteria, undeclared dependencies. FAIL = fix spec, re-run. PASS = proceed.
@@ -48,6 +50,7 @@ user-invocable: true
 | Architecture decisions (ADRs) | `wiki/architecture/` | Immutable once merged |
 | Developer guides / runbooks | `wiki/guides/` | How-tos, operational procedures |
 | Changelog / release notes / news | `wiki/changelog/` | One file per release or sprint |
+| Business context | `.ai/business-context/YYYY-MM-DD-feature.md` | User problem, JTBD, success metrics, compliance; gate before brainstorming |
 | Feature design specs | `.ai/specs/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |

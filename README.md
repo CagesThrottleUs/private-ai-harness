@@ -19,6 +19,7 @@ Not a product. Optimized for one workflow.
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
 | `brainstorming` | `/brainstorming` | Explore intent before implementing |
+| `business-context-intake` | `/business-context-intake` | Before brainstorming — captures user problem, JTBD, measurable success metrics, compliance constraints, non-goals; hard gate before design |
 | `caveman` | `/caveman` | 75% token reduction, full technical accuracy |
 | `code-documentation` | `/code-documentation` | Spec-traceable docs at authorship time |
 | `commit-discipline` | `/commit-discipline` | Conventional Commits + micro-commit rules |
@@ -61,6 +62,7 @@ Not a product. Optimized for one workflow.
 | `test-quality-reviewer` | Verify tests are meaningful, not just annotated |
 | `full-project-reviewer` | Holistic audit across quality, security, reliability, performance |
 | `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
+| `business-context-reviewer` | Business context quality gate — problem statement user-focused, JTBD complete, metrics measurable with baselines, compliance explicit, non-goals present, stakeholders mapped |
 | `hld-reviewer` | Pre-human HLD quality gate — validates C4 diagrams, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment |
 | `spec-quality-reviewer` | Spec quality gate — falsifiability, TC coverage, TC honesty, error path ownership, consistency, dependency declaration against SQLite/RFC/DO-178C standards |
 | `plan-reviewer` | Plan quality gate — spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type consistency, design principles, commit discipline |

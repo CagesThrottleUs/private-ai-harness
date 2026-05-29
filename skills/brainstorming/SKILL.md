@@ -36,11 +36,25 @@ Do NOT invoke any implementation skill, write any code, scaffold any project, or
 
 Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
 
+## Pre-Condition: Business Context Document
+
+<HARD-GATE>
+Before asking any design questions, check if a business context document exists:
+
+```bash
+ls .ai/business-context/*.md 2>/dev/null
+```
+
+If absent AND this is a feature/enhancement (not a bug fix or config change): stop and invoke `business-context-intake` skill. Do NOT proceed with brainstorming without a completed business context document. The LLM cannot know the user's business context — a human must provide it.
+
+If present: read it. Every design question must be anchored to the problem, persona, and success metrics in that document.
+</HARD-GATE>
+
 ## Checklist
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context** — check files, docs, recent commits; read `.ai/business-context/` if exists
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
