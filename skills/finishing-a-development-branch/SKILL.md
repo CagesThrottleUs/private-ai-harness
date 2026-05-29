@@ -76,9 +76,17 @@ Stop. Don't proceed to Step 1.5.
 
 **If tests pass:** Continue to Step 1.5.
 
-### Step 1: Deployment Artifacts Check
+### Step 1: E2E and Deployment Artifacts Check
 
-Before running the review gate, verify deployment artifacts exist:
+Before running the review gate, verify required artifacts exist.
+
+**E2E tests** — required for any feature with user-facing behavior:
+```bash
+ls tests/e2e/**/*.spec.ts 2>/dev/null | wc -l
+```
+If zero E2E tests AND feature has user-facing behavior → invoke `e2e-testing` skill first.
+
+**Deployment artifacts** — required for any feature changing user-facing behavior:
 
 ```bash
 ls .ai/deployment/YYYY-MM-DD-rollback.md .ai/deployment/YYYY-MM-DD-smoke-tests.md .ai/deployment/YYYY-MM-DD-deploy-runbook.md 2>/dev/null

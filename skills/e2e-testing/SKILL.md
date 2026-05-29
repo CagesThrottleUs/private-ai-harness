@@ -1,0 +1,439 @@
+---
+name: e2e-testing
+description: >
+  Use before finishing-a-development-branch for any feature with user-facing behavior. Identifies the critical user journeys from spec REQ-NNN acceptance criteria, sets up Playwright (with Page Object Model, auth fixtures, semantic locators), and adds an E2E CI job that runs against staging after deploy. Tests critical paths only — not every page. Runs e2e-reviewer agent before committing.
+---
+
+# E2E Testing
+
+E2E tests are the thin top layer of the testing pyramid — not a replacement for unit and integration tests, but the only layer that verifies the full user journey from browser to database to external service and back. Unit tests verify logic. Integration tests verify component contracts. E2E tests verify that the system works for a user.
+
+## References
+
+- **Playwright** (playwright.dev) — #1 E2E framework 2025 (20-30M weekly NPM downloads, surpassed Cypress mid-2024)
+- **Microsoft Engineering Fundamentals** (microsoft.github.io/code-with-engineering-playbook/automated-testing/e2e-testing/) — E2E for critical user journeys; `main` branch always shippable
+- **Netflix testing strategy** — PR pipeline E2E suite under 30 minutes; post-merge suite under 120 minutes
+- **Playwright best practices** (playwright.dev/docs/best-practices) — semantic locators, auto-waiting, POM, fixtures
+- **Shopware E2E guide** (frontends.shopware.com/best-practices/testing/e2e-testing) — POM structure, fixture reuse
+
+---
+
+## The Rule: Cover Journeys, Not Pages
+
+**Test 5-10 critical user journeys per feature. Never test every page.**
+
+A critical user journey is a sequence of actions that represents a core business operation. E2E tests exist to answer: "Does the system work for users?" Not: "Does every button exist?"
+
+| ✅ Critical journey (test this) | ❌ Page coverage (don't test this) |
+|--------------------------------|-----------------------------------|
+| User registers, verifies email, logs in | Header renders correctly |
+| User adds item to cart and checks out | Footer links work |
+| User creates a resource, edits it, deletes it | 404 page shows |
+| User searches and filters results | Sidebar navigation expands |
+| Admin user can access settings that non-admin cannot | Styling matches design |
+
+---
+
+## When to Use
+
+**Required** before `finishing-a-development-branch` for any feature that:
+- Has a user-facing UI (web, mobile, CLI)
+- Changes a critical user flow (auth, checkout, core CRUD, search)
+- Has acceptance criteria that can only be verified end-to-end
+
+**For API-only services** (no UI): E2E tests are HTTP integration tests covering the full request chain (auth → routing → handler → DB → response). Use Playwright's `request` API or `curl`/`httpx` in a CI test script.
+
+---
+
+## Critical Journey Identification
+
+**Read the spec REQ-NNN acceptance criteria.** Every AC that says "when user does X, the system shows Y" is a candidate E2E test.
+
+**Prioritize by blast radius:**
+1. Auth flows (login, logout, session expiry) — if broken, nothing else works
+2. Money/payment flows — highest business risk
+3. Core CRUD (create/edit/delete the primary resource) — most-used operations
+4. Permission boundaries (admin vs. regular user) — security properties
+5. Search/filter on the primary resource — high usage
+
+**Target 5-10 tests for a typical feature.** Suite runtime target: < 15 minutes in CI.
+
+---
+
+## Playwright Setup
+
+**Detect or ask:** What is the application type? (web browser / CLI / API)
+
+**Install (TypeScript — recommended):**
+```bash
+npm init playwright@latest
+# Choose: TypeScript, tests/ folder, yes to GitHub Actions
+```
+
+**`playwright.config.ts`:**
+```typescript
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  timeout: 30_000,          // per test
+  expect: { timeout: 5_000 },
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,  // fail if test.only left in CI
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? '50%' : undefined,
+  reporter: [
+    ['html', { open: 'never' }],
+    ['junit', { outputFile: 'test-results/e2e-results.xml' }],
+  ],
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'on-first-retry',
+  },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Add Firefox/WebKit only if cross-browser matters for this feature
+    // { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+  ],
+});
+```
+
+---
+
+## Test Structure
+
+```
+tests/e2e/
+├── fixtures/
+│   ├── auth.ts          ← authenticated user fixture
+│   └── test-data.ts     ← test data factory for E2E state
+├── pages/               ← Page Object Model
+│   ├── login.page.ts
+│   ├── dashboard.page.ts
+│   └── [resource].page.ts
+└── [feature]/
+    ├── auth.spec.ts
+    ├── [resource].crud.spec.ts
+    └── [permission].spec.ts
+```
+
+---
+
+## Page Object Model
+
+Locators and actions in page objects. Test specs contain only assertions and user-intent steps.
+
+```typescript
+// tests/e2e/pages/login.page.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class LoginPage {
+  readonly page: Page;
+  readonly emailInput: Locator;
+  readonly passwordInput: Locator;
+  readonly submitButton: Locator;
+  readonly errorMessage: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    // ✅ Semantic locators — resilient to CSS/DOM changes
+    this.emailInput = page.getByLabel('Email');
+    this.passwordInput = page.getByLabel('Password');
+    this.submitButton = page.getByRole('button', { name: 'Sign in' });
+    this.errorMessage = page.getByRole('alert');
+  }
+
+  async goto() {
+    await this.page.goto('/login');
+  }
+
+  async login(email: string, password: string) {
+    await this.emailInput.fill(email);
+    await this.passwordInput.fill(password);
+    await this.submitButton.click();
+  }
+}
+```
+
+**Selector priority (most to least resilient):**
+1. `getByRole('button', { name: '...' })` — ARIA semantics, survives style changes
+2. `getByLabel('Email')` — form labels, survives DOM structure changes
+3. `getByText('Submit')` — exact text, fragile with i18n but clear intent
+4. `getByTestId('submit-btn')` — use `data-testid` attribute when no semantic option
+5. CSS selector `.submit-btn` — LAST RESORT, couples to implementation
+
+**Never use:** `page.waitForTimeout(3000)` — always wait for a specific condition instead.
+
+---
+
+## Auth Fixtures
+
+Reusable authentication state — avoids repeating login UI in every test.
+
+```typescript
+// tests/e2e/fixtures/auth.ts
+import { test as base } from '@playwright/test';
+import { LoginPage } from '../pages/login.page';
+
+type AuthFixtures = {
+  authenticatedPage: Page;
+  adminPage: Page;
+};
+
+export const test = base.extend<AuthFixtures>({
+  // Standard user — authenticated via UI once, state saved to storageState
+  authenticatedPage: async ({ browser }, use) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const loginPage = new LoginPage(page);
+    
+    await loginPage.goto();
+    await loginPage.login(
+      process.env.TEST_USER_EMAIL!,
+      process.env.TEST_USER_PASSWORD!,
+    );
+    await page.waitForURL('/dashboard');
+    
+    await use(page);
+    await context.close();
+  },
+
+  // Admin user — separate context, separate credentials
+  adminPage: async ({ browser }, use) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const loginPage = new LoginPage(page);
+    
+    await loginPage.goto();
+    await loginPage.login(
+      process.env.TEST_ADMIN_EMAIL!,
+      process.env.TEST_ADMIN_PASSWORD!,
+    );
+    await page.waitForURL('/dashboard');
+    
+    await use(page);
+    await context.close();
+  },
+});
+
+export { expect } from '@playwright/test';
+```
+
+**Performance note:** Use `storageState` to persist auth session across tests — saves the login UI round-trip:
+```typescript
+// Setup: save authenticated state once
+await page.context().storageState({ path: '.auth/user.json' });
+
+// Use: load pre-authenticated state  
+const context = await browser.newContext({ storageState: '.auth/user.json' });
+```
+
+---
+
+## Test Patterns
+
+```typescript
+// tests/e2e/resources/resource.crud.spec.ts
+import { test, expect } from '../fixtures/auth';
+import { ResourcePage } from '../pages/resource.page';
+
+test.describe('Resource CRUD', () => {
+  test('user can create a resource', async ({ authenticatedPage }) => {
+    const resourcePage = new ResourcePage(authenticatedPage);
+    
+    await resourcePage.goto();
+    await resourcePage.clickCreate();
+    await resourcePage.fillName('My Test Resource');
+    
+    // ✅ Wait for navigation, not a timeout
+    await resourcePage.submit();
+    await authenticatedPage.waitForURL('/resources/*');
+    
+    // ✅ Assert on visible user-facing state, not DOM structure
+    await expect(authenticatedPage.getByRole('heading', { name: 'My Test Resource' })).toBeVisible();
+    await expect(authenticatedPage.getByText('Resource created')).toBeVisible();
+  });
+
+  test('user sees validation error on empty name', async ({ authenticatedPage }) => {
+    const resourcePage = new ResourcePage(authenticatedPage);
+    
+    await resourcePage.goto();
+    await resourcePage.clickCreate();
+    await resourcePage.submit();  // no name filled
+    
+    await expect(authenticatedPage.getByRole('alert')).toContainText('Name is required');
+  });
+
+  test('admin can delete any resource', async ({ adminPage, authenticatedPage }) => {
+    // Create as user
+    const resourcePage = new ResourcePage(authenticatedPage);
+    await resourcePage.createResource('To Be Deleted');
+    const resourceId = await resourcePage.getCurrentResourceId();
+    
+    // Delete as admin
+    const adminResourcePage = new ResourcePage(adminPage);
+    await adminResourcePage.gotoById(resourceId);
+    await adminResourcePage.delete();
+    
+    await expect(adminPage.getByText('Resource deleted')).toBeVisible();
+    await adminPage.goto(`/resources/${resourceId}`);
+    await expect(adminPage.getByRole('heading', { name: '404' })).toBeVisible();
+  });
+});
+```
+
+**Anti-patterns — never do these:**
+```typescript
+// ❌ Hardcoded wait
+await page.waitForTimeout(3000);
+
+// ❌ CSS selector coupling
+await page.locator('.submit-btn.primary').click();
+
+// ❌ Testing implementation, not behavior
+await expect(page.locator('[data-state="active"]')).toBeVisible();
+
+// ❌ Tests depending on previous test's state
+test('create resource', ...) // modifies shared state
+test('delete resource', ...)  // depends on previous test
+```
+
+---
+
+## API-Only E2E Tests (No UI)
+
+For pure API services, E2E tests verify the full request chain through the real deployed service:
+
+```typescript
+// tests/e2e/api/resources.e2e.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Resources API — E2E', () => {
+  let authToken: string;
+
+  test.beforeAll(async ({ request }) => {
+    // Authenticate against real staging endpoint
+    const response = await request.post(`${process.env.BASE_URL}/auth/token`, {
+      data: { email: process.env.TEST_USER_EMAIL, password: process.env.TEST_USER_PASSWORD },
+    });
+    const body = await response.json();
+    authToken = body.token;
+  });
+
+  test('authenticated user can create and retrieve a resource', async ({ request }) => {
+    // Create
+    const create = await request.post(`${process.env.BASE_URL}/resources`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+      data: { name: 'E2E Test Resource' },
+    });
+    expect(create.status()).toBe(201);
+    const { id } = await create.json();
+    
+    // Retrieve
+    const get = await request.get(`${process.env.BASE_URL}/resources/${id}`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    expect(get.status()).toBe(200);
+    const resource = await get.json();
+    expect(resource.name).toBe('E2E Test Resource');
+  });
+
+  test('unauthenticated request is rejected', async ({ request }) => {
+    const response = await request.get(`${process.env.BASE_URL}/resources`);
+    expect(response.status()).toBe(401);
+    const body = await response.json();
+    expect(body.code).toBe('UNAUTHORIZED');
+  });
+});
+```
+
+---
+
+## CI E2E Job
+
+E2E tests run **after staging deploy** — not on every PR (too slow). Triggered after `deploy-staging` job succeeds.
+
+**GitHub Actions:**
+```yaml
+# Adds after deploy-staging in .github/workflows/ci.yml
+  e2e-tests:
+    name: E2E Tests
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Run E2E tests against staging
+        run: npx playwright test
+        env:
+          BASE_URL: ${{ vars.STAGING_URL }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+```
+
+**Sharding** (when suite > 15 minutes):
+```yaml
+  e2e-tests:
+    strategy:
+      matrix:
+        shard: [1/3, 2/3, 3/3]
+    steps:
+      - run: npx playwright test --shard ${{ matrix.shard }}
+```
+
+---
+
+## Environment Variables Required
+
+Document in `.env.example`:
+```
+BASE_URL=https://staging.example.com
+TEST_USER_EMAIL=e2e-user@test.example
+TEST_USER_PASSWORD=<set in CI secrets>
+TEST_ADMIN_EMAIL=e2e-admin@test.example
+TEST_ADMIN_PASSWORD=<set in CI secrets>
+```
+
+Test accounts must exist in staging environment and be dedicated to E2E (not shared with humans — test data gets modified).
+
+---
+
+## Self-Review: Run `e2e-reviewer` Agent
+
+After writing E2E tests, before committing:
+
+```
+Agent(e2e-reviewer, {
+  TEST_FILES: "tests/e2e/**/*.spec.ts",
+  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+})
+```
+
+Fix all **Critical** findings (hardcoded waits, CSS selector brittleness, missing auth coverage). Fix **Important** findings (no POM, tests depending on order). Advisory may be deferred.
+
+---
+
+## Commit
+
+```
+test(e2e): add E2E tests for [critical user journey]
+
+[body: WHY — what production failures unit/integration tests cannot catch,
+which user journeys are covered, which are intentionally excluded]
+```

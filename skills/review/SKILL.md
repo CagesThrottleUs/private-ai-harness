@@ -27,6 +27,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review deployment` | Deployment artifacts review (rollback procedure, DB migration safety, smoke test coverage, deployment runbook, release notes quality) |
 | `/review integration` | Integration test review (no mocks at boundary, test isolation, factory pattern, Testcontainers config, contract tests, CI wiring) |
 | `/review api` | API contract review (OpenAPI 3.1 or .proto — completeness, error taxonomy, security, breaking changes, schema quality, REQ coverage) |
+| `/review e2e` | E2E test review (critical journey coverage, selector quality, no hardcoded waits, test independence, POM, auth fixtures, CI integration) |
 
 Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
 
@@ -48,6 +49,7 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 | `deployment-reviewer` | Deployment artifacts (`.ai/deployment/`) | When deployment artifacts are created — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes quality. 6 dimensions. Not included in `/review all`. |
 | `integration-test-reviewer` | Integration test files (`tests/integration/`) | When integration tests are written — validates no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring. 7 dimensions. Not included in `/review all`. |
 | `api-contract-reviewer` | API spec (`api/openapi.yaml`, `proto/**/*.proto`) | When API spec is written or updated — validates completeness, error taxonomy, security definitions, breaking change safety, schema quality, REQ-NNN coverage, naming consistency. 7 dimensions. Not included in `/review all`. |
+| `e2e-reviewer` | E2E test files (`tests/e2e/**`) | When E2E tests are written — validates critical journey coverage, selector quality (semantic vs CSS), no hardcoded waits, test independence, POM structure, auth fixtures, CI integration. 7 dimensions. Not included in `/review all`. |
 
 ---
 
@@ -314,6 +316,25 @@ Note: `/review api` is NOT included in `/review all`. Run from `api-contract-fir
 
 ---
 
+#### `/review e2e`
+
+Collect inputs:
+- **TEST_FILES** — glob to E2E test files. Auto-detect: `tests/e2e/**/*.spec.ts`, `e2e/**/*.spec.*`
+- **SPEC_PATH** — check `.ai/specs/` for matching spec (optional)
+
+Dispatch `e2e-reviewer` agent:
+```
+Agent (e2e-reviewer):
+  TEST_FILES: <tests/e2e/**/*.spec.ts>
+  SPEC_PATH: <.ai/specs/YYYY-MM-DD-<feature>.md>
+```
+
+Output: [e2e-reviewer report — 7 dimensions + PASS/NEEDS WORK/BLOCKED]
+
+Note: `/review e2e` is NOT included in `/review all`. Run from `e2e-testing` skill or from `finishing-a-development-branch` when E2E tests are in the diff.
+
+---
+
 #### `/review all`
 
 Dispatch all four PR-scoped agents **in parallel** (they are independent):
@@ -394,6 +415,7 @@ These phrases trigger this skill automatically:
 | "review deployment" / "check rollback" / "review my deploy plan" / "check migration safety" / "review release notes" | `/review deployment` |
 | "review integration tests" / "check my integration tests" / "are my tests mocking the DB" / "review testcontainers" | `/review integration` |
 | "review my API spec" / "check the openapi" / "review the contract" / "check my proto" / "review API design" | `/review api` |
+| "review e2e tests" / "check my playwright tests" / "review my E2E" / "are my e2e tests good" | `/review e2e` |
 
 ---
 
