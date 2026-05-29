@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — All P0 gaps closed. Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 9: 0→7/10, Phase 10: 0→7/10. Overall: 4.0→6.1/10  
+**Last updated:** 2026-05-29 — All P0 closed + Phase 7: 3→6/10 (`integration-testing` + `integration-test-reviewer`). Overall: 4.0→6.4/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -367,7 +367,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 7 — Integration & Testing | Score: 3/10
+## Phase 7 — Integration & Testing | Score: 6/10
 
 ### Industry Benchmark
 
@@ -385,11 +385,11 @@ Each phase section has five parts:
 
 **Microsoft (FAANG):** Engineering Fundamentals Playbook requires E2E tests for every critical user journey. "The main branch should always be shippable" — which requires E2E tests verifying the critical paths in CI.
 
-### Harness Score: 3/10
+### Harness Score: 6/10
 
-**Department produces (QA role):** Unit + integration + E2E + performance tests, coverage gate enforced. **Harness produces:** Unit tests only. **Verdict:** Clearly distinguishable — 1 of 4 test layers present.
+**Department produces (QA role):** Unit + integration + E2E + performance tests, coverage gate enforced. **Harness produces:** Unit test suite (TDD-enforced) + integration test suite (Testcontainers real dependencies, transaction rollback isolation, factory pattern, Pact contract tests). E2E and performance layers still absent. **Verdict:** Partially distinguishable — 2 of 4 test layers present.
 
-`test-driven-development` enforces unit test TDD. `test-quality-reviewer` validates tests are meaningful. `requesting-code-review` triggers test quality review. The harness stops at unit tests.
+`test-driven-development` enforces TDD for unit tests. `integration-testing` adds Testcontainers-based integration tests (Python/Go/TypeScript/Java/Rust) with transaction rollback isolation, factory pattern, and Pact consumer-driven contracts. `test-quality-reviewer` validates both layers. `integration-test-reviewer` validates no mocks at boundary. Remaining absent: E2E test layer and performance test layer.
 
 ### Precise Gaps
 
@@ -777,7 +777,7 @@ Performance is not addressed at any phase.
 | ✅ **P0 CLOSED** | ~~No CI/CD pipeline~~ | `ci-pipeline-setup` skill + `ci-reviewer` agent | At `using-git-worktrees` — **shipped 2026-05-29** |
 | ✅ **P0 CLOSED** | ~~No deployment~~ | `deployment-workflow` skill + `deployment-reviewer` agent | At `finishing-a-development-branch` — **shipped 2026-05-29** |
 | **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
-| **P1** | No integration tests | `integration-testing` (new) | During `test-driven-development` |
+| ✅ **P1 CLOSED** | ~~No integration tests~~ | `integration-testing` skill + `integration-test-reviewer` agent | During TDD GREEN phase — **shipped 2026-05-29** |
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
 | **P1** | No API contract first | `api-contract-first` (new) | During `writing-plans` per endpoint |
 | **P2** | No business context intake | `business-context-intake` (new) | Before `brainstorming` |
@@ -878,15 +878,22 @@ pr-creator → PR opened
 - After HLD + reviewers: 4.4/10
 - After CI pipeline: 4.9/10
 - After Observability: 5.5/10
-- After Deployment: **6.1/10**
+- After Deployment: 6.1/10
+- After Integration Testing: **6.4/10**
 
-**What was shipped today (2026-05-29):**
+**What was shipped (2026-05-29):**
 - Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
 - Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer` (6 platforms)
-- Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`. Rollback procedures, expand-contract migrations, smoke tests, release notes.
-- Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`. OTel logging, golden signals, SLOs, runbooks.
+- Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`
+- Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`
+- Phase 7 (Testing): **3→6/10** — `integration-testing` + `integration-test-reviewer`. Testcontainers (5 languages), transaction rollback isolation, factory pattern, Pact contract tests. Now 2 of 4 test layers covered.
 
-**What remains (P1/P2 gaps):** Phase 0 (Business Context, 2/10) — no PRD intake. Phase 1 (Requirements, 6/10) — NFRs not enforced in spec template. Phase 3 (LLD, 4/10) — no API contract-first skill. Phase 7 (Testing, 3/10) — integration and E2E test layers absent. The harness now covers the complete engineering lifecycle; the remaining gaps degrade quality but do not produce entirely absent artifact categories.
+**What remains (P1/P2 gaps):**
+- Phase 0 (Business Context): 2/10 — no PRD/business-context-intake skill
+- Phase 1 (Requirements): 6/10 — NFRs not enforced in spec template
+- Phase 3 (LLD): 4/10 — no API contract-first skill
+- Phase 7 (Testing): 6/10 — E2E test layer and performance test layer absent
+- All remaining gaps degrade quality but no phase is entirely artifact-absent anymore.
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 

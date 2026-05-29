@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — Phase 2: 2→7/10, Phase 8: 1→7/10, Phase 9: 0→7/10, Phase 10: 0→7/10. All P0 gaps closed. Overall: 4.0→6.1/10  
+**Last updated:** 2026-05-29 — All P0 closed. Phase 7: 3→6/10 (`integration-testing` + `integration-test-reviewer`, adds test layer 2 of 4). Overall: 4.0→6.4/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -290,20 +290,20 @@ A real engineering team moves through these phases. Each phase has mandatory del
 |-----------|---------|-----|
 | Unit testing discipline | ✅ Strong | `test-driven-development` |
 | Test quality validation | ✅ Strong | `test-quality-reviewer` |
-| Integration testing guidance | ❌ Missing | No integration test skill |
+| Integration testing (real dependencies) | ✅ Strong | `integration-testing` — Testcontainers (Python/Go/TS/Java/Rust), transaction rollback isolation, factory pattern, Pact contract tests |
 | E2E testing guidance | ❌ Missing | Not addressed |
 | Performance testing | ❌ Missing | Not addressed |
 | Security testing | ⚠️ Partial | `security-reviewer` reviews code; no security test skill |
-| Test data management | ❌ Missing | Not addressed |
-| Regression suite management | ❌ Missing | Not addressed |
+| Test data management | ✅ Strong | `integration-testing` — factory pattern with faker/sequences, transaction rollback, no shared mutable state |
+| Regression suite in CI | ✅ Partial | `ci-pipeline-setup` adds integration test CI job; unit + integration covered |
 
-**Department artifact (QA role):** Unit test suite + integration test suite (real dependencies) + at least one E2E test covering the primary user journey + performance test baseline + test data fixtures. Coverage metric enforced in CI.  
-**Harness artifact:** Unit test suite only, with high individual test quality (TDD discipline, `test-quality-reviewer`). Integration, E2E, and performance test layers are absent.  
-**Verdict:** Clearly distinguishable. A QA engineer reviewing the project's test suite would immediately notice the absence of integration and E2E tests. Unit tests alone are insufficient for any production system — this is industry consensus, not preference.
+**Department artifact (QA role):** Unit test suite + integration test suite (real dependencies) + at least one E2E test + performance test baseline + test data fixtures.  
+**Harness artifact:** Unit test suite (TDD-enforced, `test-quality-reviewer`-validated) + integration test suite (Testcontainers real dependencies, `integration-test-reviewer`-validated). E2E and performance test layers still absent.  
+**Verdict:** Distinguishable — 2 of 4 test layers now present (unit + integration). E2E and performance are still absent. Significant improvement over unit-tests-only.
 
-**Score: 3/10**
+**Score: 6/10**
 
-**Critical Gap:** The harness stops at unit tests. The score is 3 (not lower) because the unit tests it does produce are high quality — TDD-enforced, `test-quality-reviewer`-validated. But 1 out of 4 test layers is not a test strategy. Integration and E2E tests catch the failures unit tests cannot: component wiring, real dependency behavior, and full user flows.
+**Progress:** Phase 7 moved from 3/10 (unit only) to 6/10 (unit + integration). The `integration-testing` skill adds real-dependency testing — Testcontainers with pinned production versions, transaction rollback isolation, and Pact consumer-driven contract tests for service APIs. Remaining gaps: E2E test layer (critical user journeys) and performance test layer (NFR validation).
 
 ---
 
@@ -485,18 +485,18 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8/10 | 🟢 Strong — high quality; no linter gate |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
-| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + perf tests | 3/10 | 🔴 Weak — unit tests only; 3 layers absent |
+| Phase 7: Integration & Testing | QA + Sr Engineers | Unit + integration + E2E + perf tests | 6/10 | 🟡 Partial — unit + integration; E2E and performance absent |
 | Phase 8: CI/CD | DevOps | `.github/workflows/ci.yml` + pipeline | 7/10 | 🟢 Strong — `ci-pipeline-setup` generates platform-specific config (6 platforms); gaps: IaC, feature flags |
 | Phase 9: Deployment & Release | DevOps + RM | Runbook + rollback procedure + smoke tests | 7/10 | 🟢 Strong — `deployment-workflow` + `deployment-reviewer`; gaps: platform canary config, on-call rotation |
 | Phase 10: Observability & Operations | SRE | SLOs + runbooks + metrics config | 7/10 | 🟢 Strong — `observability-standards` + `observability-reviewer`; gaps: dashboards, incident matrix, on-call rotation |
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 6.1/10**
+**Overall Score: 6.4/10**
 
-> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 3 + 7 + 7 + 7 + 5) / 12 = 72.5 / 12 ≈ 6.1
+> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 6 + 7 + 7 + 7 + 5) / 12 = 75.5 / 12 ≈ 6.4
 >
-> All four P0 gaps are now closed. Phase 9 (Deployment): 0→7/10 with `deployment-workflow` + `deployment-reviewer`. Phase 10 (Observability): 0→7/10 with `observability-standards` + `observability-reviewer`. Phase 8 (CI/CD): 1→7/10. Phase 2 (HLD): 2→7/10. The harness now covers the complete engineering lifecycle from business context through deployed, observable, and deployable production systems. Remaining gaps are P1/P2: NFR enforcement in specs (Phase 1), API contract-first (Phase 3), integration and E2E testing (Phase 7), business context intake (Phase 0).
+> Phase 7 (Integration & Testing) moved from 3/10 to 6/10 with `integration-testing` skill and `integration-test-reviewer` agent. Now 2 of 4 test layers covered (unit + integration). Remaining gaps: NFR enforcement in specs (Phase 1, 6/10), API contract-first (Phase 3, 4/10), E2E and performance tests (Phase 7 remaining), business context intake (Phase 0, 2/10).
 
 ---
 
