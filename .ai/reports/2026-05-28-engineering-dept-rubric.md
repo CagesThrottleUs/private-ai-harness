@@ -2,7 +2,7 @@
 # Private AI Harness — Capability Evaluation
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — All P0 closed. Phase 7: 3→6/10 (`integration-testing` + `integration-test-reviewer`, adds test layer 2 of 4). Overall: 4.0→6.4/10  
+**Last updated:** 2026-05-29 — Phase 3: 4→7/10 (`api-contract-first` + `api-contract-reviewer`). Overall: 4.0→6.7/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Evaluator:** Claude Sonnet 4.6  
 
@@ -151,20 +151,22 @@ A real engineering team moves through these phases. Each phase has mandatory del
 | Capability | Covered | Gap |
 |-----------|---------|-----|
 | Class/interface design with design principles | ✅ Strong | `design-principles` + `writing-plans` |
-| Database schema design | ❌ Missing | Not structured |
-| API contract specification (OpenAPI/gRPC) | ❌ Missing | No API spec generation skill |
-| Error taxonomy design | ❌ Missing | Not addressed |
+| Database schema design | ⚠️ Partial | `writing-plans` schema checklist; no formal ERD artifact |
+| API contract (REST — OpenAPI 3.1) | ✅ Strong | `api-contract-first` — spec before handler, Spectral linting, Prism mock, CI lint job |
+| API contract (gRPC — .proto) | ✅ Strong | `api-contract-first` — proto-first with version package, reserved fields, evolution rules |
+| Error taxonomy design | ✅ Strong | `api-contract-first` — error schema + 4xx/5xx per endpoint required by `api-contract-reviewer` |
 | Sequence diagram generation | ❌ Missing | Not addressed |
-| REQ-NNN mapping at LLD level | ✅ Strong | `writing-plans` links tasks to REQ-NNN |
+| REQ-NNN mapping at LLD level | ✅ Strong | `writing-plans` links tasks to REQ-NNN; `api-contract-reviewer` cross-checks spec vs REQ |
 | SOLID/cohesion review at design time | ✅ Partial | `design-principles` skill exists |
+| API spec quality gate | ✅ Strong | `api-contract-reviewer` (Opus) — 7 dimensions, blocks on Critical before handler code |
 
-**Department artifact (LLD):** OpenAPI/gRPC spec per endpoint, database schema ERD with index strategy, error taxonomy document, sequence diagrams for critical flows. All produced before implementation begins.  
-**Harness artifact:** Implementation task plan with file paths and code snippets. Strong on task-level design guidance (`design-principles`). No API spec file, no schema design document, no error taxonomy.  
-**Verdict:** Distinguishable. The harness produces implementation instructions; a department produces LLD design artifacts that implementation instructions are derived from. These are different documents at different abstraction levels.
+**Department artifact (LLD):** OpenAPI/gRPC spec per endpoint, database schema ERD with index strategy, error taxonomy, sequence diagrams.  
+**Harness artifact:** `api-contract-first` skill produces `api/openapi.yaml` (REST) or `proto/**/*.proto` (gRPC) before any handler task. Spectral linting, Prism mock server for parallel development, CI spec lint job. `api-contract-reviewer` validates 7 dimensions. Hard gate in `writing-plans`: no handler task without reviewed spec.  
+**Verdict:** Largely indistinguishable for the API contract artifact. Remaining gaps: no formal database ERD, no sequence diagram generation.
 
-**Score: 4/10**
+**Score: 7/10**
 
-**Key Gap:** No API contract first. A real team writes OpenAPI before writing a handler. The harness writes code and documents it afterward. This is the difference between an API designed for consumers and an API that happens to exist. The 4/10 (not lower) reflects that `writing-plans` + `design-principles` produce task-level design reasoning that is strong — but the formal LLD artifact layer is absent.
+**Progress:** Phase 3 moved from 4/10 to 7/10. The API contract is now produced before handler code — the Stripe/Kubernetes pattern. The `api-contract-reviewer` Critical rule for money-as-float prevents a class of financial precision bugs. Remaining gap: no formal database ERD skill (schema design done in `writing-plans` checklist, not a separate artifact).
 
 ---
 
@@ -481,7 +483,7 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 0: Business Context | PM + EM | PRD / PR/FAQ | 2/10 | 🔴 Absent — no PRD artifact |
 | Phase 1: Requirements | Sr Eng + PM | REQ doc with NFRs + compliance | 6/10 | 🟡 Partial — REQ doc exists; NFRs missing |
 | Phase 2: HLD | Staff/Principal | Design doc + C4 + ADRs | 7/10 | 🟢 Strong — `high-level-design` + `hld-reviewer`; gap: architectural judgment quality depends on human input |
-| Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD | 4/10 | 🟡 Partial — task plans exist; API/schema artifacts don't |
+| Phase 3: LLD | Sr Engineer | OpenAPI spec + schema ERD | 7/10 | 🟢 Strong — `api-contract-first` + `api-contract-reviewer`; gap: no formal ERD artifact |
 | Phase 4: Task Distribution | EM + Team Leads | Sprint board + dependency graph | 7/10 | 🟢 Good — task list comparable; dependency map missing |
 | Phase 5: Implementation | ICs | Code + tests + commits | 8/10 | 🟢 Strong — high quality; no linter gate |
 | Phase 6: Code Review | Sr/Staff Reviewers | Structured PR review findings | 9.5/10 | 🟢 Exceeds department — 5 specialist Opus reviewers |
@@ -492,11 +494,11 @@ Scoring logic: Is the artifact produced? If yes, is it indistinguishable from wh
 | Phase 11: Technical Documentation | Tech Writers | API ref + ADRs + onboarding + runbooks | 5/10 | 🟡 Partial — code docs strong; doc suite incomplete |
 | Quality: Artifact indistinguishability (avg) | All roles | — | 6.4/10 | 🟡 Good where produced; absent elsewhere |
 
-**Overall Score: 6.4/10**
+**Overall Score: 6.7/10**
 
-> Score computation: (2 + 6 + 7 + 4 + 7 + 8 + 9.5 + 6 + 7 + 7 + 7 + 5) / 12 = 75.5 / 12 ≈ 6.4
+> Score computation: (2 + 6 + 7 + 7 + 7 + 8 + 9.5 + 6 + 7 + 7 + 7 + 5) / 12 = 78.5 / 12 ≈ 6.7
 >
-> Phase 7 (Integration & Testing) moved from 3/10 to 6/10 with `integration-testing` skill and `integration-test-reviewer` agent. Now 2 of 4 test layers covered (unit + integration). Remaining gaps: NFR enforcement in specs (Phase 1, 6/10), API contract-first (Phase 3, 4/10), E2E and performance tests (Phase 7 remaining), business context intake (Phase 0, 2/10).
+> Phase 3 (LLD) moved from 4/10 to 7/10 with `api-contract-first` skill and `api-contract-reviewer` agent. API contract now produced before handler code. Remaining gaps: NFR enforcement (Phase 1, 6/10), E2E + performance tests (Phase 7 partial), business context intake (Phase 0, 2/10).
 
 ---
 

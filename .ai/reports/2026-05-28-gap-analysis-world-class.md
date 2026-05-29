@@ -2,7 +2,7 @@
 # Benchmarked Against World-Class Engineering Products + FAANG
 
 **Date:** 2026-05-28  
-**Last updated:** 2026-05-29 — All P0 closed + Phase 7: 3→6/10 (`integration-testing` + `integration-test-reviewer`). Overall: 4.0→6.4/10  
+**Last updated:** 2026-05-29 — Phase 3: 4→7/10 (`api-contract-first` + `api-contract-reviewer`). Overall: 4.0→6.7/10  
 **Question:** Can this harness replace an entire engineering department and produce output indistinguishable from what that department produces?  
 **Benchmark standard:** World-class products (Linux, PostgreSQL, SQLite, Kubernetes, seL4, DO-178C, RFC 8446) + Top engineering organizations (Amazon, Google, Meta, Netflix, Stripe, Microsoft, Spotify, GitHub)  
 **Scoring threshold:** Below 9/10 = gap. Scored on two dimensions: (1) is the artifact produced? (2) if yes, is it indistinguishable from department output for that role? Missing artifact categories that a department always produces score 0. Overall score: 4.0/10 (down from 5.1/10 under the corrected question).
@@ -221,7 +221,7 @@ Each phase section has five parts:
 
 ---
 
-## Phase 3 — Low Level Design (LLD) | Score: 4/10
+## Phase 3 — Low Level Design (LLD) | Score: 7/10
 
 ### Industry Benchmark
 
@@ -237,11 +237,11 @@ Each phase section has five parts:
 
 **Netflix (FAANG):** Sequence diagrams for any operation crossing service boundaries. "Draw the sequence diagram first" is a standard design practice at Netflix for new microservice interactions. The diagram shows who talks to whom, in what order, what happens on failure at each step.
 
-### Harness Score: 4/10
+### Harness Score: 7/10
 
-**Department produces:** OpenAPI/gRPC spec per endpoint, schema ERD, error taxonomy. **Harness produces:** Implementation task plan with file paths and code snippets. No API spec file, no schema doc. **Verdict:** Distinguishable — different abstraction levels.
+**Department produces:** OpenAPI/gRPC spec per endpoint, schema ERD, error taxonomy. **Harness produces:** `api-contract-first` skill produces `api/openapi.yaml` (OpenAPI 3.1) or `proto/**/*.proto` (gRPC) before any handler task in `writing-plans`. Includes Spectral linting, Prism mock server, CI spec lint job. `api-contract-reviewer` validates 7 dimensions. Hard gate in `writing-plans`: no handler task without reviewed spec. **Verdict:** Largely indistinguishable for API contract. Remaining gap: no formal database ERD artifact.
 
-`writing-plans` produces task-level instructions with file paths and code snippets. `design-principles` guides SOLID/cohesion/coupling. `code-documentation` documents code after writing. API contracts, schema design, and error taxonomy design are absent.
+`api-contract-first` follows the Stripe/Kubernetes pattern: spec reviewed before any handler. The error taxonomy (all 4xx/5xx documented per endpoint) is enforced by `api-contract-reviewer` as a blocking check. Money-as-float is flagged as Critical. `api-contract-reviewer` cross-checks spec against REQ-NNN acceptance criteria from the source spec.
 
 ### Precise Gaps
 
@@ -779,7 +779,7 @@ Performance is not addressed at any phase.
 | **P1** | No NFR section | Enhance `brainstorming` + `spec-quality-gate` (backed by `spec-quality-reviewer` agent — **shipped**) | Spec template + quality gate |
 | ✅ **P1 CLOSED** | ~~No integration tests~~ | `integration-testing` skill + `integration-test-reviewer` agent | During TDD GREEN phase — **shipped 2026-05-29** |
 | **P1** | Security at design time | Enhance `brainstorming` + `high-level-design` | Spec template + HLD |
-| **P1** | No API contract first | `api-contract-first` (new) | During `writing-plans` per endpoint |
+| ✅ **P1 CLOSED** | ~~No API contract first~~ | `api-contract-first` skill + `api-contract-reviewer` agent | During `writing-plans`, before handler tasks — **shipped 2026-05-29** |
 | **P2** | No business context intake | `business-context-intake` (new) | Before `brainstorming` |
 | **P2** | No performance by design | Enhance HLD + `load-testing` (new) | HLD + `finishing-a-development-branch` |
 | **P2** | No E2E tests | `e2e-testing` (new) | Before `finishing-a-development-branch` |
@@ -879,21 +879,22 @@ pr-creator → PR opened
 - After CI pipeline: 4.9/10
 - After Observability: 5.5/10
 - After Deployment: 6.1/10
-- After Integration Testing: **6.4/10**
+- After Integration Testing: 6.4/10
+- After API Contract First: **6.7/10**
 
 **What was shipped (2026-05-29):**
 - Phase 2 (HLD): **2→7/10** — `high-level-design` + `hld-reviewer`
-- Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer` (6 platforms)
+- Phase 3 (LLD): **4→7/10** — `api-contract-first` + `api-contract-reviewer`. OpenAPI 3.1/gRPC spec before handler, Spectral lint, Prism mock, hard gate in `writing-plans`.
+- Phase 7 (Testing): **3→6/10** — `integration-testing` + `integration-test-reviewer`
+- Phase 8 (CI/CD): **1→7/10** — `ci-pipeline-setup` + `ci-reviewer`
 - Phase 9 (Deployment): **0→7/10** — `deployment-workflow` + `deployment-reviewer`
 - Phase 10 (Observability): **0→7/10** — `observability-standards` + `observability-reviewer`
-- Phase 7 (Testing): **3→6/10** — `integration-testing` + `integration-test-reviewer`. Testcontainers (5 languages), transaction rollback isolation, factory pattern, Pact contract tests. Now 2 of 4 test layers covered.
 
-**What remains (P1/P2 gaps):**
+**What remains (P2 gaps):**
 - Phase 0 (Business Context): 2/10 — no PRD/business-context-intake skill
 - Phase 1 (Requirements): 6/10 — NFRs not enforced in spec template
-- Phase 3 (LLD): 4/10 — no API contract-first skill
 - Phase 7 (Testing): 6/10 — E2E test layer and performance test layer absent
-- All remaining gaps degrade quality but no phase is entirely artifact-absent anymore.
+- Quality: performance by design (3/10), security at design time (6/10)
 
 **With remediations:** 8 new skills + 5 enhancements closes every gap below 9. The harness covers the complete engineering department workflow — from business context through production observability — at a quality level benchmarked against Linux, PostgreSQL, SQLite, seL4, Amazon, Google, Meta, Netflix, Stripe, and Microsoft.
 
