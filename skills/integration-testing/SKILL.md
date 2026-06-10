@@ -226,6 +226,27 @@ export function createUser(overrides: Partial<User> = {}): UserCreateInput {
 
 ---
 
+## Testing Failure Paths at Boundaries
+
+Most production bugs at service boundaries appear in failure scenarios, not success cases. For each external dependency, write tests that cover what happens when it fails — not only when it succeeds.
+
+**Database:**
+- Unique constraint violation: insert a duplicate, assert the constraint error propagates correctly
+- FK violation: reference a nonexistent parent, assert rejection
+- Rollback on error: throw mid-transaction, assert no partial write persisted
+
+**Queue / event bus:**
+- Malformed message: publish an invalid payload, assert dead-letter handling or error recording
+- Consumer error: raise from the consumer handler, assert retry or error behavior
+
+**HTTP dependency (via WireMock):**
+- 4xx from dependency (401, 403, 404, 422): assert the caller handles each correctly, not silently
+- 5xx / timeout: assert error handling, retry logic, or circuit breaker fires
+
+One failure-path test per dependency boundary, alongside the success-path tests. This is where the 60% of boundary bugs actually live.
+
+---
+
 ## Contract Testing (Service-to-Service APIs)
 
 **Required when:** this service makes HTTP calls to another service, OR provides an HTTP API consumed by other services.

@@ -207,6 +207,27 @@ Next failing test for next feature.
 | **Clear** | Name describes behavior | `test('test1')` |
 | **Shows intent** | Demonstrates desired API | Obscures what code should do |
 
+## Test Design: Finding Errors, Not Confirming Success
+
+Testing is the process of executing a program with the intent of finding errors (Myers, 1979). Design each RED test to be *likely to fail* on a wrong implementation. A test that passes regardless of whether the implementation is correct is not a test — it is noise.
+
+Three techniques that find most bugs:
+
+**Boundary value analysis** — bugs cluster at edges. For any range, test below, at, and above:
+- Max retries = 3: test 2 failures (still retrying), 3 failures (exhausted), 4 calls (must not happen)
+- Field max length = 255: test 254 chars (valid), 255 (valid), 256 (rejected)
+
+**Equivalence partitioning** — group inputs that behave identically; test one from each group, not ten from one:
+- Email validation: valid format / invalid format / empty / whitespace-only — four groups, four tests
+
+**Error guessing** — target where bugs actually hide:
+- Null / zero / empty inputs
+- Off-by-one conditions (`<` vs `<=`)
+- Concurrent access (two requests hitting the same record)
+- Partial failure (first step succeeds, second throws — is state consistent?)
+
+Apply before writing each RED test. If you can only think of happy-path tests, the interface may be hiding its error contracts from callers. Listen to that signal.
+
 ## Why Order Matters
 
 **"I'll write tests after to verify it works"**
@@ -339,7 +360,7 @@ Before marking work complete:
 - [ ] All tests pass
 - [ ] Output pristine (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)
-- [ ] Edge cases and errors covered
+- [ ] Test cases cover boundary values, equivalence classes, and error inputs — not just happy paths
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
 - [ ] Linter gate passed: format check + lint + type check for this language — zero issues, no new suppressions (run `verification-before-completion` linter gate, dispatch `linter-reviewer`)
 - [ ] If component has external dependencies: integration tests written using `integration-testing` skill (Testcontainers, no mocks at boundary, transaction rollback isolation)

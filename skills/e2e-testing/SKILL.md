@@ -8,6 +8,8 @@ description: >
 
 E2E tests are the thin top layer of the testing pyramid — not a replacement for unit and integration tests, but the only layer that verifies the full user journey from browser to database to external service and back. Unit tests verify logic. Integration tests verify component contracts. E2E tests verify that the system works for a user.
 
+The adversarial framing matters: a suite that only covers success flows leaves rejection logic, permission enforcement, and validation errors unverified at the system level. Test what breaks, not just what works.
+
 ## References
 
 - **Playwright** (playwright.dev) — #1 E2E framework 2025 (20-30M weekly NPM downloads, surpassed Cypress mid-2024)
@@ -60,6 +62,14 @@ A critical user journey is a sequence of actions that represents a core business
 3. Core CRUD (create/edit/delete the primary resource) — most-used operations
 4. Permission boundaries (admin vs. regular user) — security properties
 5. Search/filter on the primary resource — high usage
+
+**For each journey, also test the rejection path:**
+- Auth: failed login (wrong credentials), session expiry redirect
+- CRUD: create with invalid data (validation error shown), access resource owned by another user (403/redirect)
+- Payment: declined card, insufficient balance
+- Permissions: non-admin attempts admin-only action → rejected, not only that admin succeeds
+
+A journey tested only on the success path is half a test.
 
 **Target 5-10 tests for a typical feature.** Suite runtime target: < 15 minutes in CI.
 

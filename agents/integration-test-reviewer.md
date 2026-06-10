@@ -169,6 +169,36 @@ Check if integration tests are in the CI pipeline:
 
 ---
 
+### D8 — Failure Path Coverage
+
+**Check: does the suite verify what happens when the boundary fails — not only when it succeeds?**
+
+Integration tests that only cover happy paths leave constraint enforcement, error propagation, and rollback behavior unverified against the real dependency.
+
+For each external dependency, check:
+
+**Database:**
+
+- Unique constraint violation: is there a test that inserts a duplicate and asserts the constraint error propagates?
+- FK violation: is there a test that references a nonexistent parent?
+- Rollback on error: is there a test that throws mid-transaction and asserts no partial write persisted?
+
+**Queue / event bus:**
+
+- Is there a test for consumer behavior on a malformed or invalid message?
+- Is there a test for what happens when the publisher encounters an error?
+
+**HTTP dependency (WireMock):**
+
+- Does the test suite exercise 4xx responses (401, 403, 404, 422) from the dependency?
+- Does it exercise 5xx or timeout scenarios?
+
+**Critical:** Spec has unique constraint or FK AC and no test verifies it is enforced against the real DB. Spec has error-handling AC ("system retries on 5xx") and no integration test covers the failure path.
+**Important:** Component handles HTTP error responses but integration tests only exercise successful paths. Queue consumer has dead-letter or retry logic but no test publishes an invalid message.
+**Advisory:** No test verifies timeout/connection-loss behavior (acceptable to defer unless spec has resilience NFR).
+
+---
+
 ## Output Format
 
 ```
@@ -189,6 +219,7 @@ Check if integration tests are in the CI pipeline:
 | D5 — Spec AC Coverage | N/10 | |
 | D6 — Contract Tests | N/10 | |
 | D7 — CI Integration | N/10 | |
+| D8 — Failure Path Coverage | N/10 | |
 | **Overall** | **N/10** | |
 
 ### Critical Findings (must fix before committing)

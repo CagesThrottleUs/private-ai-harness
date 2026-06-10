@@ -182,6 +182,35 @@ Check:
 
 ---
 
+### D8 — Error Path and Negative Testing
+
+**Check: does the suite try to break the system, or only confirm it works?**
+
+A suite of tests named "user successfully does X" leaves error handling, validation, and permission enforcement unverified at the system level.
+
+Check for:
+
+- Validation failure paths: form submitted with invalid/missing data → error message shown
+- Authorization rejection: user attempts action on a resource they don't own → 403/redirect, not silent failure
+- Unauthenticated access: critical endpoints reject unauthenticated requests with the correct status
+- Not-found paths: navigate to non-existent resource → 404 page with correct message
+- Permission boundaries: non-privileged user attempts privileged action → rejected (not only that privileged user succeeds)
+
+**Red flags:**
+
+- Every test name begins with "user can" or "user successfully" — no failure scenarios anywhere
+- Permission boundary tests only cover the allowed path, not the denied path
+- No test submits an invalid form and asserts the error message
+- No test attempts an unauthorized action and asserts rejection
+
+If `{SPEC_PATH}` provided: for each REQ-NNN with an error or rejection AC ("returns 403", "shows validation error", "rejects unauthenticated"), is there an E2E test?
+
+**Critical:** No test verifies a forbidden action is rejected when spec has permission or auth ACs.
+**Important:** Spec has input validation ACs but no E2E test exercises invalid input. No unauthenticated rejection test for an auth-required endpoint.
+**Advisory:** No 404/not-found path tested. No session-expiry scenario exercised.
+
+---
+
 ## Output Format
 
 ```
@@ -202,6 +231,7 @@ Check:
 | D5 — Page Object Model | N/10 | |
 | D6 — Auth and State | N/10 | |
 | D7 — CI Integration | N/10 | |
+| D8 — Error Path and Negative Testing | N/10 | |
 | **Overall** | **N/10** | |
 
 ### Critical Findings (must fix before committing)
