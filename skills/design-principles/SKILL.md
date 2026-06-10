@@ -458,10 +458,4 @@ Run **after implementation, before marking complete** in `executing-plans` and `
 - Full violation/fix tables for all principles → `skills/design-principles/principles.md`
 - Full GoF applicability + relations → `skills/design-principles/references.md`
 
-**GoF pattern detail by name**
-
-Creational: [Factory Method](https://refactoring.guru/design-patterns/factory-method) · [Abstract Factory](https://refactoring.guru/design-patterns/abstract-factory) · [Builder](https://refactoring.guru/design-patterns/builder) · [Prototype](https://refactoring.guru/design-patterns/prototype) · [Singleton](https://refactoring.guru/design-patterns/singleton)
-
-Structural: [Adapter](https://refactoring.guru/design-patterns/adapter) · [Bridge](https://refactoring.guru/design-patterns/bridge) · [Composite](https://refactoring.guru/design-patterns/composite) · [Decorator](https://refactoring.guru/design-patterns/decorator) · [Facade](https://refactoring.guru/design-patterns/facade) · [Flyweight](https://refactoring.guru/design-patterns/flyweight) · [Proxy](https://refactoring.guru/design-patterns/proxy)
-
-Behavioral: [Chain of Responsibility](https://refactoring.guru/design-patterns/chain-of-responsibility) · [Command](https://refactoring.guru/design-patterns/command) · [Iterator](https://refactoring.guru/design-patterns/iterator) · [Mediator](https://refactoring.guru/design-patterns/mediator) · [Memento](https://refactoring.guru/design-patterns/memento) · [Observer](https://refactoring.guru/design-patterns/observer) · [State](https://refactoring.guru/design-patterns/state) · [Strategy](https://refactoring.guru/design-patterns/strategy) · [Template Method](https://refactoring.guru/design-patterns/template-method) · [Visitor](https://refactoring.guru/design-patterns/visitor)
+**GoF pattern detail by name:** `refactoring.guru/design-patterns/<pattern-name>` (kebab-case, e.g. `chain-of-responsibility`, `template-method`)

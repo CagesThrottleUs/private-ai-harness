@@ -33,9 +33,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D1 — Type System Correctness
 
-**What it means:** The type system is used to its full expressive power. Types are as narrow and precise as the language allows. Mutability and ownership markers are correct. Generics/templates have tight, meaningful bounds.
-
-**Signs of violation:** `any`/`void*`/`Object` when a precise type exists; missing `const`/`final`/`val`/`let`; unconstrained generics; implicit widening that loses information; casts that bypass type safety without justification.
+Violations: `any`/`void*`/`Object` when precise type exists; missing `const`/`final`/`val`/`let`; unconstrained generics; implicit widening; casts that bypass type safety without justification.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -50,9 +48,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D2 — Memory & Resource Ownership
 
-**What it means:** Every resource (memory, file handles, sockets, locks, database connections) has exactly one owner at all times. Acquisition and release are paired using the language's idiomatic mechanism. No resource leaks on any code path, including error paths.
-
-**Signs of violation:** Manual `delete`/`free` without RAII wrapper; `open()` without guaranteed `close()`; lock acquired without guaranteed release; resource allocated in a branch but released only in happy path.
+Violations: manual `delete`/`free` without RAII; `open()` without guaranteed `close()`; lock acquired without guaranteed release; resource allocated in a branch but released only in happy path.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -67,9 +63,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D3 — Undefined & Implementation-Defined Behavior
 
-**What it means:** No constructs that invoke language-standard undefined or unspecified behavior. When behavior is implementation-defined or platform-specific, it is explicitly documented. Code does not rely on behavior that "happens to work" on the current compiler/runtime.
-
-**Signs of violation:** Signed integer overflow used for wraparound without explicit annotation; reading from an uninitialized variable; accessing memory after it is freed; data races; relying on evaluation order that the standard does not guarantee.
+Violations: signed overflow without explicit annotation; reads from uninitialized variables; use-after-free; data races; relying on evaluation order the standard does not guarantee.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -84,9 +78,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D4 — Language Idioms & Standard Library Usage
 
-**What it means:** Code uses the language's canonical constructs, not idioms transplanted from another language. The standard library is used correctly and preferred over reimplementation. The code reads like it was written by someone who knows the language, not someone translating from another language.
-
-**Signs of violation:** Index-based loops where range-for/iterators are idiomatic; reimplemented sorting/searching/string manipulation; Java-style OOP class hierarchies in Go; callback-based async in modern async/await languages; `null` checks instead of `Optional`/`Result`/`Maybe`.
+Violations: index loops where range-for is idiomatic; reimplemented stdlib functions; cross-language idiom transplants (Java OOP in Go, callback async in async/await languages); `null` checks instead of `Optional`/`Result`/`Maybe`.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -101,9 +93,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D5 — Concurrency & Synchronization
 
-**What it means:** No data races. Synchronization primitives used at the right granularity. No deadlock patterns (consistent lock ordering, no lock held while acquiring another without protocol). No leaked threads, goroutines, or async tasks.
-
-**Signs of violation:** Shared mutable state accessed from multiple threads without synchronization; `volatile` used as a synchronization primitive (C++/Java); channel closed by receiver; `sync.WaitGroup` misused; `Promise` chains that swallow errors and don't propagate cancellation.
+Violations: shared mutable state without synchronization; `volatile` used as sync primitive; channel closed by receiver; `WaitGroup` misused; `Promise` chains that swallow errors or don't propagate cancellation.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -118,9 +108,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D6 — Error Handling Model
 
-**What it means:** Errors are propagated using the language's idiomatic mechanism, not silently dropped or converted to sentinel values unexpectedly. Error values carry sufficient context to diagnose the failure. Panics/exceptions are reserved for truly unrecoverable states — not for normal control flow.
-
-**Signs of violation:** `_ = err` in Go; bare `except:` in Python; `.unwrap()` outside tests in Rust; exception caught and swallowed; error converted to `null` without logging or propagation; panic/throw used for expected error conditions.
+Violations: `_ = err` in Go; bare `except:` in Python; `.unwrap()` outside tests in Rust; swallowed exceptions; error silently converted to `null`; panic/throw for expected conditions.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -135,9 +123,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D7 — API Contract Design
 
-**What it means:** Preconditions, postconditions, and invariants are encoded in types where the language allows, otherwise documented in the function signature or docstring. The public API surface is minimal — nothing is exposed that doesn't need to be. Function signatures encode constraints that prevent misuse at compile time.
-
-**Signs of violation:** Boolean parameters where an enum or overloaded function would be clearer; functions that accept any string where a validated newtype/wrapper would prevent misuse; public functions with undocumented preconditions that cause panics/UB when violated; overly broad visibility (`pub`, `public`, `export`) on internals.
+Violations: boolean params where enum/overload would be clearer; functions accepting raw strings where a validated newtype prevents misuse; public functions with undocumented preconditions; overly broad visibility on internals.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -152,9 +138,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D8 — Performance Model
 
-**What it means:** Algorithmic complexity is appropriate for the expected input scale. Language-specific allocation and copy patterns in hot paths are avoided. Standard library container and algorithm performance characteristics are understood and used correctly.
-
-**Signs of violation:** O(n²) algorithm on unbounded input; unnecessary heap allocations in tight loops; string concatenation in a loop instead of a builder; wrong container type (sorted when unsorted suffices, or vice versa); copies where moves or borrows are possible.
+Violations: O(n²) on unbounded input; unnecessary heap allocations in tight loops; string concatenation in loop instead of builder; wrong container type; copies where moves or borrows suffice.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -169,9 +153,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D9 — Standard Version Compliance
 
-**What it means:** Code targets the declared language standard `{STANDARD}`. Deprecated features from that standard are flagged and should be replaced. Features from a newer standard are not silently used without updating the declared target. Older idioms are replaced with the modern equivalent where the standard provides a better alternative.
-
-**Signs of violation:** `std::auto_ptr` in C++17+ code; `unsafe` pointer operations where safe stdlib equivalents now exist in Rust; `Optional.get()` without `isPresent()` check in Java; `asyncio.coroutine` decorator in Python 3.11+; `var` in JavaScript where `const`/`let` is available.
+Violations: `std::auto_ptr` in C++17+; `asyncio.coroutine` in Python 3.11+; `Optional.get()` without `isPresent()` in Java; `var` in JS where `const`/`let` is available; features from a newer standard used without updating the declared target.
 
 | Language | Deprecated / replaced patterns per standard |
 |----------|---------------------------------------------|
@@ -186,9 +168,7 @@ Ten language-agnostic dimensions. For each, apply the language-specific mapping 
 
 ### D10 — Safety Properties
 
-**What it means:** The language's safety model is respected, not circumvented. When safety is explicitly bypassed (unsafe blocks, raw pointer arithmetic, reflection, `eval`, native interop), the circumvention is minimal, localized, documented with explicit invariant statements, and audited for correctness.
-
-**Signs of violation:** Large `unsafe` blocks where a smaller one suffices; `eval(userInput)` without sanitization; reflection used to bypass access control without justification; raw memory manipulation without proof of bounds and lifetime correctness; disabling static analysis rules without comment.
+Violations: large `unsafe` blocks where a smaller one suffices; `eval(userInput)` without sanitization; reflection bypassing access control without justification; raw memory manipulation without bounds/lifetime proof; disabling static analysis rules without comment.
 
 | Language | Specific checks |
 |----------|----------------|
@@ -284,48 +264,7 @@ Score each dimension 0–10:
 
 ---
 
-### D2 — Memory & Resource Ownership
-[same structure]
-
----
-
-### D3 — Undefined & Implementation-Defined Behavior
-[same structure]
-
----
-
-### D4 — Language Idioms & Standard Library Usage
-[same structure]
-
----
-
-### D5 — Concurrency & Synchronization
-[same structure]
-
----
-
-### D6 — Error Handling Model
-[same structure]
-
----
-
-### D7 — API Contract Design
-[same structure]
-
----
-
-### D8 — Performance Model
-[same structure]
-
----
-
-### D9 — Standard Version Compliance
-[same structure]
-
----
-
-### D10 — Safety Properties
-[same structure]
+[Repeat the D1 finding structure (Critical / Important / Advisory) for D2–D10.]
 
 ---
 
