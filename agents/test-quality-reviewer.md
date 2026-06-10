@@ -108,6 +108,13 @@ validateEmail("")
 ```
 Detection: catch/recover with no assertion on the exception type/message.
 
+**3h. Single-Strategy Coverage**
+Exhaustive testing is impossible — this is why two complementary strategies exist. A suite that uses only one has systematic blind spots.
+- Black-box only (all tests derived from the spec): internal branches never exercised — bugs that exist on specific code paths escape.
+- White-box only (all tests derived from code structure): spec-to-behavior gaps untested — a function can pass coverage with the wrong behavior for a valid input class.
+
+Detection: all test inputs map directly to spec examples with no evidence of branch/path/condition analysis; or all tests were generated from a coverage report with no boundary value or equivalence partition cases. Flag when the suite has zero structural coverage markers (no branch/path annotations, no coverage report reference) AND no equivalence partitions.
+
 ### Step 4 — Spec TC Coverage
 
 For every named `TC-NNN` in the spec's `**Test Cases:**` section:

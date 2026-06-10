@@ -211,7 +211,11 @@ Next failing test for next feature.
 
 Testing is the process of executing a program with the intent of finding errors (Myers, 1979). Design each RED test to be *likely to fail* on a wrong implementation. A test that passes regardless of whether the implementation is correct is not a test — it is noise.
 
-Three techniques that find most bugs:
+**Exhaustive testing is impossible.** Even for trivial programs, the number of possible input combinations exceeds what can ever be tested completely. This is not a limitation to work around — it is a fundamental constraint that determines your entire approach. Because you cannot test everything, you must choose strategically. Two complementary strategies cover the space:
+
+### Black-box strategy (derive from the spec)
+
+Treat the component as a black box: you know inputs and expected outputs; you do not look at the implementation. Apply before writing each RED test.
 
 **Boundary value analysis** — bugs cluster at edges. For any range, test below, at, and above:
 - Max retries = 3: test 2 failures (still retrying), 3 failures (exhausted), 4 calls (must not happen)
@@ -226,7 +230,18 @@ Three techniques that find most bugs:
 - Concurrent access (two requests hitting the same record)
 - Partial failure (first step succeeds, second throws — is state consistent?)
 
-Apply before writing each RED test. If you can only think of happy-path tests, the interface may be hiding its error contracts from callers. Listen to that signal.
+### White-box strategy (derive from the code)
+
+After GREEN, look at the implementation. Use the code structure to find paths that black-box analysis missed.
+
+**Branch coverage** — every `if`/`else`/`switch` branch exercised at least once. An untested branch is an untested behavior.
+
+**Path coverage** — for functions with multiple conditionals, each combination of branches is a distinct execution path. Test paths that combine edge conditions, not just the most common sequence.
+
+**Condition coverage** — for compound conditions (`if (a && b)`), test each sub-expression independently so a bug that changes `&&` to `||` is caught:
+- `a=true, b=true` / `a=true, b=false` / `a=false, b=true`
+
+Write a new RED test for every uncovered branch or path white-box analysis reveals. If you can only think of happy-path tests, the interface may be hiding its error contracts from callers. Listen to that signal.
 
 ## Why Order Matters
 
