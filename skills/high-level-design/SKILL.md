@@ -49,7 +49,7 @@ Do NOT activate without a spec that has passed spec-quality-gate. If no spec exi
 
 1. **Read spec and business context** — extract NFRs, security requirements, compliance, dependencies
 2. **Ask clarifying architecture questions** — one at a time, multiple choice preferred
-3. **Present component decomposition** — boxes and arrows, get approval before diagramming
+3. **Present component decomposition** — boxes and arrows; for each proposed component name what it hides (the design decision or volatile requirement other components must not know about); get approval before diagramming
 4. **Generate C4 diagrams** — Context (Level 1) then Container (Level 2) in Mermaid
 5. **Document technology selections** — one entry per major component with rationale
 6. **Threat model** — Shostack 4 questions + STRIDE per component

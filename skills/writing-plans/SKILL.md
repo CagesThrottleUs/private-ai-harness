@@ -46,6 +46,7 @@ Before defining tasks, map out which files will be created or modified and what 
 - Each file has one clear responsibility (SRP). If you can't state it in one sentence, split the file.
 - Files that change together live together. Split by responsibility, not by technical layer.
 - Dependencies flow through interfaces, not concrete types (DIP). No `new ConcreteX()` at call sites.
+- **Before finalizing any file boundary, ask: "What difficult design decision or volatile requirement does this file hide?"** A file that can only be described as a step in a sequence ("handle input", "run the sort", "write output") is process-decomposed. Rename it to describe what it hides, or merge it into the module that owns that secret. (Parnas, 1972)
 - In existing codebases, follow established patterns. If a file you're modifying has grown unwieldy, include a targeted split in the plan.
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.

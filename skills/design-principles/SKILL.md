@@ -29,6 +29,7 @@ Every piece of knowledge has exactly one authoritative representation. DRY is ab
 **KISS — Keep It Simple, Stupid**
 The simplest solution that correctly solves the problem is the right solution.
 _Test:_ Can a new engineer understand this without asking anyone? If not, simplify.
+_Module test (Parnas):_ Can a developer understand and modify this module without reading any other module? If not, the interface reveals implementation detail — the boundary is wrong.
 
 **YAGNI — You Aren't Gonna Need It**
 Don't build for hypothetical future requirements. No extension points without a concrete second use case in the spec. No generics/templates when one type exists. No versioning until a second version is needed.
@@ -158,8 +159,20 @@ _Test:_ Swap low-level implementation — does high-level module need to change?
 
 ## Additional Design Principles
 
-**Encapsulation / Information Hiding** — Expose minimum surface area. Hide implementation decisions.
-_Test:_ If implementation changes, does any caller need to change? Yes = leaking internals. (Parnas, 1972)
+**Encapsulation / Information Hiding** — Each module hides one difficult design decision or one volatile requirement from the rest of the system. (Parnas, 1972)
+
+**Modularization criterion:** When decomposing a system, the question is not "what steps does this perform?" but "what secret does this hide?" A module named after a step (`InputHandler`, `Sorter`, `OutputFormatter`) is process-decomposed — its structure is exposed through its name and will ripple when the process changes. A module named after what it hides (`LineStorage`, `SortStrategy`, `ReportLayout`) is information-hiding decomposed — callers only depend on its interface.
+
+**Identifying the secret:** Before creating a module, ask: "What is the most volatile or difficult thing about this problem area?" That volatile thing is the secret. Wrap it behind an interface. The rest of the system must not know whether you store data in an array or linked list, call REST or gRPC, sort with QuickSort or MergeSort. Only the module owning that secret is allowed to know it.
+
+| Violation | Signal | Fix |
+|-----------|--------|-----|
+| Module named after a step | `Parse`, `Transform`, `Emit` — flowchart decomposition | Rename to what it hides: `SchemaAdapter`, `FormatTranslator`, `OutputSink` |
+| Changing a data structure requires editing N modules | The data structure leaked across module boundaries | One module owns the structure; others call its interface |
+| Adding a new storage backend requires changing business logic | Storage detail leaked upward | Storage module hides the backend; business logic calls an interface |
+| Module knows the caller's internal representation | Two-way coupling | Module exposes what it provides; caller reveals nothing about itself |
+
+_Test:_ Can you completely replace this module's implementation — swap the data structure, algorithm, or backend — without changing any other module? If yes: well-hidden. If no: implementation detail leaked. (Parnas, 1972)
 
 **Postel's Law** — Be conservative in what you send, liberal in what you accept. Normalize format variation on input; be strict on output. Not a license for accepting malformed data — that's Fail Fast's job.
 

@@ -154,6 +154,7 @@ For open-ended questions ("describe your problem"), continue using prose — the
 
 - Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
 - For each unit, you should be able to answer: what does it do, how do you use it, and what does it depend on?
+- **For each proposed component, name the difficult design decision or volatile requirement it hides from the rest of the system.** A component whose name describes a step in a sequence (`InputHandler`, `DataProcessor`, `OutputWriter`) is process-decomposed — change the step and callers break. A component whose name describes what it hides (`StorageLayout`, `SortStrategy`, `SchemaAdapter`) is information-hiding decomposed — change its internals and nothing else needs to know. (Parnas, 1972)
 - Can someone understand what a unit does without reading its internals? Can you change the internals without breaking consumers? If not, the boundaries need work.
 - Smaller, well-bounded units are also easier for you to work with - you reason better about code you can hold in context at once, and your edits are more reliable when files are focused. When a file grows large, that's often a signal that it's doing too much.
 

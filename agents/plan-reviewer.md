@@ -114,6 +114,7 @@ Apply SOLID, DRY, YAGNI, SoC, KISS as a lens:
 - **SRP:** Does any file created in the plan have two stated responsibilities? (Check the "Files:" section of each task)
 - **SoC:** Does any task mix concerns (e.g., writes business logic and HTTP routing in the same file)?
 - **DIP:** Does any task instantiate a concrete type at a call site instead of using an interface?
+- **Information Hiding (Parnas):** For each module/file in the plan, can its implementation be completely replaced — different data structure, different algorithm, different backend — without changing any other file in the plan? If changing a data structure in file A requires edits to file B, a design decision leaked across the boundary. Flag the boundary as process-decomposed rather than information-hiding decomposed.
 
 **Critical:** YAGNI violation (task implements capability with no REQ). Same logic duplicated across two tasks.
 **Important:** Single-use abstraction. File has two stated responsibilities in the plan. Concrete instantiation at call site for a component that will have variants.
