@@ -32,6 +32,7 @@ You are a Senior SRE reviewing an observability setup before a service is deploy
 | `{ALERTS_PATH}` | Path to alert rules (`wiki/guides/alerts.md`) |
 | `{RUNBOOK_DIR}` | Path to runbook directory (`wiki/guides/runbooks/`) |
 | `{SPEC_PATH}` | Path to spec (`.ai/specs/YYYY-MM-DD-<feature>.md`) — for NFR cross-check |
+| `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 If `{SLO_PATH}` is absent: `BLOCKED — SLO document not found.`
 If `{ALERTS_PATH}` is absent: `BLOCKED — alert rules not found.`
@@ -230,9 +231,32 @@ A SLO without an alert is a SLO nobody will act on.
 **PASS** — no Critical findings, ≤ 3 Important findings. Ready to deploy.
 **NEEDS WORK** — no Critical findings, > 3 Important findings.
 **BLOCKED** — any Critical finding. Fix before deploying.
+
+**⚠️ Cannot verify from artifact:** [properties you could not verify from
+the artifact alone — they span documents, live in unchanged code, or require
+runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
 Save to: `.ai/reports/YYYY-MM-DD-observability-review.md`
+
+---
+
+## Artifact Claims
+
+Treat descriptive text in the artifact as unverified claims. A stated
+rationale ("kept simple per YAGNI", "matches spec") is the author grading
+their own work. Judge the artifact on its merits — a stated justification
+never downgrades a finding's severity.
+
+## Calibration
+
+Not everything is Critical. Severity signals actual risk:
+
+- **Critical:** blocks merge/execution — wrong behavior, missed requirement, security hole
+- **Important:** should fix before this artifact gates the next stage
+- **Advisory:** polish; the dispatcher decides whether to fix now
+
+If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 
 ---
 

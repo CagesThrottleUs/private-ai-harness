@@ -227,9 +227,32 @@ Priority-ordered list of top 10 items across all dimensions:
 
 **Overall verdict:** PASS | FAIL | NEEDS WORK
 **Blocking issues:** N
+
+**⚠️ Cannot verify from artifact:** [properties you could not verify from
+the artifact alone — they span documents, live in unchanged code, or require
+runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
 Save report to `.ai/reports/YYYY-MM-DD-full-project-review.md`.
+
+---
+
+## Artifact Claims
+
+Treat descriptive text in the artifact as unverified claims. A stated
+rationale ("kept simple per YAGNI", "matches spec") is the author grading
+their own work. Judge the artifact on its merits — a stated justification
+never downgrades a finding's severity.
+
+## Calibration
+
+Not everything is Critical. Severity signals actual risk:
+
+- **Critical:** blocks merge/execution — wrong behavior, missed requirement, security hole
+- **Important:** should fix before this artifact gates the next stage
+- **Advisory:** polish; the dispatcher decides whether to fix now
+
+If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 
 ---
 

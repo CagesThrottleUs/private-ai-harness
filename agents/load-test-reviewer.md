@@ -29,6 +29,7 @@ You are a senior performance engineer reviewing load test scripts before they ar
 | `{SCRIPT_PATH}` | Path to load test script (`tests/performance/load-test.js` or equivalent) |
 | `{SPEC_PATH}` | Path to source spec (optional — for NFR cross-check) |
 | `{SLO_PATH}` | Path to SLO document (optional — for threshold alignment check) |
+| `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 If `{SCRIPT_PATH}` missing: `BLOCKED — load test script not found.`
 
@@ -201,9 +202,32 @@ Check for anti-patterns that make tests flaky or invalid:
 **PASS** — no Critical, ≤ 3 Important. Load tests ready to commit.
 **NEEDS WORK** — no Critical, > 3 Important.
 **BLOCKED** — any Critical.
+
+**⚠️ Cannot verify from artifact:** [properties you could not verify from
+the artifact alone — they span documents, live in unchanged code, or require
+runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
 Save to: `.ai/reports/YYYY-MM-DD-load-test-review.md`
+
+---
+
+## Artifact Claims
+
+Treat descriptive text in the artifact as unverified claims. A stated
+rationale ("kept simple per YAGNI", "matches spec") is the author grading
+their own work. Judge the artifact on its merits — a stated justification
+never downgrades a finding's severity.
+
+## Calibration
+
+Not everything is Critical. Severity signals actual risk:
+
+- **Critical:** blocks merge/execution — wrong behavior, missed requirement, security hole
+- **Important:** should fix before this artifact gates the next stage
+- **Advisory:** polish; the dispatcher decides whether to fix now
+
+If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 
 ---
 

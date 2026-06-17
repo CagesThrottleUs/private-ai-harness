@@ -43,9 +43,9 @@ Example confirm message:
 
 4.5. **ci-pipeline-setup** - Activates immediately after worktree creation if no CI configuration exists. Detects platform (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket), generates platform-agnostic pipeline spec and platform-specific config, runs `ci-reviewer` agent. Pipeline commits to branch before first feature commit — CI guards from day one.
 
-5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs. Each task should trace to a container in the HLD's C4 diagram.
+5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs, an Interfaces block (Consumes/Produces exact signatures), and a Task Right-Sizing boundary. Plan header includes a `## Global Constraints` section with project-wide binding requirements from the spec. Each task should trace to a container in the HLD's C4 diagram.
 
-6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with two-stage review (spec compliance, then code quality), or executes in batches with human checkpoints. After any task that creates an API endpoint or service component, triggers `observability-standards` to instrument logging, metrics, SLOs, alerts, and runbooks.
+6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with single-pass task review (spec compliance + code quality combined via `task-reviewer-prompt.md`), using file-based handoffs (`task-brief` + `review-package` scripts) to prevent context bloat. Progress tracked in a durable ledger that survives session compaction. Or executes inline with human checkpoints. After any task that creates an API endpoint or service component, triggers `observability-standards`.
 
 7. **test-driven-development** - Activates during implementation. Enforces RED-GREEN-REFACTOR: write failing test, watch it fail, write minimal code, watch it pass, commit. Deletes code written before tests.
 

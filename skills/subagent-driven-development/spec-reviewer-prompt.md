@@ -1,5 +1,9 @@
 # Spec Compliance Reviewer Prompt Template
 
+> **DEPRECATED (v2.1.0):** Two-pass review replaced by single-pass unified reviewer.
+> Use [task-reviewer-prompt.md](task-reviewer-prompt.md) instead — it covers both
+> spec compliance and code quality in one dispatch, halving reviewer invocations.
+
 Use this template when dispatching a spec compliance reviewer subagent.
 
 **Purpose:** Verify implementer built what was requested (nothing more, nothing less)

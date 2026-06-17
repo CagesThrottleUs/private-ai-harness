@@ -63,6 +63,18 @@ Each agent gets:
 - **Constraints:** Don't change other code
 - **Expected output:** Summary of what you found and fixed
 
+### 2a. File-Based Handoffs
+
+Pasted context stays resident in your session for every subsequent turn.
+Three parallel agents × pasted task text = 3× context growth before you read a result.
+
+- **Task content from a plan:** run `skills/subagent-driven-development/scripts/task-brief PLAN N`,
+  pass the printed file path. Agent reads once; you never hold the text.
+- **Agent reports:** specify a report file path in each dispatch prompt. Agent writes there;
+  you read it after completion. Never paste agent output into later dispatches.
+- **Accumulated summaries:** do not paste "state after Agents 1-3" into Agent 4's prompt.
+  A fresh agent needs its scope, the file paths it touches, and its constraints. Nothing else.
+
 ### 3. Dispatch in Parallel
 
 ```typescript
@@ -82,6 +94,16 @@ When agents return:
 - Integrate all changes
 
 ## Agent Prompt Structure
+
+**For plan-based tasks, use the handoff pattern:**
+```markdown
+Read your task brief: [BRIEF_FILE]   ← printed by task-brief script
+Write your report to: [REPORT_FILE]  ← uniquely named, never pasted back
+
+[1 line on where this task fits]
+[interfaces and decisions from earlier tasks the brief cannot know]
+[exact constraints]
+```
 
 Good agent prompts are:
 1. **Focused** - One clear problem domain
@@ -110,6 +132,12 @@ Return: Summary of what you found and what you fixed.
 ```
 
 ## Common Mistakes
+
+**❌ Pasting task text inline:** context grows with every agent dispatched; brief files eliminate this
+**✅ Use task-brief script:** pass the path — agent reads once, you never hold it
+
+**❌ Pasting accumulated summaries:** "state after Agents 1-3 is..." creates megaprompts
+**✅ Pass file paths:** each agent reads only what it needs
 
 **❌ Too broad:** "Fix all the tests" - agent gets lost
 **✅ Specific:** "Fix agent-tool-abort.test.ts" - focused scope

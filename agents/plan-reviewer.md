@@ -64,6 +64,12 @@ Read `{PLAN_PATH}` and `{SPEC_PATH}` in full (and `{HLD_PATH}` if provided) befo
 - Is each step 2–5 minutes of work? A step that says "implement the entire auth system" is not a step.
 - Does the RED step actually run and fail before the GREEN step? TDD requires failure first.
 
+**Task Right-Sizing:**
+A task may fold setup, scaffolding, and documentation into its deliverable — that is correct.
+A task must NOT bundle two independently-reviewable deliverables where a reviewer could meaningfully
+reject one while approving the other (e.g., "implement feature X AND feature Y").
+The test: could a reviewer approve the first deliverable and block the second? If yes: split required.
+
 **Karpathy anti-patterns to flag:**
 - **Over-engineering:** abstractions, configurations, or error handling not tied to a specific REQ-NNN
 - **Unstated assumptions:** task assumes an interface, data shape, or dependency exists without naming it
@@ -71,7 +77,7 @@ Read `{PLAN_PATH}` and `{SPEC_PATH}` in full (and `{HLD_PATH}` if provided) befo
 - **Blast radius too large:** single task modifies > 3 files — split it
 
 **Critical:** Verification step is entirely absent from a task. Task implements more than one logical change (compound task).
-**Important:** Verification step says "make sure it works" with no command. RED step missing (TDD task written GREEN-only). Task assumes a dependency that no previous task defines.
+**Important:** Verification step says "make sure it works" with no command. RED step missing (TDD task written GREEN-only). Task assumes a dependency that no previous task defines. Task bundles two distinct deliverables a reviewer could independently approve/reject.
 **Advisory:** Task is > 5 minutes of work by a senior engineer's estimate. No REQ-NNN reference in task header.
 
 ---
@@ -98,9 +104,15 @@ Read all tasks sequentially. Track every type, function name, class name, method
 
 **For each later task:** does it use the same names? A function called `create_user()` in Task 2 but `createUser()` in Task 5 is a bug introduced by the plan. A `UserRecord` type in Task 3 and a `User` type in Task 6 that appear to be the same thing are a naming inconsistency.
 
-**Critical:** Same entity referred to by different names in different tasks (will cause compilation/runtime errors when executed in sequence). Interface defined in Task N but Task N+1 uses a different signature for the same interface.
-**Important:** Naming convention inconsistency (snake_case in one task, camelCase in another for the same language). Return type implied in Task N differs from what Task N+1 expects.
-**Advisory:** Type import path not specified (may work but fragile).
+**Interfaces block consistency:**
+If tasks carry `**Interfaces:**` blocks (Consumes / Produces):
+
+- For every `Consumes:` entry in task N, is there a matching `Produces:` entry in an earlier task — same name, same signature?
+- For every `Produces:` entry in task N, does at least one later task's `Consumes:` reference it?
+
+**Critical:** Same entity referred to by different names in different tasks (will cause compilation/runtime errors when executed in sequence). Interface defined in Task N but Task N+1 uses a different signature for the same interface. `Consumes:` in task N references a name not produced by any earlier task — implementer has no source of truth for the interface.
+**Important:** Naming convention inconsistency (snake_case in one task, camelCase in another for the same language). Return type implied in Task N differs from what Task N+1 expects. `Produces:` in task N never appears in any `Consumes:` — dead interface (YAGNI violation or missing downstream task).
+**Advisory:** Type import path not specified (may work but fragile). `Interfaces:` block absent from tasks where cross-task dependencies exist (inferred from file overlap).
 
 ---
 
@@ -146,10 +158,18 @@ The plan header must contain:
 - `**Architecture:**` — 2–3 sentences about approach
 - `**Tech Stack:**` — key technologies/libraries
 - Reference to spec path
+- `## Global Constraints` section — project-wide binding requirements (version floors,
+  naming rules, exact values) that every task implicitly inherits
 
-**Critical:** Goal or Architecture absent.
-**Important:** Spec path not linked in header. Tech stack absent.
-**Advisory:** Architecture section is a single vague sentence.
+**Global Constraints check:**
+
+- Is `## Global Constraints` present?
+- If present: does it contain concrete values (not "TBD", not vague principles like "be performant")?
+- Are constraints derived from spec REQ-NNNs, not invented by the planner?
+
+**Critical:** Goal or Architecture absent. `## Global Constraints` section absent — task reviewer has no binding requirements anchor; every task review operates blind to cross-cutting constraints.
+**Important:** Spec path not linked in header. Tech stack absent. Global Constraints present but contains placeholder values or principles without exact values.
+**Advisory:** Architecture section is a single vague sentence. Constraint not traceable to a spec REQ-NNN.
 
 ---
 

@@ -11,20 +11,32 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
+**Narration:** between steps, narrate at most one short line — tool results carry the record.
+
 **Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (such as Claude Code or Codex). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
 
 ## The Process
 
+### Step 0: Durable Progress Check
+
+Before anything else, check for a ledger:
+`cat "$(git rev-parse --git-path executing-plans)/progress.md"` (ignore errors if absent).
+Tasks listed there as complete are DONE — do not re-execute; resume at the first incomplete task.
+Conversation memory does not survive compaction; the ledger is your recovery map.
+
 ### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+1. Read plan file; note the `## Global Constraints` section — these bind every task
+2. Pre-flight: scan for tasks that contradict each other or the Global Constraints.
+   If conflicts found, raise as ONE batched question before execution begins.
+3. Review for other concerns; raise with partner if any
+4. If clean: create todos and proceed
 
 ### Step 2: Execute Tasks
 
 For each task:
-1. Mark as in_progress
+1. Extract task brief: `skills/subagent-driven-development/scripts/task-brief PLAN_FILE N`
+   — read the printed file path; do not paste task text into context
+2. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
 4. Before committing: run the `design-principles` **Review Checklist** — catch violations before they land
@@ -34,6 +46,7 @@ For each task:
 8. If task creates a component with external dependencies (DB, queue, cache, external HTTP): invoke `integration-testing` skill — write Testcontainers-based integration tests alongside unit tests
 8. If task created a new API endpoint or service component: invoke `observability-standards` — instrument logging, metrics, SLOs, alerts, runbooks before this endpoint is deployed
 9. Mark as completed
+10. Append to ledger: `echo "Task N: complete" >> "$(git rev-parse --git-path executing-plans)/progress.md"`
 
 ### Step 3: Complete Development
 

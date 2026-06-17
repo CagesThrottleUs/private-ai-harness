@@ -64,7 +64,7 @@ Version is in `.claude-plugin/plugin.json` → `version` field (semver).
 
 Bump rules:
 - **patch** — fix a skill prompt, typo, description tweak
-- **minor** — new skill or agent added
+- **minor** — new skill or agent added; new auxiliary files in a skill directory (scripts, prompt templates) that add new capability
 - **major** — structural change (manifest format, install flow, breaking rename)
 
 Always bump version before committing a skill/agent change so Claude Code picks up the update on `/reload-plugins`.
@@ -109,7 +109,7 @@ Three skills are sourced from external references and can drift. Check and sync 
 | File | Source | How to check |
 |------|--------|-------------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill --web` |
-| `skills/using-superpowers/SKILL.md` | upstream superpowers skill | `gh search repos "claude superpowers skill"` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — last synced v6.0.2 | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | [Karpathy tweet](https://x.com/karpathy/status/2015883857489522876) + community distillations | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve any local customizations, bump patch version.

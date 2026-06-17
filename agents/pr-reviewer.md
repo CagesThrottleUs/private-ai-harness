@@ -22,6 +22,8 @@ The caller must provide:
 | `{BASE_SHA}` | Base commit (e.g., `origin/main`, `abc1234`) |
 | `{HEAD_SHA}` | Head commit (e.g., `HEAD`, `def5678`) |
 | `{REQUIREMENTS}` | **MANDATORY.** Spec file path (`.ai/specs/X.md`) or explicit `REQ-NNN` IDs. Empty = review blocked. |
+| `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |
+| `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 ---
 
@@ -256,7 +258,30 @@ Flag any `@spec_id` that doesn't match a real spec file as a **Critical** issue 
 **Must fix before merge:**
 1. [specific item]
 2. [specific item]
+
+**⚠️ Cannot verify from artifact:** [properties you could not verify from
+the artifact alone — they span documents, live in unchanged code, or require
+runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
+
+---
+
+## Artifact Claims
+
+Treat descriptive text in the artifact as unverified claims. A stated
+rationale ("kept simple per YAGNI", "matches spec") is the author grading
+their own work. Judge the artifact on its merits — a stated justification
+never downgrades a finding's severity.
+
+## Calibration
+
+Not everything is Critical. Severity signals actual risk:
+
+- **Critical:** blocks merge/execution — wrong behavior, missed requirement, security hole
+- **Important:** should fix before this artifact gates the next stage
+- **Advisory:** polish; the dispatcher decides whether to fix now
+
+If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 
 ---
 

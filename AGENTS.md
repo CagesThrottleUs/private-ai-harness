@@ -13,6 +13,7 @@ Every file is loaded raw by Claude Code on `/reload-plugins`.
 | Directory | Role |
 |-----------|------|
 | `skills/<name>/SKILL.md` | Slash-command skill loaded by Claude Code |
+| `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
 | `agents/<name>.md` | Subagent definition (dispatched via Agent tool) |
 | `scripts/install-tools.sh` | One-shot environment setup |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
@@ -62,7 +63,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for flows crossing 3+ components — Mermaid sequenceDiagram with auth boundary, error paths, sync/async arrows, retry blocks; runs `sequence-diagram-reviewer` |
 | `review` | `/review` | Central entry point for all review types |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
-| `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
+| `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation — file-based handoffs (`scripts/task-brief` + `scripts/review-package`), single-pass unified task reviewer (`task-reviewer-prompt.md`), durable progress ledger, pre-flight plan scan |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
 | `using-git-worktrees` | `/using-git-worktrees` | Parallel branches without stash churn |
@@ -90,7 +91,7 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `business-context-reviewer` | opus | Business context quality gate — validates problem statement is user-focused (not solution-framed), JTBD statement is complete, success metrics are measurable with baselines, compliance is explicitly addressed, non-goals present, stakeholders mapped, internal consistency. 6 dimensions. Invoked by `business-context-intake` skill. |
 | `hld-reviewer` | opus | Pre-human HLD quality gate — validates C4 diagrams, technology selection, STRIDE threat model, failure modes, capacity planning, ADR completeness, spec coverage, and AWS Well-Architected alignment. Invoked by `high-level-design` skill before human review. |
 | `spec-quality-reviewer` | opus | Spec quality gate — validates falsifiability, TC coverage, TC honesty, error path ownership, consistency, and dependency declaration against SQLite/RFC 8446/DO-178C standards. Invoked by `spec-quality-gate` skill. |
-| `plan-reviewer` | opus | Implementation plan quality gate — validates spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type/interface consistency, design principle compliance, and commit discipline. Invoked by `writing-plans` skill before execution handoff. |
+| `plan-reviewer` | opus | Implementation plan quality gate — validates spec coverage, task granularity (incl. Right-Sizing), Karpathy anti-patterns, placeholder detection, type/interface + Interfaces-block chain consistency, design principle compliance, Global Constraints section presence, and commit discipline. Invoked by `writing-plans` skill before execution handoff. |
 | `ci-reviewer` | opus | CI/CD pipeline quality gate — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, and branch protection alignment. Platform-agnostic: GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket. Invoked by `ci-pipeline-setup` skill. |
 | `observability-reviewer` | opus | Observability quality gate — validates OTel logging compliance (6 mandatory fields), golden signal coverage (all 4 signals), SLO quality vs spec NFRs, alert design (symptom-based, burn rate), runbook completeness (7 required sections), distributed tracing, SLO-to-alert alignment. Invoked by `observability-standards` skill. |
 | `deployment-reviewer` | opus | Deployment quality gate — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract pattern, dangerous patterns), smoke test coverage, deployment runbook, release notes quality (Keep a Changelog format), strategy-migration alignment. Invoked by `deployment-workflow` skill. |
@@ -109,7 +110,8 @@ Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"
 | `load-test-reviewer` | opus | Load test quality gate — validates NFR-aligned thresholds (arbitrary numbers = Critical), smoke test presence, realistic traffic modeling, appropriate test types (no soak for 99.9% availability = Critical), CI integration against staging (localhost = Critical), script quality. 6 dimensions. Invoked by `load-testing` skill. |
 | `linter-reviewer` | **sonnet** | Linter gate validator — detects language from manifests, verifies correct 2025 tool used (Ruff/Biome/golangci-lint/Clippy), confirms zero output, type checker run, no new suppression comments. 4 checks. Invoked by `verification-before-completion`. First Sonnet review agent. |
 
-Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`).
+Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`). `pr-reviewer` and `spec-impl-reviewer` accept optional `DIFF_FILE` (pre-generated by `scripts/review-package BASE HEAD`) — if present, the agent reads it instead of running git commands.
+All reviewer agents accept optional `REPORT_FILE` — if present, full findings are written there and only the verdict summary is returned to context.
 Business context agents (`business-context-reviewer`) require `CONTEXT_PATH`.
 Design agents (`hld-reviewer`) require `HLD_PATH` and `SPEC_PATH`.
 Spec agents (`spec-quality-reviewer`) require `SPEC_PATH`.

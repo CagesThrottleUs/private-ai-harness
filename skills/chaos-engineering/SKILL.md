@@ -233,6 +233,15 @@ For each experiment, document:
 
 ---
 
+## Reviewer Dispatch Discipline
+
+When dispatching the reviewer agent:
+- Pass artifact as a file path, not pasted content — pasted reviewer reports stay resident in context for the rest of the session
+- Do not pre-judge findings — never instruct the reviewer to ignore or not flag a specific issue, and never pre-rate severity ("treat X as Minor at most")
+- If the reviewer returns findings: dispatch ONE fix agent with the complete findings list, not one fixer per finding
+- Re-dispatch the same reviewer after fixes; repeat until PASS
+- A ⚠️ item from the reviewer is yours to resolve — you hold cross-document context the reviewer lacks; treat confirmed gaps as a failed review
+
 ## Self-Review: Run `chaos-reviewer` Agent
 
 ```
