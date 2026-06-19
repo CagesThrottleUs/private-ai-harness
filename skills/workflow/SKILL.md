@@ -83,6 +83,8 @@ Example confirm message:
 | Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
 | Quality gate reports | `.ai/reports/` | Ephemeral; one per run |
 | Requirement traceability | `.ai/requirements/` | REQ-NNN → TC mapping |
+| SDD scratch (task briefs, review diffs, progress ledger) | `.ai/sdd/` | Self-ignoring (`*` in `.gitignore`); ephemeral run state for subagent-driven-development |
+| Brainstorm server session files (mockup HTML, state, logs) | `.ai/brainstorm/` | Self-ignoring (`*` in `.gitignore`); ephemeral server runtime, created by `start-server.sh --project-dir` |
 
 ## Wiki Sync Rule
 

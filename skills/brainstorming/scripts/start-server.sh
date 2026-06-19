@@ -6,7 +6,7 @@
 # Each session gets its own directory to avoid conflicts.
 #
 # Options:
-#   --project-dir <path>  Store session files under <path>/.superpowers/brainstorm/
+#   --project-dir <path>  Store session files under <path>/.ai/brainstorm/
 #                         instead of /tmp. Files persist after server stops.
 #   --host <bind-host>    Host/interface to bind (default: 127.0.0.1).
 #                         Use 0.0.0.0 in remote/containerized environments.
@@ -78,7 +78,7 @@ fi
 SESSION_ID="$$-$(date +%s)"
 
 if [[ -n "$PROJECT_DIR" ]]; then
-  SESSION_DIR="${PROJECT_DIR}/.superpowers/brainstorm/${SESSION_ID}"
+  SESSION_DIR="${PROJECT_DIR}/.ai/brainstorm/${SESSION_ID}"
 else
   SESSION_DIR="/tmp/brainstorm-${SESSION_ID}"
 fi
@@ -87,8 +87,13 @@ STATE_DIR="${SESSION_DIR}/state"
 PID_FILE="${STATE_DIR}/server.pid"
 LOG_FILE="${STATE_DIR}/server.log"
 
-# Create fresh session directory with content and state peers
+# Create fresh session directory with content and state peers.
+# Write a self-ignoring .gitignore in the parent brainstorm dir so session
+# files (HTML mockups, PID, logs) never appear in git status.
 mkdir -p "${SESSION_DIR}/content" "$STATE_DIR"
+if [[ -n "$PROJECT_DIR" ]]; then
+  printf '*\n' > "${PROJECT_DIR}/.ai/brainstorm/.gitignore"
+fi
 
 # Kill any existing server
 if [[ -f "$PID_FILE" ]]; then
