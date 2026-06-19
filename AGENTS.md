@@ -32,6 +32,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — structured interview capturing user problem, JTBD, measurable success metrics, compliance, non-goals, stakeholder map; runs `business-context-reviewer`; hard gate before brainstorming |
 | `caveman` | `/caveman` | Ultra-compressed comms, ~75% token reduction |
 | `code-documentation` | `/code-documentation` | Writing or modifying any public construct |
+| `codebase-comprehension` | `/codebase-comprehension` | Universal Step 1 in every lane — maps relevant symbols, callers, data flow, and dependencies using codegraph/scout before any code change; inline for quick-fix, writes `.ai/work/<id>/comprehension.md` for task/epic |
 | `commit-discipline` | `/commit-discipline` | Generating compliant commit messages |
 | `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | 2+ independent tasks |
@@ -43,14 +44,17 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `integration-testing` | `/integration-testing` | During TDD GREEN phase for components with external I/O — Testcontainers setup (real DB/queue/cache), transaction rollback isolation, factory pattern, Pact contract tests for service APIs, CI integration job; runs `integration-test-reviewer` |
 | `api-contract-first` | `/api-contract-first` | Before any handler/gRPC service implementation — writes OpenAPI 3.1 spec or .proto file, sets up Spectral linting, Prism mock server, CI spec lint job; runs `api-contract-reviewer`; hard gate before handler code |
 | `e2e-testing` | `/e2e-testing` | Before `finishing-a-development-branch` for user-facing features — identifies critical user journeys, sets up Playwright with POM/auth fixtures/semantic locators, adds post-deploy CI E2E job against staging; runs `e2e-reviewer` |
+| `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
+| `engineer` | `/engineer` | **Universal entry point** — routes any request to the right lane (quick-fix/task/epic/research), classifies complexity from observable signals, proposes a skill chain, waits for user confirmation, then starts the flow |
+| `epic-decomposition` | `/epic-decomposition` | After HLD human approval in the epic lane — breaks epic into bounded stories, creates child work-item manifests under `.ai/work/<epic>/children/`, identifies parallel vs sequential dependency waves |
 | `load-testing` | `/load-testing` | Before `finishing-a-development-branch` when spec has NFR targets — generates k6 scripts (smoke/load/stress/spike/soak), thresholds tied to spec NFRs, CI performance job against staging; runs `load-test-reviewer` |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
-| `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/AST before LLM |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
+| `research-spike` | `/research-spike` | Time-boxed feasibility, comparison, or POC investigation — answer is the deliverable, not code; produces decision artifact in `.ai/` or ADR in `wiki/architecture/`; spike code is throwaway |
 | `feature-flags` | `/feature-flags` | For any feature needing gradual rollout, A/B test, kill switch, or permission gate — OpenFeature SDK setup, naming conventions, flag registry, progressive rollout pattern, CI flag hygiene check; runs `feature-flag-reviewer` |
 | `infrastructure-as-code` | `/infrastructure-as-code` | When feature needs new infrastructure (compute, DB, storage, networking) — Terraform/Pulumi structure with pinned versions, remote state + locking, typed variables, environment separation, tfsec CI scan; runs `iac-reviewer` |
 | `database-erd` | `/database-erd` | During HLD §5.2 or writing-plans for any feature with DB changes — Mermaid erDiagram with entities/FKs/cardinality, index strategy, design decisions section; runs `database-erd-reviewer` |
