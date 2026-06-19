@@ -53,6 +53,7 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
+| `refactoring` | `/refactoring` | Behavior-preserving restructure with test guard at every step — names the smell (god class/duplication/nesting/coupling), establishes test baseline, one structural move per micro-commit, behavior verified after each; zero new behavior |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
 | `research-spike` | `/research-spike` | Time-boxed feasibility, comparison, or POC investigation — answer is the deliverable, not code; produces decision artifact in `.ai/` or ADR in `wiki/architecture/`; spike code is throwaway |
 | `feature-flags` | `/feature-flags` | For any feature needing gradual rollout, A/B test, kill switch, or permission gate — OpenFeature SDK setup, naming conventions, flag registry, progressive rollout pattern, CI flag hygiene check; runs `feature-flag-reviewer` |

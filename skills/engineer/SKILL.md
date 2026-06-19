@@ -22,8 +22,13 @@ Read the request. Apply the signal table. When signals conflict or span two lane
 | **task** | Bounded feature, extending existing patterns, may add 1 endpoint or component, no new service | Hours |
 | **epic** | New service/system, new data model, external integration, PII/auth/payment, multiple parallel workstreams | Days–weeks |
 | **research** | "spike", "POC", "feasibility", "compare A vs B", "design doc", "evaluate X", "is X possible" — answer is the deliverable, not code | Hours |
+| **refactoring** | "refactor", "clean up", "extract", "split class/method", "reduce duplication", "decouple", "restructure", "simplify", "rename module" — code is correct, shape is wrong; zero new behavior | Hours |
 
-**Ambiguity rule:** if signals point to two lanes, ask the user: "Is the core deliverable working code merged to main, or a decision/doc?" That single question resolves quick-fix-vs-research and task-vs-epic in nearly every case.
+**Ambiguity rule:** if signals conflict, ask ONE question:
+- fix-vs-refactor: "Is something broken, or does the code work but have the wrong shape?"
+- refactor-vs-task: "Will callers need to change, or does the external contract stay identical?"
+- task-vs-epic: "Is this extending an existing service, or creating something new?"
+- any-vs-research: "Is the deliverable committed code or a decision document?"
 
 ## Step 2 — Present to user (MANDATORY — no skill fires before this)
 
@@ -121,6 +126,23 @@ Footprint: ~5 skills · decision artifact · hours. No production commits.
 3. Output: `.ai/YYYY-MM-DD-<topic>-findings.md` or `wiki/architecture/YYYY-MM-DD-<topic>-adr.md`
 
 Research code lives in a throwaway branch (`spike/<topic>`), deleted when spike closes. If the spike expands into implementation, STOP — re-invoke `/engineer "<task>"` with the decision as context.
+
+---
+
+### REFACTORING lane
+
+Footprint: ~4 skills · no manifest · hours. Zero new behavior.
+
+**Hard gate:** the external contract — callers, return values, error behavior — must be identical before and after. If a caller needs to change, that is a task not a refactor.
+
+1. Name the smell in one phrase (god class / duplication / deep nesting / long method / tight coupling / dead code / primitive obsession)
+2. **codebase-comprehension** (inline) — map target symbols + callers + `codegraph_impact`; identify covering tests
+3. Test baseline — run covering tests NOW; all must pass; if any fail → STOP, fix first via `systematic-debugging` in a separate lane
+4. **refactoring** — one structural move per micro-commit; behavior check (tests pass) after every move; stop when the named smell is gone
+5. **verification-before-completion** — lint gate on final state
+6. **commit-discipline** — WHY body: which smell was removed and why that shape is better
+
+If you discover a bug mid-refactor: commit the refactor progress, open a quick-fix lane for the bug, then resume.
 
 ---
 
