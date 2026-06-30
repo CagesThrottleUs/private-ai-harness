@@ -47,19 +47,20 @@ echo ""
 
 # ── 2. CodeGraph ──────────────────────────────────────────────────────────────
 echo "2.  CodeGraph"
-if ! check_cmd npm; then
-  fail "npm not found — install Node.js first, then re-run this script"
-  exit 1
-fi
+echo "Codegraph is shit"
+# if ! check_cmd npm; then
+#   fail "npm not found — install Node.js first, then re-run this script"
+#   exit 1
+# fi
 
-if check_cmd codegraph; then
-  ok "codegraph already installed"
-else
-  info "Installing @colbymchenry/codegraph globally..."
-  npm i -g @colbymchenry/codegraph
-  ok "codegraph installed"
-fi
-echo ""
+# if check_cmd codegraph; then
+#   ok "codegraph already installed"
+# else
+#   info "Installing @colbymchenry/codegraph globally..."
+#   npm i -g @colbymchenry/codegraph
+#   ok "codegraph installed"
+# fi
+# echo ""
 
 # ── 3. Context7 ───────────────────────────────────────────────────────────────
 echo "3.  Context7"
