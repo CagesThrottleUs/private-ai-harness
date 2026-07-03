@@ -131,6 +131,33 @@ Do NOT just increase timeouts - find the real issue.
 Return: Summary of what you found and what you fixed.
 ```
 
+## Coordinating a Long-Lived Fleet (3+ agents)
+
+Short parallel bursts (fix N test files, return) need no coordinator — dispatch, collect, integrate. But when 3+ agents run **long-lived** on the same repo, you need one coordination-only role holding a shared board. This is a portable file-ledger — no external coordination service required, works anywhere.
+
+**Board file:** `.ai/sdd/board.md` (same scratch dir subagent-driven-development uses; self-ignored by git).
+
+**Each worker writes a heartbeat block** (never broadcasts to peers):
+
+```markdown
+## agent-<id>
+last_progress: <what just finished>
+next_action: <what it will do next>
+blocked_on: <dependency or none>
+verification_status: <untested | tests-green | review-pending>
+file_claims: <paths this agent is actively editing>
+updated: <timestamp>
+```
+
+**One coordinator agent** (coordination only — never implements):
+1. Reads all heartbeat blocks each cycle.
+2. Renders a single canonical board — one write, not peer-to-peer broadcast flooding.
+3. Detects **file-claim collisions** — two agents claiming the same path → serialize them.
+4. Nudges a stale agent privately (no board spam) when its `updated` is old.
+5. Escalates to the human **only** true blockers — a `blocked_on` no agent can clear.
+
+Rule: the board is the single source of truth. Workers read it before claiming files; the coordinator is the only writer of the rendered board. This replaces N² peer chatter with one read + one write per cycle.
+
 ## Common Mistakes
 
 **❌ Pasting task text inline:** context grows with every agent dispatched; brief files eliminate this

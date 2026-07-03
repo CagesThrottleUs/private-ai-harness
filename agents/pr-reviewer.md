@@ -24,6 +24,8 @@ The caller must provide:
 | `{REQUIREMENTS}` | **MANDATORY.** Spec file path (`.ai/specs/X.md`) or explicit `REQ-NNN` IDs. Empty = review blocked. |
 | `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
+| `{PR_NUMBER}` | Optional. GitHub PR number or URL. If present, read the existing review threads via `gh` to flag adverse prior advice and amplify sound unresolved suggestions. Pure `gh` — no code-index dependency. |
+| `{REVIEW_POLICY}` | Optional. Path to a repo review-policy file. If absent, auto-check `.ai/review-policy.md` then repo-root `review-policy.md`. Its rules bind as additions to the five dimensions. |
 
 ---
 
@@ -81,6 +83,26 @@ Read the full diff. Identify:
 ### Step 2 — Load Requirements Context
 
 From `{REQUIREMENTS}`, read the spec file or extract the REQ-NNN IDs this PR claims to implement. If a spec file path is given, read it. Identify which REQs are in scope for this PR.
+
+### Step 2.5 — Prior Review Context & Repo Policy (portable — `gh` + file read only)
+
+This step uses only `gh` and file reads. No code-index dependency — it works on any repo, any host with `gh`.
+
+**Repo review policy.** Resolve a policy file in order: `{REVIEW_POLICY}` if given → `.ai/review-policy.md` → repo-root `review-policy.md`. If one exists, read it and treat each rule as a binding addition to the five dimensions (e.g., "never approve without a changelog entry", "flag any new runtime dependency"). When a finding stems from the policy, cite the rule.
+
+**Existing review threads.** If `{PR_NUMBER}` is set, read prior review comments:
+
+```bash
+gh pr view {PR_NUMBER} --json reviews,comments
+gh api repos/{owner}/{repo}/pulls/{PR_NUMBER}/comments
+```
+
+Then:
+- **Flag adverse advice** — a prior comment pushing a change that would introduce a bug, security hole, or spec violation. Call it out explicitly so the author does not act on it. Cite the comment.
+- **Amplify sound suggestions** — an unresolved good suggestion still worth doing. Reinforce it rather than re-deriving it from scratch.
+- **Do not repeat** findings already raised and resolved.
+
+If `{PR_NUMBER}` is absent, skip the thread read — do not fabricate prior context.
 
 ### Step 3 — Five-Dimension Review (diff-scoped)
 
@@ -241,6 +263,20 @@ Flag any `@spec_id` that doesn't match a real spec file as a **Critical** issue 
 - `file:line` — `functionName` — add `@spec_id SPEC-N` and/or `@req_id REQ-NNN`
 - `file:line` — `testName` — add `@spec_id SPEC-N` and/or `@validates_req REQ-NNN`
 - `file:line` — orphaned `@spec_id SPEC-N` — no matching spec file found [CRITICAL]
+
+---
+
+## 7. Prior Review & Policy
+_(only if `{PR_NUMBER}` or a policy file was present — omit this section otherwise)_
+
+### Adverse prior advice
+- [comment ref] — [why acting on it would break something] — [what to do instead]
+
+### Sound suggestions to amplify
+- [comment ref] — [unresolved good suggestion worth reinforcing]
+
+### Policy findings
+- `file:line` — [violation] — cites `review-policy.md`: [rule]
 
 ---
 
