@@ -153,3 +153,4 @@ If you discover a bug mid-refactor: commit the refactor progress, open a quick-f
 - **Confirmation required at:** initial plan (Step 2), every gate FAIL, every BLOCKED subagent status, HLD approval (epic only)
 - **Never auto-continue past BLOCKED or FAIL** — surface to human, wait for resolution
 - **Manifest updated at each phase transition** (task/epic lanes)
+- **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising

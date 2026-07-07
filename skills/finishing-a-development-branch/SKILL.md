@@ -110,6 +110,12 @@ Invoke `deployment-workflow` skill first. Do NOT proceed to review gate without 
 
 **If documentation-only or config-only change:** skip.
 
+**DAST scan** — required for any externally-facing service (public endpoint, internet-reachable UI):
+```bash
+ls .zap/*.conf .github/workflows/*dast*.yml 2>/dev/null | wc -l
+```
+If zero AND the branch exposes an external endpoint → invoke `dast-testing` skill first.
+
 ### Step 1.5: Review Gate
 
 Run `/review all` before presenting merge/PR options. All four agents run in parallel.

@@ -50,6 +50,8 @@ A critical user journey is a sequence of actions that represents a core business
 **Infer + confirm:**
 > "This adds a backend utility with no user-facing endpoints or UI changes. Skipping e2e-testing. Correct?"
 
+**After the Playwright journey suite is committed**, for any feature with visible UI: invoke `visual-regression` to add screenshot-diff coverage on top of these functional journeys — E2E catches broken behavior, visual regression catches broken layout.
+
 ---
 
 ## Critical Journey Identification

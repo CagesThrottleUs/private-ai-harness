@@ -27,6 +27,8 @@ Generate a CI/CD pipeline that gates every merge — before any feature code exi
 
 **See also:** `infrastructure-as-code` skill — generates the `infra/` Terraform structure and adds `terraform plan` + `tfsec` CI jobs. Run `infrastructure-as-code` before `ci-pipeline-setup` if the feature needs new infrastructure.
 
+**See also:** `github-workflows` skill — when the detected platform is GitHub Actions, use it for PR automation patterns (issue templates, label routing, PR checks) beyond the pipeline stages generated here.
+
 **Skip if:** a comprehensive CI pipeline already exists and passes `ci-reviewer` with no Critical findings.
 
 **Infer + confirm:**

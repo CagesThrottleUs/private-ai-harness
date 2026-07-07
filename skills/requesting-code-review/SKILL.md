@@ -125,6 +125,8 @@ The `review` skill collects inputs, dispatches all agents in parallel, aggregate
 
 Push back if reviewer is wrong — with technical reasoning and evidence.
 
+For structured triage and resolution of returned findings (not just re-running the same reviewer), invoke `receiving-code-review`.
+
 ---
 
 ## Self-Check Before Requesting

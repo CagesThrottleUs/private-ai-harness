@@ -75,6 +75,7 @@ Choose based on system type and change risk. State the choice explicitly in the 
 - New stateless endpoint → **Rolling** (simple, cheap, default)
 - Major feature impacting many users → **Canary** (limit blast radius)
 - Security fix or patch → **Blue-Green** (instant rollback if regression found)
+- Rollout needs a kill switch, percentage ramp, or A/B split independent of deploy → invoke `feature-flags` before finalizing the strategy; the flag becomes the actual rollback lever instead of a full redeploy
 
 ---
 

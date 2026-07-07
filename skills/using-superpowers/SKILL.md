@@ -57,6 +57,10 @@ This harness runs on Claude Code: use the `Skill` tool to invoke skills. If you 
 - Copilot CLI: `references/copilot-tools.md`
 - Gemini CLI: `references/gemini-tools.md`
 
+## No Skill Covers This
+
+If you keep hitting the same recurring pattern and no existing skill covers it, invoke `writing-skills` to author one — don't repeatedly improvise the same workflow from scratch.
+
 ## User Instructions
 
 User instructions (CLAUDE.md, AGENTS.md, GEMINI.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.

@@ -91,6 +91,8 @@ Wait for confirmation. Adjust if user sees a story as too broad or too narrow.
 
 ### Step 5 — Hand off to task lane
 
+When a wave contains 2+ independent stories, invoke `dispatching-parallel-agents` to coordinate their concurrent task-lane runs instead of executing them one at a time.
+
 For each story (respecting wave order):
 
 1. Re-invoke `/engineer "<story description>"` at task lane with context:
