@@ -165,6 +165,17 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
 - **Confirmation required at:** initial plan (Step 2), every gate FAIL, every BLOCKED subagent status, HLD approval (epic only)
 - **Never auto-continue past BLOCKED or FAIL** — surface to human, wait for resolution
 - **Manifest updated at each phase transition** (task/epic lanes)
+- **Cost checkpoints:** before each numbered step in the lane, run
+  `scripts/cost-checkpoint start <step-slug>` (from this skill's directory,
+  e.g. `skills/engineer/scripts/cost-checkpoint`). Immediately after the step
+  finishes — success, BLOCKED, or FAIL — run `scripts/cost-checkpoint end
+  <step-slug> --row phase --lane <lane> --phase <phase> --skill <skill>`.
+  For task/epic lanes, `--phase` is the manifest's current `phase:` value at
+  that moment, read from `.ai/work/<id>/manifest.md` — the source of truth.
+  For lanes with no manifest (quick-fix, research, refactoring), use the
+  lane name as `--phase`. This appends one row to a global, cross-repo
+  ledger — tokens only, no dollar figure, since pricing drifts and token
+  counts don't. See "Cost ledger" below for the row schema and location.
 - **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising
 - **Artifact-by-reference:** each phase writes its output to a file and records
   the path in the manifest. Hold only the manifest pointer, the ledger, and the
