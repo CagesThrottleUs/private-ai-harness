@@ -187,3 +187,38 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   REPORT_FILE path — never paste their findings into the orchestrator.
 - **After each phase:** tell the user "phase complete — safe to /compact; the
   manifest holds state." Context eviction needs /compact; a prompt cannot evict.
+
+## Cost ledger
+
+`scripts/cost-checkpoint` gives per-step token observability so a run's cost
+is visible phase-by-phase, not just as a surprise total at the end.
+
+**Location:** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl` — one
+file, outside any repo, shared across every project. One JSON line per
+checkpoint, append-only.
+
+**Row schema (phase rows — the only row type wired in this skill):**
+```json
+{"row": "phase", "session_id": "...", "repo": "owner/name", "timestamp": "...",
+ "lane": "task", "phase": "construct", "skill": "subagent-driven-development",
+ "tokens_by_model": {"claude-opus-4-8": {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0}}}
+```
+
+**Currency is tokens, not dollars.** Per-token pricing changes over time and
+isn't reliably available to a running skill; token counts don't drift. If you
+want a dollar figure, convert later yourself with whatever pricing you look
+up at that time — the ledger deliberately does not store or estimate cost.
+
+**Querying:**
+- Everything for one run: filter by `session_id`.
+- Most expensive phase across history: group by `phase`, sum `tokens_by_model`.
+- Cross-repo total: the file already spans every repo — no aggregation step needed.
+- One repo only: filter by `repo`.
+
+**Scope note:** this tracks the main orchestrator's per-step cost. It does
+NOT yet attribute cost to individual named subagent dispatches (e.g., which
+specific reviewer inside `subagent-driven-development` or `/review all` cost
+the most) — that would mean instrumenting dispatch call sites across a dozen
+other skills, which is out of scope here. `cost-checkpoint` already supports
+an `agent` row type (`--row agent --agent NAME --role ROLE --model MODEL`)
+for exactly that, ready to be adopted by those skills later.
