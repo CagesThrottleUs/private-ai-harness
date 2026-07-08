@@ -146,6 +146,18 @@ If you discover a bug mid-refactor: commit the refactor progress, open a quick-f
 
 ---
 
+## Session model per lane
+
+The main session model cannot change mid-run. Pick the launch model by lane:
+
+| Lane | Launch on | Why |
+|------|-----------|-----|
+| quick-fix, refactoring, task | Sonnet | judgment work is in pinned-model subagents; orchestration is thin |
+| epic design phases (brainstorm, HLD) | Opus | these reason in the main session and cannot be offloaded |
+| research | Sonnet; Opus for hard trade-offs | spike judgment is sometimes deep |
+
+Named subagents ignore the chat model (their frontmatter `model:` is pinned).
+
 ## Universal constraints (every lane, always active)
 
 - **karpathy lens:** surgical changes, no over-build, verifiable success criteria
