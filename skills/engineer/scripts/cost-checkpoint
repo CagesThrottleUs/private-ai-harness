@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# Token-usage checkpoint for the /engineer cost ledger. Brackets a phase (or,
+# later, an agent dispatch) with a `start` (snapshot cumulative tokens) and
+# `end` (snapshot again, diff, append one row to the global ledger).
+#
+# Tokens are read from this session's own transcript
+# (~/.claude/projects/<repo-slug>/$CLAUDE_CODE_SESSION_ID.jsonl), which
+# Claude Code writes with a usage block on every assistant turn. Tokens are
+# the tracked currency — no pricing lookup, no dollar figure is stored;
+# that conversion is left to the user, done later, outside the harness.
+#
+# session_id and repo are auto-derived (not passed in) so callers cannot
+# drift them across start/end of the same bracket.
+#
+# Usage:
+#   cost-checkpoint start <checkpoint-id>
+#   cost-checkpoint end <checkpoint-id> --row phase --lane LANE \
+#     --phase PHASE --skill SKILL
+#   cost-checkpoint end <checkpoint-id> --row agent --lane LANE \
+#     --agent AGENT --role ROLE --model MODEL \
+#     [--dispatch-mode sequential|parallel_batch]
+#
+# Ledger: ~/.claude/private-ai-harness/engineer-cost-ledger.jsonl (global,
+# cross-repo; one JSON line per row; append-only).
+set -euo pipefail
+
+LEDGER_DIR="$HOME/.claude/private-ai-harness"
+LEDGER_FILE="$LEDGER_DIR/engineer-cost-ledger.jsonl"
+
+checkpoint_dir() {
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  local dir="$root/.ai/observability/cost-checkpoints"
+  mkdir -p "$dir"
+  printf '*\n' > "$dir/.gitignore"
+  printf '%s' "$dir"
+}
+
+repo_name() {
+  local url
+  url=$(git remote get-url origin 2>/dev/null || true)
+  if [ -n "$url" ]; then
+    url=${url%.git}
+    echo "$url" | sed -E 's#.*[:/]([^/]+/[^/]+)$#\1#'
+  else
+    basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+  fi
+}
+
+snapshot() {
+  # Sum tokens_by_model from the current session transcript. Prints JSON.
+  local slug transcript
+  slug=$(pwd | sed 's/\//-/g')
+  transcript="$HOME/.claude/projects/$slug/${CLAUDE_CODE_SESSION_ID:-unknown}.jsonl"
+  python3 - "$transcript" <<'PYEOF'
+import json, sys
+path = sys.argv[1]
+totals = {}
+try:
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            msg = obj.get("message")
+            if not isinstance(msg, dict):
+                continue
+            usage = msg.get("usage")
+            if not isinstance(usage, dict):
+                continue
+            model = msg.get("model", "unknown")
+            t = totals.setdefault(model, {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0})
+            t["input"] += usage.get("input_tokens", 0)
+            t["output"] += usage.get("output_tokens", 0)
+            t["cache_read"] += usage.get("cache_read_input_tokens", 0)
+            t["cache_creation"] += usage.get("cache_creation_input_tokens", 0)
+except FileNotFoundError:
+    pass
+print(json.dumps(totals))
+PYEOF
+}
+
+cmd=${1:-}
+case "$cmd" in
+  start)
+    id=${2:?usage: cost-checkpoint start <checkpoint-id>}
+    dir=$(checkpoint_dir)
+    snapshot > "$dir/$id.json"
+    ;;
+  end)
+    id=${2:?usage: cost-checkpoint end <checkpoint-id> --row phase|agent ...}
+    shift 2
+    row="" lane="" phase="" skill="" agent="" role="" model="" dispatch_mode=""
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --row) row=$2; shift 2 ;;
+        --lane) lane=$2; shift 2 ;;
+        --phase) phase=$2; shift 2 ;;
+        --skill) skill=$2; shift 2 ;;
+        --agent) agent=$2; shift 2 ;;
+        --role) role=$2; shift 2 ;;
+        --model) model=$2; shift 2 ;;
+        --dispatch-mode) dispatch_mode=$2; shift 2 ;;
+        *) echo "unknown flag: $1" >&2; exit 2 ;;
+      esac
+    done
+    : "${row:?--row is required (phase|agent)}"
+    : "${lane:?--lane is required}"
+
+    dir=$(checkpoint_dir)
+    before_file="$dir/$id.json"
+    before=$(cat "$before_file" 2>/dev/null || echo '{}')
+    after=$(snapshot)
+    rm -f "$before_file"
+
+    mkdir -p "$LEDGER_DIR"
+    session_id="${CLAUDE_CODE_SESSION_ID:-unknown}"
+    repo=$(repo_name)
+
+    python3 - "$row" "$session_id" "$repo" "$lane" "$phase" "$skill" "$agent" "$role" "$model" "$dispatch_mode" "$before" "$after" "$LEDGER_FILE" <<'PYEOF'
+import json, sys, datetime
+
+row, session_id, repo, lane, phase, skill, agent, role, model, dispatch_mode, before_s, after_s, ledger_path = sys.argv[1:14]
+before = json.loads(before_s)
+after = json.loads(after_s)
+
+delta = {}
+for m in set(before) | set(after):
+    b = before.get(m, {})
+    a = after.get(m, {})
+    d = {k: max(0, a.get(k, 0) - b.get(k, 0)) for k in ("input", "output", "cache_read", "cache_creation")}
+    if any(d.values()):
+        delta[m] = d
+
+entry = {
+    "row": row,
+    "session_id": session_id,
+    "repo": repo,
+    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "lane": lane,
+}
+if row == "phase":
+    entry["phase"] = phase
+    entry["skill"] = skill
+    entry["tokens_by_model"] = delta
+elif row == "agent":
+    entry["agent"] = agent
+    entry["role"] = role
+    entry["model"] = model
+    entry["dispatch_mode"] = dispatch_mode or "sequential"
+    entry["tokens"] = delta.get(model, {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0})
+
+with open(ledger_path, "a") as f:
+    f.write(json.dumps(entry) + "\n")
+PYEOF
+    ;;
+  *)
+    echo "usage: cost-checkpoint start <id> | cost-checkpoint end <id> --row phase|agent ..." >&2
+    exit 2
+    ;;
+esac
