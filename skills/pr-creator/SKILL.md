@@ -1,6 +1,6 @@
 ---
 name: pr-creator
-description: Use when creating a pull request. Runs pre-flight checks, enforces spec+plan linkage, generates a commit-msg.sh compliant title and WHY-focused body, auto-populates traceability from the diff, runs all four review agents in parallel before submitting, and creates the PR via gh CLI.
+description: Use when creating a pull request. Runs pre-flight checks, enforces spec+plan linkage, generates a commit-msg.sh compliant title and WHY-focused body, auto-populates traceability from the diff, consumes the branch's review verdict before submitting, and creates the PR via gh CLI.
 ---
 
 # PR Creator
@@ -25,7 +25,7 @@ Step 1 → Collect spec + plan
 Step 2 → Generate title (commit-msg.sh validated)
 Step 3 → Build WHY body
 Step 4 → Auto-traceability block
-Step 5 → Run all review agents in parallel (/review all)
+Step 5 → Consume review verdict (no re-dispatch)
 Step 6 → Assign reviewers
 Step 7 → Create PR (draft if any gap, ready if all green)
 Step 8 → Post-creation report
@@ -242,50 +242,29 @@ If any public construct in the diff is missing `@spec_id` or `@req_id`: flag as 
 
 ---
 
-## Step 5 — Run All Review Agents (parallel)
+## Step 5 — Consume Review Verdict (no re-dispatch)
 
-Before creating the PR, dispatch all four review agents simultaneously via `/review all`. They are independent — run in parallel, not sequentially.
+The authoritative review runs once, at `finishing-a-development-branch`
+Step 1.5, which writes `.ai/reports/YYYY-MM-DD-<branch>-review-summary.md`.
+pr-creator consumes that verdict — it does NOT run review agents again.
 
-```
-Parallel dispatch:
-
-Agent 1 → pr-reviewer
-  DESCRIPTION: <from Step 2+3>
-  BASE_SHA: <merge-base with origin/main>
-  HEAD_SHA: HEAD
-  REQUIREMENTS: <spec path from Step 1>
-
-Agent 2 → spec-impl-reviewer
-  SPEC_PATH: <spec path from Step 1>
-  BASE_SHA: <merge-base with origin/main>
-  HEAD_SHA: HEAD
-
-Agent 3 → test-quality-reviewer
-  SPEC_PATH: <spec path from Step 1>
-  BASE_SHA: <merge-base with origin/main>
-  HEAD_SHA: HEAD
-
-Agent 4 → security-reviewer
-  DESCRIPTION: <from Step 2+3>
-  BASE_SHA: <merge-base with origin/main>
-  HEAD_SHA: HEAD
-  SPEC_PATH: <spec path from Step 1>
+```bash
+BRANCH=$(git branch --show-current)
+VERDICT=$(ls -t .ai/reports/*-"$BRANCH"-review-summary.md 2>/dev/null | head -1)
 ```
 
-Wait for all four to complete. Aggregate findings:
+- If `$VERDICT` exists and was written for the current HEAD → read it. Do NOT
+  dispatch any review agent.
+- If `$VERDICT` is absent → run `/review all` exactly once, then read the
+  summary it writes.
 
-| Agent | Verdict | Critical | Important |
-|-------|---------|----------|-----------|
-| PR Review | | N | N |
-| Spec Correctness | | N | N |
-| Test Quality | | N | N |
-| Security | | N | N |
+Decide PR state from the verdict's `## Overall` line:
 
-**Any Critical from any agent:** STOP. List all Critical issues. Do not create the PR.
-
-**Important issues from any agent:** Create as **draft**. List all Important issues in PR body under `## Review Notes`.
-
-**Minor only or clean across all agents:** Create as **ready**.
+| Overall | PR state |
+|---------|----------|
+| MERGE READY | ready |
+| NEEDS WORK | draft — list Important issues under `## Review Notes` |
+| BLOCKED | STOP — do not create the PR |
 
 ---
 
@@ -309,12 +288,12 @@ Store for `gh pr create --reviewer` flag.
 **Draft conditions** (any one = draft):
 - Pre-flight had warnings (not hard failures — those stopped at Step 0)
 - Traceability gaps found in Step 4
-- pr-reviewer returned Important issues
+- Review verdict (Step 5) is NEEDS WORK
 
 **Ready conditions** (all must be true):
 - Pre-flight clean
 - Full traceability coverage
-- pr-reviewer clean or Minor-only
+- Review verdict (Step 5) is MERGE READY
 
 ```bash
 # Validate final title+body one more time
