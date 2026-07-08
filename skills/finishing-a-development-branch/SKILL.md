@@ -126,6 +126,10 @@ Run `/review all` before presenting merge/PR options. All four agents run in par
 
 This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
 
+The aggregated summary is written to `.ai/reports/YYYY-MM-DD-<branch>-review-summary.md`.
+This is the authoritative branch verdict. `pr-creator` consumes it — do not run
+the suite again downstream.
+
 **Dispatch additional reviewers** for changed artifact types — run in parallel with `/review all`:
 
 | If diff contains | Agent | Key inputs |
@@ -268,7 +272,7 @@ Use the `pr-creator` skill — it handles spec linkage, commit-msg.sh compliance
 `pr-creator` will:
 1. Push the branch
 2. Validate title + body via commit-msg.sh
-3. Run `/review all` (already done in Step 1.5 — skip if results are fresh)
+3. Consume the review verdict written in Step 1.5 (does not re-dispatch)
 4. Create PR as draft or ready based on review results
 
 **Do NOT clean up worktree** — user needs it alive to iterate on PR feedback.
