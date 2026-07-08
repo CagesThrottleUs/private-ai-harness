@@ -166,3 +166,13 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
 - **Never auto-continue past BLOCKED or FAIL** — surface to human, wait for resolution
 - **Manifest updated at each phase transition** (task/epic lanes)
 - **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising
+- **Artifact-by-reference:** each phase writes its output to a file and records
+  the path in the manifest. Hold only the manifest pointer, the ledger, and the
+  current phase in context. Re-read a prior artifact only when a step needs it —
+  do not keep full bodies resident.
+- **Manifest is the source of truth:** read phase/gate/artifact state from
+  `.ai/work/<id>/manifest.md`, not from memory. This survives compaction.
+- **Verdict-only returns:** gates and reviewers return `PASS|FAIL` plus a
+  REPORT_FILE path — never paste their findings into the orchestrator.
+- **After each phase:** tell the user "phase complete — safe to /compact; the
+  manifest holds state." Context eviction needs /compact; a prompt cannot evict.
