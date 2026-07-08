@@ -165,18 +165,27 @@ For artifact reviews, auto-detect paths per footnotes below.
 ¹⁹ Check `.ai/lld/` for `*sequences*.md`.
 ²⁰ Check `tests/performance/` for `*.js`, `*.py` (Locust), `*.scala` (Gatling).
 
-### Step 3 — `/review all` (parallel dispatch)
+### Step 3 — `/review all` (conditional parallel dispatch)
 
-Dispatch all four PR-scoped agents simultaneously:
+First scan the diff to decide which agents have something to review:
 
+```bash
+CHANGED=$(git diff $BASE..$HEAD --name-only)
+echo "$CHANGED" | grep -qE '(test|spec)' && TESTS=1 || TESTS=0
+echo "$CHANGED" | grep -vqE '\.(md|txt)$' && CODE=1 || CODE=0
 ```
-Agent 1 → pr-reviewer           (DESCRIPTION, BASE_SHA, HEAD_SHA, REQUIREMENTS)
-Agent 2 → spec-impl-reviewer    (SPEC_PATH, BASE_SHA, HEAD_SHA)
-Agent 3 → test-quality-reviewer (SPEC_PATH, BASE_SHA, HEAD_SHA)
-Agent 4 → security-reviewer     (DESCRIPTION, BASE_SHA, HEAD_SHA, SPEC_PATH)
-```
 
-Wait for all four, then produce the aggregated report (Step 4).
+Dispatch in parallel by rule. Always pass REPORT_FILE so findings go to a file,
+not into the caller's context:
+
+| Agent | Dispatch when | Inputs |
+|-------|---------------|--------|
+| pr-reviewer | always | DESCRIPTION, BASE_SHA, HEAD_SHA, REQUIREMENTS, REPORT_FILE |
+| spec-impl-reviewer | always | SPEC_PATH, BASE_SHA, HEAD_SHA, REPORT_FILE |
+| test-quality-reviewer | TESTS=1 | SPEC_PATH, BASE_SHA, HEAD_SHA, REPORT_FILE |
+| security-reviewer | CODE=1 (skip only if docs/comment-only) | DESCRIPTION, BASE_SHA, HEAD_SHA, SPEC_PATH, REPORT_FILE |
+
+Wait for all dispatched agents, then produce the aggregated report (Step 4).
 
 ### Step 4 — Aggregated Report (for `/review all` only)
 
