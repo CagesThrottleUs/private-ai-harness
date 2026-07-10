@@ -15,6 +15,12 @@ TITLE AND BODY MUST PASS commit-msg.sh.
 WHY — NOT WHAT FILES CHANGED.
 ```
 
+Before validation, resolve `HARNESS_ROOT` from this installed skill's path:
+the plugin root is two directories above `skills/pr-creator/SKILL.md`. Use
+`$HARNESS_ROOT/scripts/commit-msg.sh` in every command below. This works for
+both Claude Code and Codex plugin installations; do not assume a
+`~/.claude/scripts/` path.
+
 ---
 
 ## Execution Order
@@ -72,7 +78,7 @@ pytest 2>&1 | tail -20
 
 # 5. Commit messages all compliant
 git log origin/main..HEAD --format="%H %s" | while read sha subject; do
-  git show -s --format="%B" "$sha" | bash ~/.claude/scripts/commit-msg.sh /dev/stdin
+  git show -s --format="%B" "$sha" | bash "$HARNESS_ROOT/scripts/commit-msg.sh" /dev/stdin
 done
 # Any red output = non-compliant commit = STOP, list failing commits
 ```
@@ -149,7 +155,7 @@ PR title = commit subject line. Must pass commit-msg.sh.
 
 ```bash
 # Validate the drafted title
-printf '<drafted-title>' | bash ~/.claude/scripts/commit-msg.sh /dev/stdin
+printf '<drafted-title>' | bash "$HARNESS_ROOT/scripts/commit-msg.sh" /dev/stdin
 ```
 
 Present to user for confirmation. Re-draft if rejected.
@@ -201,7 +207,7 @@ Requirements: REQ-001, REQ-002, REQ-003
 
 **Validate body before using:**
 ```bash
-printf '<title>\n\n<body>' | bash ~/.claude/scripts/commit-msg.sh /dev/stdin
+printf '<title>\n\n<body>' | bash "$HARNESS_ROOT/scripts/commit-msg.sh" /dev/stdin
 # Zero output = compliant. Any red = fix before proceeding.
 ```
 
@@ -297,7 +303,7 @@ Store for `gh pr create --reviewer` flag.
 
 ```bash
 # Validate final title+body one more time
-printf '<title>\n\n<body>' | bash ~/.claude/scripts/commit-msg.sh /dev/stdin
+printf '<title>\n\n<body>' | bash "$HARNESS_ROOT/scripts/commit-msg.sh" /dev/stdin
 
 # Create PR
 gh pr create \
@@ -366,7 +372,7 @@ The same rules that govern commits govern PRs:
 
 Run before every creation attempt:
 ```bash
-printf '<title>\n\n<body>' | bash ~/.claude/scripts/commit-msg.sh /dev/stdin
+printf '<title>\n\n<body>' | bash "$HARNESS_ROOT/scripts/commit-msg.sh" /dev/stdin
 # Zero output = compliant. Any red line = fix first.
 ```
 

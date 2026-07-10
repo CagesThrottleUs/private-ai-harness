@@ -1,6 +1,6 @@
 ---
 name: using-superpowers
-description: Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions
+description: Use when starting any conversation - establishes how to find and use harness skills on Claude Code, Codex, Copilot CLI, or Gemini CLI before any response including clarifying questions
 ---
 
 <SUBAGENT-STOP>
@@ -51,7 +51,13 @@ These thoughts mean STOP—you're rationalizing:
 
 ## Platform Adaptation
 
-This harness runs on Claude Code: use the `Skill` tool to invoke skills. If you are running on another harness listed here, read its reference file for special instructions:
+Detect the current host before invoking or dispatching anything:
+
+- Claude Code: use the `Skill` and `Agent` tools directly.
+- Codex: skills load natively; use `$<skill-name>` or the skill picker, and read `references/codex-tools.md` before the first subagent dispatch.
+- Copilot CLI or Gemini CLI: read the matching tool reference before the first tool call.
+
+Platform references:
 
 - Codex: `references/codex-tools.md`
 - Copilot CLI: `references/copilot-tools.md`

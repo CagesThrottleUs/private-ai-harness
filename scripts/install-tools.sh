@@ -2,12 +2,10 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-14 run automatically. Step 9 self-installs this repo as a Claude plugin.
-# Step 10 injects caveman mode into ~/.claude/CLAUDE.md.
-# Step 11 injects commit discipline into ~/.claude/CLAUDE.md.
-# Step 12 injects development workflow into ~/.claude/CLAUDE.md.
-# Step 13 injects Karpathy guidelines into ~/.claude/CLAUDE.md.
-# Step 14 installs the commit-msg git hook in the current project.
+# Steps 1-15 run automatically. Step 9 self-installs this repo as a Claude plugin.
+# Step 10 installs the Codex plugin and custom-agent adapters when Codex exists.
+# Steps 11-14 inject the global Claude Code guidance blocks.
+# Step 15 installs the commit-msg git hook in the current project.
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
@@ -184,8 +182,20 @@ else
 fi
 echo ""
 
-# ── 10. Caveman mode — global CLAUDE.md ──────────────────────────────────────
-echo "10. Caveman mode (global CLAUDE.md)"
+# ── 10. Codex plugin + custom agents ─────────────────────────────────────────
+echo "10. Codex plugin (skills + custom agents)"
+if ! check_cmd codex; then
+  warn "codex CLI not found — skipping Codex installation"
+  warn "Run later: bash $REPO_ROOT/scripts/install-codex.sh"
+else
+  bash "$REPO_ROOT/scripts/install-codex.sh" \
+    && ok "private-ai-harness installed for Codex" \
+    || warn "Codex installation failed — run scripts/install-codex.sh for details"
+fi
+echo ""
+
+# ── 11. Caveman mode — global CLAUDE.md ──────────────────────────────────────
+echo "11. Caveman mode (global CLAUDE.md)"
 
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 CAVEMAN_MARKER="## Caveman Mode"
@@ -207,8 +217,8 @@ EOF
 fi
 echo ""
 
-# ── 11. Commit discipline — global CLAUDE.md ─────────────────────────────────
-echo "11. Commit discipline (global CLAUDE.md)"
+# ── 12. Commit discipline — global CLAUDE.md ─────────────────────────────────
+echo "12. Commit discipline (global CLAUDE.md)"
 
 COMMIT_DISCIPLINE_MARKER="## Commit Discipline"
 
@@ -229,8 +239,8 @@ EOF
 fi
 echo ""
 
-# ── 12. Development workflow — global CLAUDE.md ─────────────────────────────
-echo "12. Development workflow (global CLAUDE.md)"
+# ── 13. Development workflow — global CLAUDE.md ─────────────────────────────
+echo "13. Development workflow (global CLAUDE.md)"
 
 WORKFLOW_MARKER="## Development Workflow"
 
@@ -254,8 +264,8 @@ EOF
 fi
 echo ""
 
-# ── 13. Karpathy guidelines — global CLAUDE.md ──────────────────────────────
-echo "13. Karpathy guidelines (global CLAUDE.md)"
+# ── 14. Karpathy guidelines — global CLAUDE.md ──────────────────────────────
+echo "14. Karpathy guidelines (global CLAUDE.md)"
 
 KARPATHY_MARKER="## Karpathy Guidelines"
 
@@ -274,8 +284,8 @@ EOF
 fi
 echo ""
 
-# ── 14. commit-msg git hook ──────────────────────────────────────────────────
-echo "14. commit-msg hook"
+# ── 15. commit-msg git hook ──────────────────────────────────────────────────
+echo "15. commit-msg hook"
 
 # Install into the repo containing this script (the harness itself)
 HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
@@ -303,13 +313,15 @@ fi
 echo ""
 
 echo "═══════════════════════════════════════════"
-echo -e "${YELLOW}MANUAL STEPS REQUIRED — run inside Claude Code:${RESET}"
+echo -e "${YELLOW}ACTIVATION STEPS:${RESET}"
 echo ""
 echo "  /voicemode:install    — installs VoiceMode CLI, FFmpeg, voice services"
 echo "  /reload-plugins       — activates private-ai-harness skills + agents"
+echo "  New Codex session     — activates updated plugin skills + custom agents"
 echo ""
 echo "Verify plugin loaded:"
-echo "  /plugin list"
+echo "  Claude Code: /plugin list"
+echo "  Codex:       /plugins"
 echo ""
 echo "Available after reload:"
 echo "  Skills : /review, /pr-creator, /spec-quality-gate, /code-documentation"

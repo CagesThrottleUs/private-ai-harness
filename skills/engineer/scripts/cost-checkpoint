@@ -3,11 +3,9 @@
 # later, an agent dispatch) with a `start` (snapshot cumulative tokens) and
 # `end` (snapshot again, diff, append one row to the global ledger).
 #
-# Tokens are read from this session's own transcript
-# (~/.claude/projects/<repo-slug>/$CLAUDE_CODE_SESSION_ID.jsonl), which
-# Claude Code writes with a usage block on every assistant turn. Tokens are
-# the tracked currency — no pricing lookup, no dollar figure is stored;
-# that conversion is left to the user, done later, outside the harness.
+# Tokens are read from the current Claude Code or Codex session transcript.
+# Tokens are the tracked currency — no pricing lookup, no dollar figure is
+# stored; that conversion is left to the user, done later, outside the harness.
 #
 # session_id and repo are auto-derived (not passed in) so callers cannot
 # drift them across start/end of the same bracket.
@@ -20,11 +18,16 @@
 #     --agent AGENT --role ROLE --model MODEL \
 #     [--dispatch-mode sequential|parallel_batch]
 #
-# Ledger: ~/.claude/private-ai-harness/engineer-cost-ledger.jsonl (global,
+# Ledger: $CODEX_HOME/private-ai-harness/engineer-cost-ledger.jsonl on Codex,
+# otherwise ~/.claude/private-ai-harness/engineer-cost-ledger.jsonl (global,
 # cross-repo; one JSON line per row; append-only).
 set -euo pipefail
 
-LEDGER_DIR="$HOME/.claude/private-ai-harness"
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  LEDGER_DIR="${CODEX_HOME:-$HOME/.codex}/private-ai-harness"
+else
+  LEDGER_DIR="$HOME/.claude/private-ai-harness"
+fi
 LEDGER_FILE="$LEDGER_DIR/engineer-cost-ledger.jsonl"
 
 checkpoint_dir() {
@@ -48,7 +51,62 @@ repo_name() {
 }
 
 snapshot() {
-  # Sum tokens_by_model from the current session transcript. Prints JSON.
+  # Read cumulative tokens_by_model from the current session. Prints JSON.
+  if [ -n "${CODEX_THREAD_ID:-}" ]; then
+    python3 - "${CODEX_HOME:-$HOME/.codex}/sessions" "$CODEX_THREAD_ID" <<'PYEOF'
+import json, pathlib, sys
+
+sessions_root = pathlib.Path(sys.argv[1])
+thread_id = sys.argv[2]
+matches = []
+for path in sessions_root.glob("**/*.jsonl"):
+    try:
+        with path.open(encoding="utf-8") as handle:
+            for _ in range(8):
+                line = handle.readline()
+                if not line:
+                    break
+                obj = json.loads(line)
+                if obj.get("type") == "session_meta" and obj.get("payload", {}).get("id") == thread_id:
+                    matches.append(path)
+                    break
+    except (OSError, json.JSONDecodeError):
+        continue
+
+if not matches:
+    print("{}")
+    raise SystemExit
+
+transcript = max(matches, key=lambda path: path.stat().st_mtime)
+model = "codex"
+usage = None
+with transcript.open(encoding="utf-8") as handle:
+    for line in handle:
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        payload = obj.get("payload", {})
+        if obj.get("type") == "turn_context" and payload.get("model"):
+            model = payload["model"]
+        if obj.get("type") == "event_msg" and payload.get("type") == "token_count":
+            candidate = payload.get("info", {}).get("total_token_usage")
+            if isinstance(candidate, dict):
+                usage = candidate
+
+if usage is None:
+    print("{}")
+else:
+    print(json.dumps({model: {
+        "input": usage.get("input_tokens", 0),
+        "output": usage.get("output_tokens", 0) + usage.get("reasoning_output_tokens", 0),
+        "cache_read": usage.get("cached_input_tokens", 0),
+        "cache_creation": 0,
+    }}))
+PYEOF
+    return
+  fi
+
   local slug transcript
   slug=$(pwd | sed 's/\//-/g')
   transcript="$HOME/.claude/projects/$slug/${CLAUDE_CODE_SESSION_ID:-unknown}.jsonl"
@@ -118,7 +176,7 @@ case "$cmd" in
     rm -f "$before_file"
 
     mkdir -p "$LEDGER_DIR"
-    session_id="${CLAUDE_CODE_SESSION_ID:-unknown}"
+    session_id="${CODEX_THREAD_ID:-${CLAUDE_CODE_SESSION_ID:-unknown}}"
     repo=$(repo_name)
 
     python3 - "$row" "$session_id" "$repo" "$lane" "$phase" "$skill" "$agent" "$role" "$model" "$dispatch_mode" "$before" "$after" "$LEDGER_FILE" <<'PYEOF'

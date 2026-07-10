@@ -3,7 +3,7 @@
 # Character limits are guidelines (warn, don't block).
 # Hard blocks: no WHY body on multi-file commits, pure file-list body,
 #   subject >72 chars, body lines >80 chars, bad Conventional Commits format.
-# Install: ln -sf ~/.claude/scripts/commit-msg.sh .git/hooks/commit-msg
+# Install: ln -sf /path/to/private-ai-harness/scripts/commit-msg.sh .git/hooks/commit-msg
 # Do not use set -e or pipefail — grep returning 1 (no match) must not abort the hook.
 
 COMMIT_MSG_FILE="$1"

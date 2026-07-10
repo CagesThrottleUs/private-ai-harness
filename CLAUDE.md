@@ -1,7 +1,8 @@
 # private-ai-harness — project instructions
 
-This repo is a Claude Code plugin: skills, agents, scripts, and philosophy docs.
-No application code. No tests. No build step.
+This repo is a dual Claude Code and Codex plugin: shared skills, canonical
+agent prompts, host adapters, scripts, and philosophy docs. No application
+code. No tests. No build step.
 
 @AGENTS.md
 
@@ -13,9 +14,12 @@ No application code. No tests. No build step.
 skills/<name>/SKILL.md      skill definitions (frontmatter + prompt body)
 agents/<name>.md            subagent definitions
 scripts/install-tools.sh    one-shot environment setup
+scripts/install-codex.sh    Codex plugin + custom-agent installer
+scripts/install-codex-agents.py  Markdown-to-Codex-agent adapter
 scripts/commit-msg.sh       conventional commits enforcement hook
-.claude-plugin/plugin.json  plugin manifest
-.claude-plugin/marketplace.json  local marketplace manifest
+.claude-plugin/plugin.json  Claude Code plugin manifest
+.claude-plugin/marketplace.json  Claude/local marketplace manifest
+.codex-plugin/plugin.json   Codex plugin manifest
 PHILOSOPHY.md               design rationale — read before changing structure
 ```
 
@@ -29,12 +33,12 @@ Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter:
 ---
 name: <kebab-case>
 description: >
-  One sentence that tells Claude WHEN to invoke this skill automatically.
+  One sentence that tells an AI host WHEN to invoke this skill automatically.
   This text is the trigger — be specific and actionable.
 ---
 ```
 
-Body is the prompt Claude receives when the skill is invoked.
+Body is the prompt Claude Code or Codex receives when the skill is invoked.
 
 Rules:
 - `description` must answer "invoke this when…" — vague descriptions kill auto-trigger
@@ -56,18 +60,26 @@ model: opus   # or sonnet, haiku
 ---
 ```
 
+These Markdown files are the source of truth. Do not hand-maintain duplicate
+Codex prompts. `scripts/install-codex-agents.py` generates Codex TOML agents,
+mapping Opus/Sonnet/Haiku to high/medium/low reasoning while inheriting the
+active Codex model.
+
 ---
 
 ## Version bumping
 
-Version is in `.claude-plugin/plugin.json` → `version` field (semver).
+Version is synchronized across `.claude-plugin/plugin.json`,
+`.claude-plugin/marketplace.json`, and `.codex-plugin/plugin.json`.
 
 Bump rules:
 - **patch** — fix a skill prompt, typo, description tweak
 - **minor** — new skill or agent added; new auxiliary files in a skill directory (scripts, prompt templates) that add new capability
 - **major** — structural change (manifest format, install flow, breaking rename)
 
-Always bump version before committing a skill/agent change so Claude Code picks up the update on `/reload-plugins`.
+Always bump every manifest version before committing a skill/agent change so
+Claude Code picks it up on `/reload-plugins` and Codex picks it up after local
+plugin reinstall plus a new session.
 
 ---
 
@@ -119,6 +131,6 @@ When upgrading: diff upstream against local, preserve any local customizations, 
 ## What not to do
 
 - Don't create application code, test files, or CI pipelines in this repo
-- Don't add a build step — the plugin is loaded raw by Claude Code
+- Don't add a build step — the plugin is loaded raw by Claude Code and Codex
 - Don't flatten `skills/` — each skill must be its own subdirectory
 - Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`

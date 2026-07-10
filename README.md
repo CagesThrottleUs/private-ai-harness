@@ -1,6 +1,8 @@
 # private-ai-harness
 
-Personal Claude Code harness. One install, full stack: Karpathy guidelines, commit discipline, parallel agent patterns, TDD workflows, systematic debugging, code review, and caveman mode.
+Personal Claude Code + Codex harness. One shared skill tree, full stack:
+Karpathy guidelines, commit discipline, parallel agent patterns, TDD
+workflows, systematic debugging, code review, and caveman mode.
 
 Not a product. Optimized for one workflow.
 
@@ -10,11 +12,16 @@ Not a product. Optimized for one workflow.
 
 | Directory | Contents |
 |-----------|----------|
-| `skills/` | Slash-command skills loaded into Claude Code |
-| `agents/` | Subagent definitions (pr-reviewer, security-reviewer, etc.) |
-| `scripts/` | `install-tools.sh` and `commit-msg.sh` hook |
+| `skills/` | Shared skills loaded into Claude Code and Codex |
+| `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents |
+| `scripts/` | Shared installer, Codex installer/adapter, and `commit-msg.sh` hook |
+| `.claude-plugin/` | Claude Code manifest and local marketplace |
+| `.codex-plugin/` | Native Codex plugin manifest |
 
 ### Skills
+
+Use `/<name>` in Claude Code. In Codex, mention `$<name>` or choose the skill
+from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
@@ -65,6 +72,10 @@ Not a product. Optimized for one workflow.
 
 ### Agents
 
+Claude Code exposes agents as `private-ai-harness:<name>`. The Codex installer
+generates equivalent `private-ai-harness-<name>` custom agents from the same
+Markdown definitions, so reviewer prompts do not drift between hosts.
+
 | Agent | Purpose |
 |-------|---------|
 | `pr-reviewer` | PR review across code, security, design, completeness |
@@ -106,6 +117,8 @@ Not a product. Optimized for one workflow.
 | macOS | scripts assume `zsh`/`bash` |
 | [Node.js](https://nodejs.org/) ≥ 18 | `npm`/`npx` for CodeGraph, Context7, claude-mem, skills |
 | [Claude Code](https://claude.ai/code) CLI (`claude`) | plugin install, marketplace registration |
+| [Codex](https://developers.openai.com/codex/) CLI (`codex`) | Codex plugin install and custom-agent dispatch |
+| Python ≥ 3.11 | validates and renders Codex custom-agent TOML files |
 | [GitHub CLI](https://cli.github.com/) (`gh`) | checking upstream skill repos for updates |
 
 ### Upstream skills to monitor for updates
@@ -119,7 +132,7 @@ Check them periodically with `gh` and sync if they've changed:
 | `skills/using-superpowers/SKILL.md` | upstream superpowers skill | `gh search repos "claude superpowers skill"` |
 | `skills/karpathy/SKILL.md` | [Karpathy guidelines](https://x.com/karpathy/status/2015883857489522876) | manual review |
 
-### One-command install
+### Install every detected host
 
 ```bash
 bash scripts/install-tools.sh
@@ -136,10 +149,27 @@ This script installs (in order):
 7. **LSP plugins** — `clangd-lsp`, `gopls-lsp`, `jdtls-lsp`, `kotlin-lsp`, `rust-analyzer-lsp`, `typescript-lsp`
 8. **Understand-Anything** — multimodal analysis plugin (`Lum1104/Understand-Anything`)
 9. **VoiceMode** — marketplace + plugin install
-10. **This repo as a plugin** — registers the harness as a local Claude marketplace and installs it at user scope
-11. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
+10. **This repo for Claude Code** — registers the harness as a local marketplace and installs it at user scope
+11. **This repo for Codex** — registers the same local marketplace, installs the native Codex plugin, generates custom-agent TOML adapters, and synchronizes global Codex guidance
+12. **Global Claude guidance** — caveman, commit discipline, workflow, and Karpathy blocks
+13. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
 
-### Manual steps (run inside Claude Code after the script)
+Host-specific steps are skipped when their CLI is not installed.
+
+### Codex-only install
+
+```bash
+bash scripts/install-codex.sh
+```
+
+Pass `--no-global-guidance` to install only the plugin and custom agents. The
+installer uses `$CODEX_HOME` when set, otherwise `~/.codex`, and keeps the
+existing Claude agent files as the single source of truth.
+
+After installation, start a new Codex session and open `/plugins`. Use `/agent`
+to inspect reviewer agents.
+
+### Claude Code manual steps
 
 ```
 /voicemode:install    — install VoiceMode CLI, FFmpeg, voice services

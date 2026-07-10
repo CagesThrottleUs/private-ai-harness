@@ -1,0 +1,34 @@
+{
+  "name": "private-ai-harness",
+  "version": "3.0.0",
+  "description": "Personal AI engineering harness with structured planning, implementation, testing, debugging, review, and delivery workflows",
+  "author": {
+    "name": "CagesThrottleUs"
+  },
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "review",
+    "testing",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Private AI Harness",
+    "shortDescription": "Opinionated engineering workflows and reviewers",
+    "longDescription": "A full software-delivery harness for scoping, planning, TDD, debugging, specialized review, verification, and branch completion.",
+    "developerName": "CagesThrottleUs",
+    "category": "Productivity",
+    "capabilities": [
+      "Engineering workflows",
+      "Code review",
+      "Custom agents"
+    ],
+    "defaultPrompt": [
+      "Route this engineering task through the harness.",
+      "Review this change against its specification.",
+      "Debug this issue systematically."
+    ],
+    "brandColor": "#111827"
+  }
+}

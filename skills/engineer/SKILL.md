@@ -193,15 +193,16 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
 `scripts/cost-checkpoint` gives per-step token observability so a run's cost
 is visible phase-by-phase, not just as a surprise total at the end.
 
-**Location:** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl` — one
-file, outside any repo, shared across every project. One JSON line per
-checkpoint, append-only.
+**Location:** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl` on
+Claude Code, or `$CODEX_HOME/private-ai-harness/engineer-cost-ledger.jsonl`
+(normally `~/.codex/...`) on Codex. Each is outside any repo, shared across
+every project on that host, and append-only with one JSON line per checkpoint.
 
 **Row schema (phase rows — the only row type wired in this skill):**
 ```json
 {"row": "phase", "session_id": "...", "repo": "owner/name", "timestamp": "...",
  "lane": "task", "phase": "construct", "skill": "subagent-driven-development",
- "tokens_by_model": {"claude-opus-4-8": {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0}}}
+ "tokens_by_model": {"<host-model>": {"input": 0, "output": 0, "cache_read": 0, "cache_creation": 0}}}
 ```
 
 **Currency is tokens, not dollars.** Per-token pricing changes over time and

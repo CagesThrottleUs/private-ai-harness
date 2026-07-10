@@ -49,6 +49,13 @@ Also triggers on direct chat: "review my PR", "check my tests", "security review
 
 **`/review all` scope:** runs only pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer in parallel. All other agents run independently via their specific subcommand.
 
+**Platform dispatch:** Claude Code uses `private-ai-harness:<agent>` through
+the `Agent` tool. Codex uses the installed custom agent
+`private-ai-harness-<agent>` through its native subagent tools. If a Codex
+custom agent is unavailable, follow the fallback in
+`using-superpowers/references/codex-tools.md` and load `agents/<agent>.md` as
+the spawned agent's instructions.
+
 | Agent | Scope | When to use |
 |-------|-------|-------------|
 | `pr-reviewer` | PR diff | Every PR before merge. 5 dimensions + traceability. Blocks on missing spec. |

@@ -7,24 +7,31 @@ working inside this repo. Keep it current whenever skills, agents, or the instal
 
 ## Repo contract
 
-This repo is a **Claude Code plugin** — no application code, no build step, no test suite.
-Every file is loaded raw by Claude Code on `/reload-plugins`.
+This repo is a **dual Claude Code and Codex plugin** — no application code, no
+build step, no test suite. Skills are shared and loaded raw by both hosts.
+Claude refreshes them on `/reload-plugins`; Codex loads plugin changes in a new
+session after reinstalling the local plugin.
 
 | Directory | Role |
 |-----------|------|
-| `skills/<name>/SKILL.md` | Slash-command skill loaded by Claude Code |
+| `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
-| `agents/<name>.md` | Subagent definition (dispatched via Agent tool) |
-| `scripts/install-tools.sh` | One-shot environment setup |
+| `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly and Codex adapters are generated from it |
+| `scripts/install-tools.sh` | One-shot shared + detected-host environment setup |
+| `scripts/install-codex.sh` | Codex plugin, custom-agent, and global-guidance installer |
+| `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version) |
-| `.claude-plugin/marketplace.json` | Local marketplace manifest |
+| `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
+| `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
+| `.codex-plugin/plugin.json` | Native Codex plugin manifest and install-surface metadata |
 
 ---
 
 ## Available skills
 
-Invoke with the `Skill` tool or as a slash command (`/<name>`).
+Claude Code invokes skills with the `Skill` tool or `/<name>`. Codex loads the
+same skills natively; mention `$<name>` or select them with `/skills` (installed
+plugin UIs may display the `private-ai-harness:` namespace).
 
 | Skill name | Invocation | When to use |
 |------------|------------|-------------|
@@ -82,7 +89,11 @@ Invoke with the `Skill` tool or as a slash command (`/<name>`).
 
 ## Available agents
 
-Dispatched via the `Agent` tool with `subagent_type: "private-ai-harness:<name>"`.
+Claude Code dispatches with the `Agent` tool and
+`subagent_type: "private-ai-harness:<name>"`. Codex dispatches the generated
+custom agent `private-ai-harness-<name>`. `scripts/install-codex-agents.py`
+maps `opus` to high reasoning, `sonnet` to medium, and `haiku` to low while
+inheriting the parent Codex model.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
@@ -233,7 +244,8 @@ When upgrading: diff upstream against local, preserve local customizations, bump
 
 ## Version bump rules
 
-Version lives in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`.
+Version lives in `.claude-plugin/plugin.json`,
+`.claude-plugin/marketplace.json`, and `.codex-plugin/plugin.json`.
 
 | Change | Bump |
 |--------|------|
@@ -241,4 +253,6 @@ Version lives in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.js
 | New skill or agent | minor |
 | Structural change (manifest format, breaking rename) | major |
 
-Always bump before committing a skill/agent change so `/reload-plugins` picks it up.
+Always bump all three before committing a skill/agent change. Claude Code then
+uses `/reload-plugins`; Codex reinstalls the local plugin and starts a new
+session.
