@@ -65,3 +65,13 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Verify Load-Bearing Claims
+
+**Don't trust the doc. Don't trust the test. Build the repro that would break it.**
+
+When a change makes a safety, correctness, or compatibility claim ("this enforces the limit", "this validates input", "this is backward compatible"):
+- Read the source of the dependency you're relying on, not just its docs or surface API. If you use a framework abstraction, go read how it's implemented.
+- Build the smallest adversarial repro that would falsify the claim before trusting it. "Verified against docs" is weaker than "built the adversarial case and watched it fail/pass."
+- Ask "what breaks for a client already running the old behavior in production?" before "does this work for the new case."
+- A prior "confirmed" claim — yours or someone else's — that hasn't been verified this way is still unverified. Dispute it with evidence rather than deferring to it.
