@@ -312,6 +312,8 @@ If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 - Check IDOR on every endpoint that takes an ID parameter
 - Check constant-time comparison on every secret/token comparison
 - Report future impact — mandatory, not optional
+- When a change relies on a framework/library abstraction for its security claim (body limit, sanitizer, rate limiter, auth guard), verify against that dependency's actual implementation — not its docs or a single passing test. A test exercising the wrong entry point (e.g., a `Bytes` extractor when production uses `route_service`) proves nothing about the real path.
+- Order Critical findings by which one invalidates the change's core security claim first — everything else (scope, docs, compat) is secondary until that's settled.
 
 **DO NOT:**
 - Say "consider using HTTPS" — either it's missing (Critical) or it's there (pass)
