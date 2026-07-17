@@ -330,6 +330,10 @@ If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 - Flag missing `@spec_id` or `@req_id` on every new public symbol
 - Flag missing `@spec_id` or `@validates_req` on every new test function
 - Flag orphaned `@spec_id` (references non-existent spec) as Critical
+- Within each dimension, lead with the finding that invalidates the PR's core claim — not the first one you noticed. Scope ambiguity and doc gaps are real but secondary to "does the load-bearing claim actually hold."
+- Write each "add tests" ask as a falsifiable test case the author can write today (e.g., "cover below-limit / exact-limit / limit-plus-one, and malformed override values"), not "test more."
+- For any change touching a client-visible contract (API shape, config default, wire format), check what happens to a caller already running the previous behavior in production — not just whether the new behavior works.
+- If a prior review comment or commit message asserts something is "verified" or "confirmed" without a repro, treat it as an unverified claim, not a fact.
 
 **DO NOT:**
 - Proceed past Step 0 if no spec is attached — halt immediately
