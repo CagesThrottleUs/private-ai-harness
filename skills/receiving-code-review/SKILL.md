@@ -129,6 +129,14 @@ FOR multi-item feedback:
   4. Verify no regressions
 ```
 
+## Style vs. Substance Triage
+
+Not every disagreement is worth the same fight:
+- **Style/convention preference** (formatting, naming taste, "I'd write it differently") → defer to the project's established convention or the reviewer's preference. Not worth pushing back on.
+- **Correctness/design substance** (breaks behavior, violates an architectural decision, introduces a real bug) → verify first, then push back with technical reasoning if wrong.
+
+Picking the wrong fight on style burns credibility for the substance pushback that actually matters.
+
 ## When To Push Back
 
 Push back when:
@@ -224,6 +232,8 @@ You understand 1,2,3,6. Unclear on 4,5.
 ## GitHub Thread Replies
 
 When replying to inline review comments on GitHub, reply in the comment thread (`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), not as a top-level PR comment.
+
+Reply to every comment, even trivial ones — a silent fix with no reply leaves the reviewer unsure whether it was seen or ignored. "Fixed." is a sufficient reply; no reply is not.
 
 ## The Bottom Line
 
