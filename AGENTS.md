@@ -59,6 +59,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
+| `giving-code-review` | `/giving-code-review` | Acting as reviewer on a PR via `gh` — someone else's, or self-review of your own before requesting external review; walks every commit, applies `pr-reviewer`'s dimensions, runs a trust-but-verify pass on claims, doubles rigor in self-review mode |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
 | `refactoring` | `/refactoring` | Behavior-preserving restructure with test guard at every step — names the smell (god class/duplication/nesting/coupling), establishes test baseline, one structural move per micro-commit, behavior verified after each; zero new behavior |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
