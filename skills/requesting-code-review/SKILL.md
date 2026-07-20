@@ -9,6 +9,8 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 
 **Core principle:** Review early, review often. After each task, not just at PR time.
 
+`pr-reviewer` walks every commit in the range, not just the aggregate diff — if it flags the range as too large to review thoroughly (30+ commits or ~1000+ changed lines), split the PR before re-requesting review rather than pushing for a faster pass.
+
 ---
 
 ## Review Agent Roster
