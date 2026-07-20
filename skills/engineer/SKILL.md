@@ -92,7 +92,7 @@ artifacts: {}
 5. **using-git-worktrees** — isolated branch before any code
 6. **subagent-driven-development** — the belt: orchestrator-workers + evaluator-optimizer + ledger; update manifest `phase: construct`
 7. **verification-before-completion** *(⊘ linter-reviewer)* — lint + type check; update manifest `phase: verify`
-8. **requesting-code-review** — per-task `/review pr` during SDD only (task-scoped). The authoritative full-suite `/review all` runs ONCE at step 10 (finishing), not here.
+8. **requesting-code-review** *(⊘ receiving-code-review for triaging returned findings)* — per-task `/review pr` during SDD only (task-scoped). The authoritative full-suite `/review all` runs ONCE at step 10 (finishing), not here.
 9. **pr-creator** — assemble PR; consumes the step-10 review verdict (no re-review); update manifest `phase: deliver`
 10. **finishing-a-development-branch** — merge/cleanup; update manifest `phase: done`
 
