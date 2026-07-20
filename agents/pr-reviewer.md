@@ -80,6 +80,21 @@ Read the full diff. Identify:
 - New/modified test functions
 - Wiki/doc changes (or absence of expected ones)
 
+**Multi-commit ranges — walk every commit, not just the aggregate diff:**
+
+```bash
+git log --reverse --format='%h %s' {BASE_SHA}..{HEAD_SHA}
+```
+
+The aggregate diff hides intent an intermediate commit reveals (an author trying
+approach A, reverting it, then shipping B). Flag: commits mixing unrelated
+changes (refactor + feature + fix in one commit), code added then reverted
+within the range (net-zero noise — suggest squashing), and commit messages
+that contradict their own diff. If the range exceeds ~30 commits or ~1000
+changed lines, say so in the verdict and recommend splitting — do not quietly
+skip commits to fit a review budget; a partial review is worse than an honest
+"this needs to be split."
+
 ### Step 2 — Load Requirements Context
 
 From `{REQUIREMENTS}`, read the spec file or extract the REQ-NNN IDs this PR claims to implement. If a spec file path is given, read it. Identify which REQs are in scope for this PR.
@@ -118,6 +133,12 @@ For every new/modified function or class:
 - Mutation of state that was previously immutable?
 - Missing input validation on new system boundaries?
 - Premature abstraction or over-engineering beyond the stated requirement?
+
+**Adversarial pass** — for each new/modified function, also check:
+- Empty/zero/negative/nil/max-size/unicode inputs, and concurrent duplicate calls
+- Loop bounds: 0/1/large-N; unbounded iteration on externally-controlled data
+- Concurrency: lock ordering, shared state without synchronization, locks held across an await/yield point
+- Numeric: overflow, division by zero, float `==`, narrowing conversions
 
 #### Dimension 2: Wiki / Doc Alignment
 
