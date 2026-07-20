@@ -89,6 +89,43 @@ gh pr review <number> --request-changes --body "see inline comments"
 gh pr review <number> --comment --body "LGTM except for X"
 ```
 
+**Posting review findings pinned to diff lines.** `gh pr review` above only
+posts a body — no inline comments. For findings tied to specific `file:line`,
+post one atomic GitHub Review via `gh api` instead so inline comments land
+pinned to their diff lines, not buried in a wall-of-text body:
+
+```bash
+# Confirm identity first — a wrong-account review is hard to unsend
+git config user.email
+gh api user -q .login
+
+# Metadata needed for the API call
+gh pr view <number> --json baseRefName,headRefOid,headRefName \
+  --jq '{base: .baseRefName, sha: .headRefOid, head: .headRefName}'
+
+gh api -X POST "repos/{owner}/{repo}/pulls/<number>/reviews" --input - <<'JSON'
+{
+  "commit_id": "<headRefOid from above>",
+  "event": "REQUEST_CHANGES",
+  "body": "<overall summary — omit per-line findings, those go in comments[]>",
+  "comments": [
+    { "path": "src/foo.rs", "line": 42, "side": "RIGHT", "body": "**[CRITICAL]** <description>" }
+  ]
+}
+JSON
+```
+
+`event`: `APPROVE` / `REQUEST_CHANGES` (any Critical or non-deferred High
+finding) / `COMMENT` (discussion only, no block signal). `side: "RIGHT"` pins
+to the PR's new file version; use `"LEFT"` only for comments on removed lines.
+
+**Fallback** — if `gh api /reviews` fails (auth scope, enterprise host
+quirks), post the body via `gh pr comment <number> --body-file <path>` and
+say so — inline pinning is lost.
+
+Do not auto-post: show findings to the user first and confirm Approve /
+Request changes / Comment-only before submitting.
+
 ### Merge
 
 ```bash
