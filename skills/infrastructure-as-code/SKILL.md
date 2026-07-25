@@ -65,6 +65,44 @@ infra/
         └── outputs.tf
 ```
 
+## Golden-path modules & self-service (CNCF L4)
+
+The highest-leverage IaC is the IaC a service *doesn't hand-write*. At CNCF
+Platform Engineering maturity Level 4, developers **instantiate curated,
+versioned modules from a registry** rather than authoring root infrastructure —
+the platform team curates a library of Terraform modules (and Kubernetes
+controllers/CRDs) that encode the paved-road defaults, and a new service's
+`main.tf` is a thin module call, not a bespoke resource graph.
+
+```hcl
+# A service root that CONSUMES a golden-path module — not bespoke resources
+module "service" {
+  source  = "app.terraform.io/acme/service/aws"  # curated private registry
+  version = "3.2.0"                               # pinned, semver-ranged module
+  name    = "orders-api"
+  size    = "small"                               # paved-road t-shirt sizes
+  # compliant defaults (encryption, tagging, network policy) live in the module
+}
+```
+
+Why this is the self-service target, not just DRY:
+- **Self-service:** a developer provisions a compliant service by calling a
+  module — no platform ticket, no copy-pasted HCL. This is what "self-service
+  infrastructure" in the maturity model actually means.
+- **Compliant by construction:** encryption, tagging, network policy, and
+  resource limits are baked into the module and enforced by policy-as-code
+  (tfsec / OPA / Conftest) in the module's own CI, so a self-service consumer
+  **cannot** provision non-compliant infra. The guardrail is inside the road.
+- **Curated + versioned:** modules are pinned by semver; the platform team ships
+  new module versions, consumers adopt them deliberately. This is how a fleet of
+  services stays consistent without a human reviewing every plan.
+- `service-scaffolding` generates the module *call*; this skill defines the
+  module *library* the call consumes.
+
+**Honest maturity note:** consuming a curated module registry with policy
+enforcement is L3→L4. A single bespoke root module hand-written per service is
+L2. State which one this is — do not label bespoke HCL "self-service."
+
 ### `versions.tf` — always pin
 
 ```hcl

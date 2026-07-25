@@ -40,8 +40,33 @@ A new service must be born with all of these — a missing one is a scorecard fa
 | Test harness | unit + integration skeleton (`test-driven-development`, `integration-testing`) |
 | Runbook stub | `wiki/guides/runbooks/<service>.md` skeleton |
 | Resource limits | container/K8s manifest with CPU/memory requests+limits set (no unbounded) |
+| Infra provisioning | root module that **instantiates a curated golden-path module** from the platform registry (`infrastructure-as-code`) — not hand-written HCL — so infra is self-service and compliant by construction |
 | Catalog entry | `catalog-info.yaml` — see below |
 | Docs skeleton | Diátaxis-shaped `wiki/` stub (reference + how-to + explanation) |
+
+### Self-service provisioning (CNCF L4 target)
+
+The scaffold is the *template*, but the maturity goal is that instantiating it is
+**self-service** — a developer creates a new compliant service without a platform
+ticket. CNCF Platform Engineering Maturity Level 4 (Optimizing) is full
+self-service with golden paths and automated compliance; that is the direction
+this skill points, even where a step is still manual today.
+
+- **Template, not blank page:** the service is generated from a golden-path
+  template (Backstage Software Template / `cookiecutter` / a repo template), so
+  every artifact above comes pre-wired, not hand-assembled.
+- **Curated module registry, not bespoke infra:** the infra root instantiates a
+  **versioned module from the platform's curated registry** (private Terraform
+  registry / a library of Terraform modules + CRDs the platform team owns).
+  Developers instantiate; the platform team curates. See `infrastructure-as-code`
+  §Golden-path modules.
+- **Compliant by construction:** policy (tfsec / OPA / Conftest) and the paved
+  defaults live *inside* the template and module, so a self-service provision
+  cannot produce a non-compliant service — the guardrail is the road, not a
+  gate bolted on after.
+- **Honest maturity marker:** record in the scorecard whether provisioning is
+  genuinely self-service (L4) or template-assisted-but-manual (L2–L3). Do not
+  claim L4 for a golden path that still needs a human to run it.
 
 ## The service catalog
 

@@ -1,6 +1,6 @@
 ---
 name: service-scaffolding-reviewer
-description: Sonnet-powered service scaffolding reviewer. Mechanically validates that a new service's paved-road scaffold is complete — CI wired, observability instrumented, API contract stub, test harness, runbook stub, resource limits set (not unbounded), a catalog entry with an owner and lifecycle, and an attached maturity scorecard. Invoked by service-scaffolding before the service is built into.
+description: Sonnet-powered service scaffolding reviewer. Mechanically validates that a new service's paved-road scaffold is complete — CI wired, observability instrumented, API contract stub, test harness, runbook stub, resource limits set (not unbounded), infra provisioned by instantiating a curated golden-path module (not bespoke HCL), a catalog entry with an owner and lifecycle, and an attached maturity scorecard. Invoked by service-scaffolding before the service is built into.
 model: sonnet
 ---
 
@@ -45,9 +45,14 @@ Check each paved-road component exists in the scaffold:
 4. **Test harness** — unit + integration test skeletons present.
 5. **Runbook** — `wiki/guides/runbooks/<service>.md` (or equivalent) present.
 6. **Resource limits** — container/K8s manifest sets CPU/memory requests AND limits; flag any unbounded container (Critical — the classic noisy-neighbor/OOM outage).
-7. **Catalog entry** — present, with a real `owner` and a `lifecycle`.
-8. **Docs skeleton** — Diátaxis-shaped stub present.
-9. **Scorecard** — attached, with the maturity checklist.
+7. **Infra provisioning** — an infra root present that **instantiates a curated
+   golden-path module** (a versioned `module "…" { source … version … }` call),
+   not hand-written bespoke resources. Flag bespoke per-service HCL as a finding
+   (it is not self-service / compliant-by-construction) and flag a scorecard that
+   claims L4 self-service while the infra is hand-authored.
+8. **Catalog entry** — present, with a real `owner` and a `lifecycle`.
+9. **Docs skeleton** — Diátaxis-shaped stub present.
+10. **Scorecard** — attached, with the maturity checklist.
 
 A missing component is a finding. An unbounded container or a catalog entry with
 no owner is Critical.
