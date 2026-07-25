@@ -172,8 +172,13 @@ For each dimension, produce:
 - Cost Optimization: at least a rough monthly cost estimate for expected load?
 - Sustainability: not applicable is an acceptable answer if justified.
 
-**Critical:** Cross-Cutting Concerns table absent entirely.
-**Important:** Pillar listed as "addressed" but §9 row contains no specifics. Operational Excellence with no logging or alerting mention.
+**Quality-attribute scenarios (ATAM):**
+- Each applicable pillar names a **measurable** quality-attribute scenario (stimulus → measurable response), not a vibe. "Fast" or "scalable" with no number is a finding.
+- **Sensitivity & tradeoff points** named (a decision that strongly moves one attribute; a decision where improving one attribute hurts another), and the ADRs justify them.
+- **42010 concern→view traceability:** every stakeholder concern from §1 is answered by at least one view/section. Flag a concern no view addresses.
+
+**Critical:** Cross-Cutting Concerns table absent entirely. A stakeholder concern with no view addressing it.
+**Important:** Pillar listed as "addressed" but §9 row contains no specifics or no measurable scenario. Operational Excellence with no logging or alerting mention. No sensitivity/tradeoff points named for a design with obvious tensions.
 **Advisory:** Cost estimate rough or missing for expected load scenario.
 
 ---

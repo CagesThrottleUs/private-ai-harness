@@ -266,18 +266,32 @@ C4Container
 
 ---
 
-## 9. Cross-Cutting Concerns
+## 9. Cross-Cutting Concerns & Quality-Attribute Scenarios
 
-*AWS Well-Architected 6 Pillars — address each explicitly or state "not applicable + reason."*
+*AWS Well-Architected 6 Pillars — address each explicitly or state "not
+applicable + reason." For each applicable pillar, give a **measurable
+quality-attribute scenario** (ATAM), not a vibe: a concrete stimulus →
+measurable response, so the architecture is verifiable against it.*
 
-| Pillar | Addressed? | Notes |
-|--------|-----------|-------|
-| Operational Excellence | [Yes/Partial/No] | [how: structured logging, runbooks, alerting design] |
-| Security | [Yes] | [See §6] |
-| Reliability | [Yes] | [See §7] |
-| Performance Efficiency | [Yes/Partial/No] | [caching strategy, async boundaries, index design] |
+| Pillar | Addressed? | Quality-attribute scenario (stimulus → measurable response) |
+|--------|-----------|-------------|
+| Operational Excellence | [Yes/Partial/No] | [e.g. "an alert fires → on-call has a runbook that resolves it in < 15 min"] |
+| Security | [Yes] | [See §6 — STRIDE mitigations] |
+| Reliability | [Yes] | [e.g. "one AZ fails → service stays up, error rate < 0.1%" — see §7] |
+| Performance Efficiency | [Yes/Partial/No] | [e.g. "p99 read latency < 200ms at 10× current load"] |
 | Cost Optimization | [Yes/Partial/No] | [estimated monthly infra cost at expected load] |
 | Sustainability | [Yes/Partial/No] | [any energy / carbon considerations] |
+
+**Sensitivity & tradeoff points (ATAM):** name the decisions that strongly move
+one attribute (sensitivity points) and the ones where improving one attribute
+hurts another (tradeoff points) — e.g. "synchronous replication buys durability
+but costs write latency." These are what the ADRs must justify.
+
+**Stakeholder concern → view traceability (ISO/IEC/IEEE 42010):** confirm each
+stakeholder concern (from §1) is answered by at least one view — the C4 Context
+view for scope concerns, the Container view for deployment/interaction concerns,
+§5 for data/flow concerns, §6 for security concerns. A concern no view addresses
+is a hole in the design, not just the document.
 
 ---
 
