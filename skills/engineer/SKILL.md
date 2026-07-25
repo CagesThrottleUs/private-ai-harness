@@ -109,7 +109,7 @@ epic — sequences many epics against finite capacity.
 
 1. **portfolio-management** *(⊘ portfolio-reviewer)* — run the SAFe Portfolio Kanban: place each initiative in a state (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), score by **WSJF** (cost of delay ÷ job size), enforce **WIP limits** (Little's Law), validate the cross-epic dependency DAG, link each epic to an OKR
 2. **Pull loop:** when Implementing WIP < limit, pull the highest-WSJF backlog epic whose dependencies are all done, and dispatch it as `/engineer "<epic>"` at the **epic lane** — recursive orchestration one level down
-3. On each epic `done`: record for **delivery-metrics**, then pull the next. Never exceed the WIP limit to get ahead — Little's Law says that lengthens every in-flight epic
+3. On each epic `done`: record for **delivery-metrics**, and consume its **outcome-review** decision — a `kill` frees WIP and lowers cost-of-delay for follow-ons; a `persevere` raises it. Then pull the next. Never exceed the WIP limit to get ahead — Little's Law says that lengthens every in-flight epic
 
 Hold the WIP limit regardless of how cheaply AI can start epics; the 2024 DORA report ties undisciplined AI throughput to lower delivery stability.
 
@@ -117,7 +117,7 @@ Hold the WIP limit regardless of how cheaply AI can start epics; the 2024 DORA r
 
 ### EPIC lane
 
-Footprint: ~all 54 skills · epic manifest + N child manifests · days–weeks.
+Footprint: ~all 55 skills · epic manifest + N child manifests · days–weeks.
 
 **First:** create epic manifest at `.ai/work/YYYY-MM-DD-<slug>/manifest.md`. Every gate below is hard-blocking — do not advance past a FAIL without human resolution.
 
@@ -134,6 +134,7 @@ Footprint: ~all 54 skills · epic manifest + N child manifests · days–weeks.
 11. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch
 12. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
 13. **delivery-metrics** — after launch (and periodically): DORA four keys + reliability and flow efficiency from the manifest phase timestamps
+14. **outcome-review** *(⊘ outcome-review-reviewer)* — after launch (and at each HEART-aligned checkpoint): measure the business-context north-star + input metrics against their targets with cited sources; render persevere/iterate/kill. Closes the "measure what you shipped" loop back to §4 intake and feeds the portfolio
 
 ---
 

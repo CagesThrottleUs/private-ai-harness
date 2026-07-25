@@ -58,6 +58,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `incident-response` | `/incident-response` | For production services — severity matrix, IC role, postmortem template (Google SRE standard), MTTD/MTTR targets |
 | `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery — DORA four keys + reliability and Flow Framework flow efficiency, derived from manifest phase timestamps + cost-ledger; never fabricates failure-dependent keys |
 | `onboarding-guide` | `/onboarding-guide` | On first production release — synthesizes HLD, ADRs, OpenAPI, SLOs into wiki/ONBOARDING.md with 8 required sections |
+| `outcome-review` | `/outcome-review` | After ship (and at HEART-aligned checkpoints) — measures north-star + input metrics vs target with cited sources, renders persevere/iterate/kill, feeds the portfolio; rejects fabricated numbers; closes the measurement loop |
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
@@ -109,6 +110,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `incident-response-reviewer` | **Sonnet** — IR docs gate: severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication templates |
 | `production-readiness-reviewer` | PRR gate — SRE Launch Coordination Checklist seven dimensions; accepts a readiness claim only when evidenced (tested rollback, sourced SLO, verified dependency, exercised runbook), not when plausibly written; flags AI-plausible-but-unverified readiness |
 | `onboarding-reviewer` | Onboarding guide gate — 8 required sections, executable dev setup, C4 diagram, ADRs, contribution path, actionable ops section |
+| `outcome-review-reviewer` | Post-launch outcome gate — every metric measured against a re-runnable source (fabricated = Critical), no premature failure before HEART horizon, decision follows evidence |
 | `dast-reviewer` | **Sonnet** — DAST config gate: ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF uploaded, auth configured |
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |
