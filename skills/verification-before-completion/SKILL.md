@@ -105,15 +105,6 @@ Skip any step = lying, not verifying
 ❌ Trust agent report
 ```
 
-## Why This Matters
-
-From 24 failure memories:
-- your human partner said "I don't believe you" - trust broken
-- Undefined functions shipped - would crash
-- Missing requirements shipped - incomplete features
-- Time wasted on false completion → redirect → rework
-- Violates: "Honesty is a core value. If you lie, you'll be replaced."
-
 ## Language Linter Gate
 
 **Required before every commit that creates or modifies source code files.**
@@ -188,11 +179,3 @@ Agent(linter-reviewer, {
 - Paraphrases and synonyms
 - Implications of success
 - ANY communication suggesting completion/correctness
-
-## The Bottom Line
-
-**No shortcuts for verification.**
-
-Run the command. Read the output. THEN claim the result.
-
-This is non-negotiable.

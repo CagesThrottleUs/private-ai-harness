@@ -141,6 +141,7 @@ For open-ended questions ("describe your problem"), continue using prose — the
 - Propose 2-3 different approaches with trade-offs
 - Present options conversationally with your recommendation and reasoning
 - Lead with your recommended option and explain why
+- YAGNI ruthlessly - remove unnecessary features from every approach and design
 
 **Presenting the design:**
 
@@ -322,15 +323,6 @@ Wait for the user's response. If they request changes, make them and re-run the 
 
 - For architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill. It produces C4 diagrams, technology selection records, threat model, failure modes, capacity planning, and ADRs before `writing-plans` activates.
 - For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` directly.
-
-## Key Principles
-
-- **One question at a time** - Don't overwhelm with multiple questions
-- **Multiple choice preferred** - Easier to answer than open-ended when possible
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design, get approval before moving on
-- **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
 
