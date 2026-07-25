@@ -28,14 +28,27 @@ The HLD C4 Container diagram IS the decomposition map. Without it, stories are i
 
 Read the HLD's C4 Container diagram. Each container or component maps to one story.
 
-**Rules for a valid story:**
-- One independently deployable or testable slice
-- Fits in a single task lane run (~1 session, 1 PR)
-- Has a clear done-state testable in isolation
-- Produces one artifact another story can consume (schema, API contract, event interface)
-- Does NOT require coordinating two concurrent workstreams
+**Rules for a valid story — INVEST + vertical slice:**
+- **Vertical slice, not a layer.** Each story delivers an observable change in
+  system behaviour end-to-end (it may touch DB + API + UI together). Do NOT split
+  by architectural layer — "the data-model story", "the API story", "the UI story"
+  are horizontal slices that fail INVEST: none is independently valuable, and they
+  force lockstep integration. Split by *user-visible capability* instead.
+- **INVEST:** Independent (minimal cross-story coupling), Negotiable, **Valuable**
+  (a user or a downstream system is observably better when it's done), Estimable,
+  **Small** (fits one task-lane run, ~1 session, 1 PR), **Testable** (a clear
+  done-state verifiable in isolation).
+- Prefer a **walking skeleton first** — a thin end-to-end slice that proves the
+  whole path works — then thicken it with subsequent stories.
+- A story may still *produce* an interface another consumes (schema, contract,
+  event), but that interface is a byproduct of a valuable slice, not a story unto
+  itself.
 
-Typical slices for a new service: data model, API + consumer, delivery worker, UI layer, preferences/config.
+Split a large capability by the SPIDR patterns: **S**pike, **P**aths (workflow
+variations), **I**nterfaces (channels/clients), **D**ata (data variations),
+**R**ules (business-rule subsets) — each yielding a vertical, INVEST-passing
+slice. Example (notifications epic): "user gets an email on order-ship" is a
+vertical slice; "the email templating layer" is not.
 
 ### Step 2 — Map dependencies
 
