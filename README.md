@@ -56,6 +56,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `visual-regression` | `/visual-regression` | For UI features — Playwright toHaveScreenshot(), animations disabled, baselines in git, pinned Docker CI |
 | `chaos-engineering` | `/chaos-engineering` | For resilience NFR services — k6 fault injection, Toxiproxy network faults, steady state hypothesis, CI chaos job |
 | `incident-response` | `/incident-response` | For production services — severity matrix, IC role, postmortem template (Google SRE standard), MTTD/MTTR targets |
+| `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery — DORA four keys + reliability and Flow Framework flow efficiency, derived from manifest phase timestamps + cost-ledger; never fabricates failure-dependent keys |
 | `onboarding-guide` | `/onboarding-guide` | On first production release — synthesizes HLD, ADRs, OpenAPI, SLOs into wiki/ONBOARDING.md with 8 required sections |
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |

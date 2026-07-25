@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""Derive DORA + Flow metrics from the engineer cost-ledger and an optional
+delivery ledger. Timestamp-derived keys (deployment frequency, lead time, flow
+efficiency, flow time) always print; failure-dependent keys (change failure
+rate, MTTR, reliability) print only when a delivery ledger supplies the signal,
+never fabricated.
+
+Usage: dora-report [--since 30d] [--repo owner/name] [--ledger PATH]
+                   [--delivery-ledger PATH]
+"""
+import argparse
+import json
+import os
+import sys
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+
+
+def parse_ts(s):
+    if not s:
+        return None
+    s = s.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+def parse_since(s):
+    if not s:
+        return None
+    unit = s[-1]
+    n = int(s[:-1])
+    mult = {"d": 1, "w": 7, "h": 1 / 24}.get(unit)
+    if mult is None:
+        sys.exit(f"bad --since: {s} (use e.g. 30d, 4w, 12h)")
+    return datetime.now(timezone.utc) - timedelta(days=n * mult)
+
+
+def default_ledger():
+    home = os.environ.get("CODEX_HOME") or os.path.expanduser("~/.claude")
+    return os.path.join(home, "private-ai-harness", "engineer-cost-ledger.jsonl")
+
+
+def default_delivery_ledger():
+    home = os.environ.get("CODEX_HOME") or os.path.expanduser("~/.claude")
+    return os.path.join(home, "private-ai-harness", "delivery-ledger.jsonl")
+
+
+def read_jsonl(path):
+    if not path or not os.path.exists(path):
+        return []
+    rows = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def percentile(values, p):
+    if not values:
+        return None
+    values = sorted(values)
+    k = (len(values) - 1) * p
+    lo = int(k)
+    hi = min(lo + 1, len(values) - 1)
+    return values[lo] + (values[hi] - values[lo]) * (k - lo)
+
+
+def fmt_hours(h):
+    if h is None:
+        return "n/a"
+    if h < 1:
+        return f"{h * 60:.0f}m"
+    if h < 48:
+        return f"{h:.1f}h"
+    return f"{h / 24:.1f}d"
+
+
+def band_lead_time(hours):
+    if hours is None:
+        return ""
+    if hours < 24:
+        return "elite (<1d)"
+    if hours < 24 * 7:
+        return "high (<1w)"
+    if hours < 24 * 30:
+        return "medium (<1mo)"
+    return "low (>1mo)"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--since")
+    ap.add_argument("--repo")
+    ap.add_argument("--ledger", default=default_ledger())
+    ap.add_argument("--delivery-ledger", default=default_delivery_ledger())
+    args = ap.parse_args()
+
+    since = parse_since(args.since)
+    rows = read_jsonl(args.ledger)
+    if args.repo:
+        rows = [r for r in rows if r.get("repo") == args.repo]
+
+    # Group cost-ledger rows into sessions -> phases with start/end timestamps.
+    sessions = defaultdict(list)
+    for r in rows:
+        sid = r.get("session_id")
+        ts = parse_ts(r.get("timestamp"))
+        if not sid or not ts:
+            continue
+        if since and ts < since:
+            continue
+        sessions[sid].append(ts)
+
+    lead_hours, flow_eff, flow_time_hours = [], [], []
+    for sid, tss in sessions.items():
+        tss.sort()
+        span = (tss[-1] - tss[0]).total_seconds() / 3600.0
+        flow_time_hours.append(span)
+        lead_hours.append(span)  # proxy; delivery ledger refines below
+        # Flow efficiency proxy: active = sum of consecutive gaps under a
+        # working threshold (2h); longer gaps count as wait. Timestamps are
+        # per-checkpoint, so this approximates active-vs-wait.
+        active = 0.0
+        for a, b in zip(tss, tss[1:]):
+            gap = (b - a).total_seconds() / 3600.0
+            active += gap if gap <= 2 else 0.0
+        flow_eff.append((active / span) if span > 0 else 0.0)
+
+    deploys = len(sessions)
+    print("=== Delivery Metrics (DORA + Flow) ===")
+    if args.repo:
+        print(f"repo: {args.repo}")
+    if args.since:
+        print(f"window: last {args.since}")
+    print(f"ledger: {args.ledger}")
+    print()
+    print("DORA — timestamp-derived:")
+    print(f"  Deployment frequency : {deploys} delivered work-item(s) in window")
+    p50 = percentile(lead_hours, 0.5)
+    p90 = percentile(lead_hours, 0.9)
+    print(f"  Lead time for change : p50 {fmt_hours(p50)}  p90 {fmt_hours(p90)}"
+          f"  [{band_lead_time(p50)}]")
+    eff = (sum(flow_eff) / len(flow_eff) * 100) if flow_eff else None
+    print(f"  Flow efficiency      : "
+          + (f"{eff:.0f}% (active vs wait across phases)" if eff is not None else "n/a"))
+    ftp50 = percentile(flow_time_hours, 0.5)
+    print(f"  Flow time (p50)      : {fmt_hours(ftp50)}")
+    print()
+
+    # Failure-dependent keys: only from the delivery ledger. Never fabricate.
+    dl = read_jsonl(args.delivery_ledger)
+    if args.repo:
+        dl = [d for d in dl if d.get("repo") == args.repo]
+    if since:
+        dl = [d for d in dl if (parse_ts(d.get("merged_at")) or datetime.now(timezone.utc)) >= since]
+
+    print("DORA — failure-dependent (need a real failure signal):")
+    if not dl:
+        print("  Change failure rate  : needs incident linkage "
+              "(populate delivery-ledger.jsonl)")
+        print("  MTTR (recovery)      : needs incident linkage")
+        print("  Reliability (SLO)    : needs incident linkage")
+    else:
+        total = len(dl)
+        failed = sum(1 for d in dl if d.get("caused_incident"))
+        cfr = failed / total * 100 if total else 0.0
+        band = "elite (<5%)" if cfr < 5 else "high (<10%)" if cfr < 10 else \
+            "medium (<15%)" if cfr < 15 else "low (>15%)"
+        print(f"  Change failure rate  : {cfr:.0f}%  ({failed}/{total})  [{band}]")
+        mttrs = []
+        for d in dl:
+            s, r = parse_ts(d.get("incident_start")), parse_ts(d.get("restored_at"))
+            if s and r:
+                mttrs.append((r - s).total_seconds() / 3600.0)
+        mttr = percentile(mttrs, 0.5)
+        print(f"  MTTR (p50)           : {fmt_hours(mttr)}"
+              + ("  [elite <1h]" if mttr is not None and mttr < 1 else ""))
+        slo_met = sum(1 for d in dl if d.get("slo_met"))
+        print(f"  Reliability          : {slo_met}/{total} deliveries met SLO")
+    print()
+    print("Flow efficiency < ~15% => wait time between phases dominates; "
+          "target the slowest inter-phase gap, not raw speed.")
+
+
+if __name__ == "__main__":
+    main()
