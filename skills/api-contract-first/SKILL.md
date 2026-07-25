@@ -253,20 +253,36 @@ components:
           minLength: 1
           maxLength: 255
 
+    # RFC 9457 Problem Details (application/problem+json) — the IANA-standard
+    # error shape; supersedes RFC 7807. Prefer this over a bespoke error object
+    # so every consumer parses errors the same way.
     Error:
       type: object
-      required: [code, message]
+      required: [type, title, status]
       properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem type (RFC 9457).
+          examples: ["https://api.example.com/problems/validation-error"]
+        title:
+          type: string
+          description: Short, human-readable summary of the problem type.
+          examples: ["Validation failed", "Not found", "Unauthorized"]
+        status:
+          type: integer
+          description: HTTP status code.
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          format: uri
+          description: URI identifying this specific occurrence.
         code:
           type: string
-          description: Machine-readable error code.
-          examples: ["VALIDATION_ERROR", "NOT_FOUND", "UNAUTHORIZED"]
-        message:
-          type: string
-          description: Human-readable error message.
-        details:
-          type: object
-          description: Additional error context. Shape varies by error code.
+          description: Optional machine-readable app error code (extension member).
+          examples: ["VALIDATION_ERROR", "NOT_FOUND"]
 
   responses:
     BadRequest:
@@ -465,6 +481,24 @@ docker run --rm -p 4010:4010 stoplight/prism:4 mock -h 0.0.0.0 /tmp/openapi.yaml
 ```
 
 Frontend developers use `http://localhost:4010` as their base URL while backend implements the spec. Both are building against the same contract simultaneously.
+
+---
+
+## Consumer-Driven Contract Testing (service-to-service)
+
+The OpenAPI/proto spec is **provider-driven** — it declares what the provider
+offers. For **service-to-service** calls, add a **consumer-driven contract
+(Pact)**: each consumer records the exact requests it makes and the response
+fields it depends on, and the provider is verified against those recorded
+expectations in CI. This catches the break the provider spec cannot see — a
+provider changing a field no one thought a consumer relied on.
+
+- Provider spec (OpenAPI) + consumer contracts (Pact) are complementary, not
+  redundant: the spec governs shape broadly; Pact proves real consumers still work.
+- Wire provider verification into CI so a provider change that breaks a recorded
+  consumer expectation fails the build before deploy.
+- Skip Pact for a public API with unknown consumers (the OpenAPI spec + schema
+  validation is the contract there); use it wherever you own both sides.
 
 ---
 

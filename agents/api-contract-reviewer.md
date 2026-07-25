@@ -88,13 +88,23 @@ Every response body must have:
 | DELETE | 204, 401, 404, 500 |
 | Any public endpoint | 200/201, 500 |
 
-**Error schema:**
-- All error responses must use the same `Error` schema shape (or equivalent)
+**Error schema (prefer RFC 9457 Problem Details):**
+- All error responses use the same error schema shape, ideally **RFC 9457
+  `application/problem+json`** (`type`, `title`, `status`, `detail`, `instance`)
+  — the IANA standard that supersedes RFC 7807 — so every consumer parses errors
+  identically. A bespoke error object is acceptable only if consistent and
+  documented; flag a new API that invents its own instead of using RFC 9457.
 - Error responses must have `content` defined (not just a description string)
-- Error codes must be documented in the schema (what does `VALIDATION_ERROR` mean?)
+- Error meanings documented (what does `VALIDATION_ERROR` / a given `type` URI mean?)
+
+**Consumer-driven contracts (service-to-service):**
+- For an API with known internal consumers, is there a plan/reference for
+  consumer-driven contract tests (Pact) verifying the provider against real
+  consumer expectations? The OpenAPI spec alone cannot catch a field a consumer
+  silently depends on. (Advisory for public APIs with unknown consumers.)
 
 **Critical:** 500 response absent from any endpoint. 401 absent from authenticated endpoint. Error response has no `content` schema. POST returns 200 instead of 201 for creation.
-**Important:** 422 (business validation) absent from POST/PUT/PATCH. Error responses use inconsistent schema shapes across endpoints. No `code` field in error schema (makes programmatic handling impossible).
+**Important:** 422 (business validation) absent from POST/PUT/PATCH. Error responses use inconsistent schema shapes across endpoints. A new API inventing a bespoke error object instead of RFC 9457 with no consistency rationale.
 **Advisory:** 429 (rate limit) absent from high-traffic endpoints. 503 absent from external-dependency-heavy endpoints.
 
 ---
