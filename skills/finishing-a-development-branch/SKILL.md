@@ -286,6 +286,19 @@ Use the `pr-creator` skill — it handles spec linkage, commit-msg.sh compliance
 
 Report: "Keeping branch <name>. Worktree preserved at <path>."
 
+#### Record the delivery signal (Options 1 & 2 only)
+
+Once the change is merged/deployed, record the deploy event so DORA lead time and
+change-failure-rate come from what actually shipped, not a hand-edited ledger:
+
+```bash
+skills/delivery-metrics/scripts/delivery-record deploy --work-item <manifest-id>
+```
+
+This is the deploy half of the delivery ledger `delivery-metrics` reads; the
+incident half is filled by `incident-response`. Skip only when there is no
+work-item manifest (bare quick-fix with no `.ai/work/<id>/`).
+
 **Don't cleanup worktree.**
 
 #### If your human partner asks to discard the work

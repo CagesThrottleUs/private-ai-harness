@@ -84,18 +84,40 @@ the timestamps. Flow efficiency needs captured active time. Lead time, CFR,
 MTTR, and reliability need a real change/failure signal. Report any of these as
 unavailable until its input exists rather than reporting a 0.
 
-## The delivery-metrics ledger (optional enrichment)
+## The delivery-metrics ledger (auto-populated from real events)
 
-To capture the failure-dependent keys, append one line per delivery to
-`~/.claude/private-ai-harness/delivery-ledger.jsonl`:
+The failure-dependent keys (lead time, change failure rate, MTTR, reliability)
+need a real change/failure signal. That signal is now **recorded from the events
+that actually produce it**, not hand-edited — `scripts/delivery-record` upserts
+one row per work-item into `~/.claude/private-ai-harness/delivery-ledger.jsonl`
+and is fired at the moments the harness already passes through:
+
+| Event | Fired by | Records |
+|---|---|---|
+| `deploy` | `finishing-a-development-branch` on merge/deploy | `created_at`, `merged_at`, `deployed_at` |
+| `incident-start` | `incident-response` when an incident linked to this work-item is declared | `caused_incident=true`, `incident_start` |
+| `incident-resolve` | `incident-response` when that incident is resolved | `restored_at` |
+| `slo` | `observability-standards` / `outcome-review` | `slo_met` |
+
+```bash
+scripts/delivery-record deploy --work-item 2026-07-25-slug
+scripts/delivery-record incident-start   --work-item 2026-07-25-slug
+scripts/delivery-record incident-resolve --work-item 2026-07-25-slug
+scripts/delivery-record slo --work-item 2026-07-25-slug --met true
+```
+
+Row shape:
 ```json
 {"work_item": "2026-07-25-slug", "repo": "owner/name",
  "created_at": "...", "merged_at": "...", "deployed_at": "...",
  "caused_incident": false, "incident_start": null, "restored_at": null,
  "slo_met": true}
 ```
-`dora-report` prefers this ledger when present. Without it, only the
-timestamp-derived keys are reported.
+`dora-report` prefers this ledger when present. Because it fills from the deploy
+and incident events themselves, CFR and MTTR reflect what happened rather than
+what someone remembered to log — the difference between a real DORA read and a
+fabricated one. Without any recorded event, only the timestamp-derived keys are
+reported (never a fabricated 0).
 
 ## Interpreting
 

@@ -134,6 +134,25 @@ Record each incident in `wiki/guides/incident-log.md` (one row per incident):
 ```
 ```
 
+### Feed the delivery ledger (change failure rate + MTTR)
+
+The incident-log row is for humans. The DORA stability keys need the same two
+events as machine data, linked to the work-item whose deploy caused the
+incident, so `delivery-metrics` computes change failure rate and MTTR from what
+happened rather than a remembered log:
+
+```bash
+# on declare — links this incident to the deploy that caused it
+skills/delivery-metrics/scripts/delivery-record incident-start   --work-item <deploy-work-item>
+# on resolve
+skills/delivery-metrics/scripts/delivery-record incident-resolve --work-item <deploy-work-item>
+```
+
+Only record `incident-start` when the incident is attributable to a change this
+harness deployed (that is what change failure rate measures) — not for
+externally-triggered incidents, which would inflate CFR against your own
+deploys.
+
 ---
 
 ### 2. Blameless Postmortem Template

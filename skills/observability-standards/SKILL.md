@@ -258,6 +258,14 @@ The policy must state a machine-readable **budget status** so the
 **Status: warning (budget < ~25% remaining)** — heightened caution; prefer
 reliability work; no risky launches.
 
+**Record the reliability signal:** when the budget status is evaluated for a
+shipped work-item, record whether its SLO held so `delivery-metrics` can report
+the DORA reliability (5th) key from data, not assertion:
+
+```bash
+skills/delivery-metrics/scripts/delivery-record slo --work-item <id> --met true|false
+```
+
 ### Burn-rate alerting (multi-window, multi-burn-rate — Google SRE Workbook)
 
 Use **two windows per alert**: a long window to detect a sustained burn and a

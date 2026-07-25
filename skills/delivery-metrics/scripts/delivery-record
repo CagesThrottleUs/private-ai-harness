@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Populate the delivery-ledger from real deploy/incident/SLO events, so the
+# DORA failure-dependent keys (lead time, change failure rate, MTTR,
+# reliability) come from what actually happened — not a hand-edited file.
+#
+# Upserts one row per work_item, keyed by --work-item, into the global ledger
+# that dora-report reads. Timestamps default to now (ISO-8601 UTC) when omitted.
+#
+# Usage:
+#   delivery-record deploy            --work-item ID [--repo owner/name] \
+#     [--created-at T] [--merged-at T] [--deployed-at T]
+#   delivery-record incident-start    --work-item ID [--start T]
+#   delivery-record incident-resolve  --work-item ID [--restored-at T]
+#   delivery-record slo               --work-item ID --met true|false
+#
+# deploy           → created/merged/deployed (fired by finishing-a-development-branch)
+# incident-start   → caused_incident=true + incident_start (fired when an
+#                    incident linked to this work-item is declared)
+# incident-resolve → restored_at (fired when that incident is resolved)
+# slo              → slo_met (fired by observability-standards / outcome-review)
+#
+# Ledger: $CODEX_HOME/private-ai-harness/delivery-ledger.jsonl on Codex,
+# otherwise ~/.claude/private-ai-harness/delivery-ledger.jsonl (global,
+# cross-repo, append/upsert; one JSON object per work_item).
+set -euo pipefail
+
+if [ -n "${CODEX_THREAD_ID:-}" ]; then
+  LEDGER_DIR="${CODEX_HOME:-$HOME/.codex}/private-ai-harness"
+else
+  LEDGER_DIR="$HOME/.claude/private-ai-harness"
+fi
+LEDGER_FILE="$LEDGER_DIR/delivery-ledger.jsonl"
+
+repo_name() {
+  local url
+  url=$(git remote get-url origin 2>/dev/null || true)
+  if [ -n "$url" ]; then
+    url=${url%.git}
+    echo "$url" | sed -E 's#.*[:/]([^/]+/[^/]+)$#\1#'
+  else
+    basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+  fi
+}
+
+event=${1:-}
+case "$event" in
+  deploy|incident-start|incident-resolve|slo) shift 1 ;;
+  *) echo "usage: delivery-record deploy|incident-start|incident-resolve|slo --work-item ID ..." >&2; exit 2 ;;
+esac
+
+work_item="" repo="" created_at="" merged_at="" deployed_at="" start="" restored_at="" met=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --work-item) work_item=$2; shift 2 ;;
+    --repo) repo=$2; shift 2 ;;
+    --created-at) created_at=$2; shift 2 ;;
+    --merged-at) merged_at=$2; shift 2 ;;
+    --deployed-at) deployed_at=$2; shift 2 ;;
+    --start) start=$2; shift 2 ;;
+    --restored-at) restored_at=$2; shift 2 ;;
+    --met) met=$2; shift 2 ;;
+    *) echo "unknown flag: $1" >&2; exit 2 ;;
+  esac
+done
+: "${work_item:?--work-item is required}"
+[ -z "$repo" ] && repo=$(repo_name)
+
+mkdir -p "$LEDGER_DIR"
+touch "$LEDGER_FILE"
+
+python3 - "$LEDGER_FILE" "$event" "$work_item" "$repo" "$created_at" "$merged_at" "$deployed_at" "$start" "$restored_at" "$met" <<'PYEOF'
+import json, sys, datetime
+
+path, event, work_item, repo, created_at, merged_at, deployed_at, start, restored_at, met = sys.argv[1:11]
+now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+rows, found = [], None
+with open(path) as f:
+    for line in f:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if obj.get("work_item") == work_item and found is None:
+            found = obj
+        else:
+            rows.append(obj)
+
+row = found or {
+    "work_item": work_item, "repo": repo,
+    "created_at": None, "merged_at": None, "deployed_at": None,
+    "caused_incident": False, "incident_start": None, "restored_at": None,
+    "slo_met": None,
+}
+row["repo"] = repo
+
+if event == "deploy":
+    row["created_at"] = created_at or row.get("created_at") or now
+    row["merged_at"] = merged_at or now
+    row["deployed_at"] = deployed_at or now
+elif event == "incident-start":
+    row["caused_incident"] = True
+    row["incident_start"] = start or row.get("incident_start") or now
+elif event == "incident-resolve":
+    row["caused_incident"] = True
+    if not row.get("incident_start"):
+        row["incident_start"] = now  # resolve seen without a prior start
+    row["restored_at"] = restored_at or now
+elif event == "slo":
+    if met not in ("true", "false"):
+        sys.exit("--met must be true|false")
+    row["slo_met"] = met == "true"
+
+rows.append(row)
+with open(path, "w") as f:
+    for obj in rows:
+        f.write(json.dumps(obj) + "\n")
+print(json.dumps(row))
+PYEOF
