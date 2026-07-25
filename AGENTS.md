@@ -99,7 +99,7 @@ inheriting the parent Codex model.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `pr-reviewer` | opus | PR diff review — 5 dimensions + spec traceability |
+| `pr-reviewer` | opus | PR diff review — 6 dimensions (incl. AI-authored-code risk) + spec traceability |
 | `security-reviewer` | opus | Threat modeling, attack surface, auth/authz chains, cryptography |
 | `spec-impl-reviewer` | opus | Verify implementation satisfies each REQ acceptance criterion |
 | `test-quality-reviewer` | opus | Verify tests are meaningful, not just annotated |

@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across five dimensions — code quality, wiki/doc alignment, security, reliability, performance — plus req_id traceability for all changed symbols and tests. Use before merging any PR.
+description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across six dimensions — code quality, wiki/doc alignment, security, reliability, performance, and AI-authored-code risk (hallucinated APIs, dropped authz, happy-path-only) — plus req_id traceability for all changed symbols and tests. Use before merging any PR.
 model: opus
 ---
 
@@ -177,6 +177,28 @@ For every new/modified code path:
 - Repeated computation that could be cached?
 - Synchronous blocking call in an async handler?
 
+#### Dimension 6: AI-Authored-Code Risk (assume AI-authored unless told otherwise)
+
+AI code reads cleanly and passes the happy path while hiding a specific defect
+profile; the 2024 DORA report ties AI adoption to *lower delivery stability*, so
+this dimension is not optional. For the changed code:
+- **Hallucinated API / package** — does every imported symbol, function
+  signature, and dependency actually exist and match its real contract? Flag any
+  call whose behavior is *assumed* rather than verified against the dependency's
+  source. Flag any newly added package that may not exist or is deprecated.
+- **Confident-but-wrong logic** — the code compiles and looks right; does it
+  actually satisfy the requirement, or a plausible mis-reading of it?
+- **Happy-path-only** — are empty/nil/boundary inputs, error paths, and
+  concurrency handled, or only the nominal case the prompt implied?
+- **Silently dropped authorization** — never assume the model added authz;
+  verify every new path enforces it.
+- **Hardcoded secrets** — AI frequently inlines keys/tokens; scan for them.
+- **Scope inflation** — did the model add unrequested "helpful" abstractions,
+  endpoints, or config (YAGNI)?
+
+Route auth/payments/PII/security-boundary AI code through `security-reviewer`
+regardless of diff size.
+
 ### Step 4 — Traceability Check
 
 Classify every new/modified construct in the diff by tier (from code-documentation skill):
@@ -274,7 +296,17 @@ Flag any `@spec_id` that doesn't match a real spec file as a **Critical** issue 
 
 ---
 
-## 6. Traceability
+## 6. AI-Authored-Code Risk
+
+### Critical
+- `file:line` — [hallucinated API / missing authz / hardcoded secret / wrong contract] — [fix]
+
+### Important
+- `file:line` — [happy-path-only / confident-but-wrong / scope inflation] — [fix]
+
+---
+
+## 7. Traceability
 
 | Symbol / Test | File:Line | @spec_id | @req_id / @validates_req | Fully Traced |
 |---------------|-----------|----------|--------------------------|--------------|
@@ -287,7 +319,7 @@ Flag any `@spec_id` that doesn't match a real spec file as a **Critical** issue 
 
 ---
 
-## 7. Prior Review & Policy
+## 8. Prior Review & Policy
 _(only if `{PR_NUMBER}` or a policy file was present — omit this section otherwise)_
 
 ### Adverse prior advice

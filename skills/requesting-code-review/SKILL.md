@@ -44,13 +44,43 @@ productivity super-linearly). Target a **first reviewer response within one
 business day**. For AI reviewers this is immediate; the norm binds human
 reviewers in the loop and any queued re-review after a fix.
 
+## Reviewing AI-Authored Code (default assumption in this harness)
+
+Most diffs here are AI-authored, so treat every review as an AI-code review
+unless told otherwise. Two grounded facts set the posture:
+
+- The **2024 DORA report** found AI adoption raises throughput but **lowers
+  delivery stability (~7.2% per 25% adoption)** — "more code, more breakage."
+  Small batch size is the named mitigation, so the **PR Size Gate above is
+  stricter, not laxer, for AI diffs** — an AI can emit 1,500 plausible lines in
+  a minute; that is the exact shape the evidence says review misses.
+- AI code **reads cleanly and passes the happy path** while hiding specific
+  defect classes; ~76% of developers report frequent AI hallucinations.
+
+**Inspect the assumptions behind the code, not just its surface** — inputs,
+outputs, dependencies, permissions, failure modes. Explicitly check for:
+
+| AI-specific risk | What to verify |
+|---|---|
+| Hallucinated APIs / non-existent packages | Every imported symbol and dependency actually exists and is the current, non-deprecated one |
+| Insecure/outdated libraries | No known-vulnerable or abandoned deps introduced |
+| Hardcoded secrets | No API keys/tokens/passwords in the diff (AI frequently inlines these) |
+| Happy-path-only logic | Error paths, empty/nil/boundary inputs, and concurrency are handled, not just the nominal case |
+| Missing authorization | Auth/authz checks present on every new path — never assume the AI added them |
+| Confident-but-wrong behavior | Claimed library/framework behavior matches its real contract (read the source, not the docstring) |
+
+**Never skip human review for AI-authored code touching authentication,
+payments, PII, or security boundaries** — route it through `security-reviewer`
+regardless of size. AI review tools catch ~42–48% of runtime bugs (vs <20% for
+static analysis) but do not replace the human gate on high-blast-radius code.
+
 ---
 
 ## Review Agent Roster
 
 | Agent | Invocation | Use when |
 |-------|-----------|----------|
-| `pr-reviewer` | `/review pr` | Every PR, always. 5 dimensions (code quality, docs, security, reliability, performance) + traceability. Blocks without spec. |
+| `pr-reviewer` | `/review pr` | Every PR, always. 6 dimensions (code quality, docs, security, reliability, performance, AI-authored-code risk) + traceability. Blocks without spec. |
 | `spec-impl-reviewer` | `/review spec` | You have a spec and want to verify the implementation actually satisfies acceptance criteria — not just that annotations exist. |
 | `test-quality-reviewer` | `/review tests` | Tests were added or modified. Checks meaningful assertions, spec TC coverage, mutation resistance, anti-patterns. |
 | `security-reviewer` | `/review security` | PR touches auth, input handling, data access, external communication, config, or adds new endpoints/handlers. |
