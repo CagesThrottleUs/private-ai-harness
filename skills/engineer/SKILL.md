@@ -113,7 +113,9 @@ Footprint: ~all 44 skills · epic manifest + N child manifests · days–weeks.
 7. **deployment-workflow** *(⊘ deployment-reviewer)* — rollback, expand-contract migration, smoke tests
 8. **observability-standards** *(⊘ observability-reviewer)* — SLOs, runbooks, golden signals
 9. **incident-response** — severity matrix, postmortem template for new service
-10. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
+10. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch
+11. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
+12. **delivery-metrics** — after launch (and periodically): DORA four keys + reliability and flow efficiency from the manifest phase timestamps
 
 ---
 

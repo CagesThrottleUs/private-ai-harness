@@ -103,6 +103,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `visual-regression-reviewer` | **Sonnet** — VRT gate: screenshots on critical pages, animations off, baselines committed, dynamic content masked, pinned Docker CI |
 | `chaos-reviewer` | **Sonnet** — Chaos test gate: steady state/hypothesis, scenarios match HLD, thresholds allow degradation, abort criteria, CI on staging |
 | `incident-response-reviewer` | **Sonnet** — IR docs gate: severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication templates |
+| `production-readiness-reviewer` | PRR gate — SRE Launch Coordination Checklist seven dimensions; accepts a readiness claim only when evidenced (tested rollback, sourced SLO, verified dependency, exercised runbook), not when plausibly written; flags AI-plausible-but-unverified readiness |
 | `onboarding-reviewer` | Onboarding guide gate — 8 required sections, executable dev setup, C4 diagram, ADRs, contribution path, actionable ops section |
 | `dast-reviewer` | **Sonnet** — DAST config gate: ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF uploaded, auth configured |
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
