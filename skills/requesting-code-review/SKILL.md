@@ -13,6 +13,39 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 
 ---
 
+## PR Size Gate (evidence-backed — check BEFORE dispatching any reviewer)
+
+Review effectiveness is dominated by one variable: **change size**. This is the
+best-measured lever in code review, so it gates first.
+
+| Changed LOC (added + modified, excluding generated/vendored/lockfiles) | Action |
+|---|---|
+| ≤ 200 | Ideal — dispatch review |
+| 201–400 | Good — dispatch review |
+| 401–1000 | **Warn** — split if the diff spans independent concerns; otherwise proceed and tell the reviewer where to focus |
+| > 1000 | **Block** — split into reviewable PRs before requesting review |
+
+Evidence (SmartBear 2,500-review study; Google *Modern Code Review*): defect
+detection peaks at **200–400 changed LOC** and ~60 minutes, and collapses from
+~87% under 100 LOC to ~28% over 1,000 LOC. A 2,000-line PR is not "one big
+review" — it is a review that silently misses two-thirds of its defects.
+
+**Measure before requesting:**
+```bash
+git diff --numstat <base>...HEAD | awk '$1!="-"{a+=$1} $2!="-"{m+=$2} END{print a+m" changed LOC"}'
+# Exclude generated/vendored: add  | grep -vE '(lock|\.min\.|dist/|vendor/|generated/)'
+```
+If over 1000, stop and split — one vertical slice per PR (see `epic-decomposition`).
+
+## Review Latency Norm
+
+Slow review decays the whole team's throughput (Google: review delay reduces
+productivity super-linearly). Target a **first reviewer response within one
+business day**. For AI reviewers this is immediate; the norm binds human
+reviewers in the loop and any queued re-review after a fix.
+
+---
+
 ## Review Agent Roster
 
 | Agent | Invocation | Use when |
