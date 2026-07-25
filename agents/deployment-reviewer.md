@@ -138,8 +138,14 @@ Check the expand-contract pattern is followed:
 **Deployment strategy:**
 - Is the strategy stated explicitly (Rolling / Blue-Green / Canary / Dark Launch)?
 - Does the strategy match the change type? (DB migration with Rolling = dangerous — flag this)
+- **If the strategy is Canary:** is there an *automated* canary analysis (Argo
+  Rollouts `AnalysisTemplate` / Flagger `MetricTemplate` / Kayenta) whose SLI
+  queries tie to the SLO document and whose failure condition triggers an
+  **automatic abort + rollback** — or is the canary only human-watched? A canary
+  whose only rollback trigger is "on-call notices the dashboard" is a manual gate
+  masquerading as progressive delivery.
 
-**Critical:** No deploy command (only "deploy the service"). Deployment strategy not stated. No link to rollback procedure. Pre-deploy checklist absent.
+**Critical:** No deploy command (only "deploy the service"). Deployment strategy not stated. No link to rollback procedure. Pre-deploy checklist absent. Canary strategy with no automated analysis + auto-rollback (relies on a human watching metrics).
 **Important:** No 30-minute watch phase. Deployment complete notification absent (no team awareness). On-call not mentioned in pre-deploy.
 **Advisory:** No estimated deploy time. No dashboard link.
 

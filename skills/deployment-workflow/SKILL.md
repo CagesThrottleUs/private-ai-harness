@@ -97,6 +97,49 @@ Choose based on system type and change risk. State the choice explicitly in the 
 - Security fix or patch → **Blue-Green** (instant rollback if regression found)
 - Rollout needs a kill switch, percentage ramp, or A/B split independent of deploy → invoke `feature-flags` before finalizing the strategy; the flag becomes the actual rollback lever instead of a full redeploy
 
+### Automated Canary Analysis (required when the strategy is Canary)
+
+A canary that a human watches on a dashboard is a manual gate — it fails exactly
+when everyone is asleep. When the strategy is Canary, the rollback trigger below
+("When to Rollback") must be **executed by the rollout controller, not a person**:
+the controller queries the SLIs at each traffic step and auto-promotes on healthy,
+auto-aborts-and-rolls-back on breach.
+
+Specify, in the runbook, an analysis definition the controller enforces:
+
+- **Controller + analysis:** Argo Rollouts `AnalysisTemplate`, Flagger
+  `MetricTemplate`, or Kayenta automated canary analysis (Mann-Whitney statistical
+  comparison of canary vs. baseline). Pick the one native to the platform.
+- **Metric provider:** where the SLIs are read — Prometheus, Datadog, CloudWatch,
+  New Relic, or Kayenta.
+- **SLI queries tied to the SLOs** (not arbitrary numbers): the same error-rate and
+  latency SLIs the `observability-standards` SLO document defines. A canary that
+  passes on metrics unrelated to the SLO proves nothing.
+- **Step schedule + analysis per step:** e.g. 1% → 10% → 50% → 100%, with the
+  analysis run at each step before promotion.
+- **Failure condition → automatic abort:** breach of the SLI threshold (or a
+  failed Mann-Whitney vs. baseline) aborts the rollout and shifts 100% of traffic
+  back to stable with no human in the loop. `failureLimit`/`inconclusive` handling
+  stated explicitly.
+
+```yaml
+# Argo Rollouts AnalysisTemplate (illustrative) — SLIs from the SLO doc
+metrics:
+  - name: error-rate
+    interval: 1m
+    failureLimit: 2               # abort after 2 breaching reads
+    successCondition: result < 0.01   # ties to the 99% success SLO
+    provider:
+      prometheus:
+        query: |
+          sum(rate(http_requests_total{status=~"5..",app="{{args.svc}}"}[1m]))
+          / sum(rate(http_requests_total{app="{{args.svc}}"}[1m]))
+```
+
+This makes the "When to Rollback" trigger machine-enforced: the same conditions a
+human would watch for become the controller's abort criteria, so a bad canary
+rolls back in seconds regardless of who is watching.
+
 ---
 
 ## Zero-Downtime Migration Checklist
@@ -170,6 +213,11 @@ Trigger rollback if, within 30 minutes of production deploy:
 - p99 latency rises > 50% above SLO threshold
 - Smoke tests fail
 - Manual decision by on-call engineer
+
+**Under a Canary strategy these are the controller's automated abort conditions
+(see Automated Canary Analysis above), not a dashboard someone watches** — encode
+the first three as the `AnalysisTemplate` failure conditions so rollback is
+automatic; the manual trigger remains as the human override.
 
 Do NOT wait for a postmortem. Rollback first, investigate after.
 
