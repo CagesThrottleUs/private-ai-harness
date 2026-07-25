@@ -126,13 +126,14 @@ Footprint: ~all 44 skills · epic manifest + N child manifests · days–weeks.
 3. **spec-quality-gate** *(⊘ spec-quality-reviewer)*
 4. **high-level-design** *(⊘ hld-reviewer → human must approve)* — C4, STRIDE, failure modes, capacity; human approval is required before next step
 5. **epic-decomposition** — break epic → N bounded stories; produce child manifests; identify parallel vs sequential waves
-6. **For each child story:** invoke this skill as `/engineer "<story description>"` at task lane — recursive orchestrator-workers one level down (SDD inside each story)
-7. **deployment-workflow** *(⊘ deployment-reviewer)* — rollback, expand-contract migration, smoke tests
-8. **observability-standards** *(⊘ observability-reviewer)* — SLOs, runbooks, golden signals
-9. **incident-response** — severity matrix, postmortem template for new service
-10. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch
-11. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
-12. **delivery-metrics** — after launch (and periodically): DORA four keys + reliability and flow efficiency from the manifest phase timestamps
+6. **service-scaffolding** *(⊘ service-scaffolding-reviewer)* — for a NEW service: emit the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, catalog entry, scorecard) so it is born compliant *before* any child story implements into it. Skip if extending an existing service
+7. **For each child story:** invoke this skill as `/engineer "<story description>"` at task lane — recursive orchestrator-workers one level down (SDD inside each story)
+8. **deployment-workflow** *(⊘ deployment-reviewer)* — rollback, expand-contract migration, smoke tests
+9. **observability-standards** *(⊘ observability-reviewer)* — SLOs, runbooks, golden signals
+10. **incident-response** — severity matrix, postmortem template for new service
+11. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch
+12. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
+13. **delivery-metrics** — after launch (and periodically): DORA four keys + reliability and flow efficiency from the manifest phase timestamps
 
 ---
 

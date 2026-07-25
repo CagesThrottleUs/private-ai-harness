@@ -62,6 +62,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
 | `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; the engineer PORTFOLIO lane; runs `portfolio-reviewer` |
+| `service-scaffolding` | `/service-scaffolding` | Golden-path scaffold for a NEW service (CNCF Platform Eng L3) — CI, observability, contract stub, tests, runbook, resource limits, catalog entry, scorecard from birth; runs `service-scaffolding-reviewer` |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
@@ -101,6 +102,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `load-test-reviewer` | Load test quality gate — NFR-aligned thresholds, smoke test, realistic traffic, test type coverage (soak for availability NFRs), CI against staging |
 | `feature-flag-reviewer` | **Sonnet** — Flag gate: naming conventions, registry completeness, CI expired-flag block, safe defaults, cleanup queue |
 | `iac-reviewer` | **Sonnet** — IaC gate: versions pinned, remote state+locking, sensitive vars, env separation, tfsec/checkov scan, no secrets in code |
+| `service-scaffolding-reviewer` | **Sonnet** — Scaffold completeness gate: CI, observability, contract stub, tests, runbook, resource limits (not unbounded), catalog entry with owner, scorecard all present |
 | `database-erd-reviewer` | **Sonnet** — ERD gate: PKs present, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions |
 | `visual-regression-reviewer` | **Sonnet** — VRT gate: screenshots on critical pages, animations off, baselines committed, dynamic content masked, pinned Docker CI |
 | `chaos-reviewer` | **Sonnet** — Chaos test gate: steady state/hypothesis, scenarios match HLD, thresholds allow degradation, abort criteria, CI on staging |
