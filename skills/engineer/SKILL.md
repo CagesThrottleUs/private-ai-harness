@@ -117,7 +117,7 @@ Hold the WIP limit regardless of how cheaply AI can start epics; the 2024 DORA r
 
 ### EPIC lane
 
-Footprint: ~all 44 skills · epic manifest + N child manifests · days–weeks.
+Footprint: ~all 54 skills · epic manifest + N child manifests · days–weeks.
 
 **First:** create epic manifest at `.ai/work/YYYY-MM-DD-<slug>/manifest.md`. Every gate below is hard-blocking — do not advance past a FAIL without human resolution.
 
