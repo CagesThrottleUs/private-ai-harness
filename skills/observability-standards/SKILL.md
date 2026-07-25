@@ -245,16 +245,36 @@ Save to: `.ai/observability/YYYY-MM-DD-slos.md`
 
 ## Error Budget Policy
 
-When the error budget is exhausted:
-- [ ] Stop new feature work
-- [ ] Freeze non-critical deploys
-- [ ] Engineering focus shifts to reliability
-- [ ] Budget resets at window start
+The policy must state a machine-readable **budget status** so the
+`deployment-workflow` release gate can read it: `ok` | `warning` | `frozen`.
 
-When burning at > 2× expected rate (burn rate alert):
-- [ ] Page on-call immediately
-- [ ] Escalate if not resolved within 1 hour
-- [ ] Postmortem if downtime > 30 minutes
+**Status: frozen (budget exhausted)** — Google SRE error-budget policy:
+- [ ] Feature freeze — stop new feature deploys
+- [ ] Only critical fixes ship (P0/SEV-1 or security), and each needs explicit reliability/SRE approval
+- [ ] Engineering focus shifts to a reliability sprint until the budget recovers
+- [ ] Stakeholders notified
+- [ ] Work resumes automatically when the budget recovers (window rolls / burn stops)
+
+**Status: warning (budget < ~25% remaining)** — heightened caution; prefer
+reliability work; no risky launches.
+
+### Burn-rate alerting (multi-window, multi-burn-rate — Google SRE Workbook)
+
+Use **two windows per alert**: a long window to detect a sustained burn and a
+short window to confirm it is current, not historical (suppresses flapping).
+
+| Burn rate | Budget consumed | Long / short window | Action |
+|---|---|---|---|
+| **14.4×** | 2% of monthly budget per hour | 1h / 5m | **Page** — fast burn |
+| **6×** | ~5% over 6h | 6h / 30m | **Page** — medium burn |
+| **1×** | slow drain | 3d / 6h | **Ticket** — slow burn |
+
+Reference: `sre.google/workbook/alerting-on-slos/`.
+
+**AI-age note:** AI raises deploy frequency, and the 2024 DORA report ties that
+to lower delivery stability. The error budget is the **objective circuit
+breaker** — when AI-accelerated feature velocity burns the budget, the freeze
+protects the SLO regardless of how fast changes can be produced.
 
 ---
 

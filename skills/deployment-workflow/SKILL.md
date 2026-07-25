@@ -45,6 +45,26 @@ Produce the deployment artifacts before the PR is opened — not as a post-merge
 
 ---
 
+## Error Budget Release Gate (check FIRST, before recommending a strategy)
+
+Before planning any non-critical release, read the target service's **error
+budget status** from its SLO doc (`observability-standards` records it as
+`ok | warning | frozen`):
+
+- **frozen (budget exhausted):** **block the release.** Only P0/SEV-1 or security
+  fixes ship, each with explicit reliability/SRE approval, until the budget
+  recovers. This is the Google SRE error-budget policy — it exists so reliability
+  is not silently traded for feature velocity.
+- **warning (< ~25% remaining):** proceed with caution; no risky launches; prefer
+  a safer strategy (blue-green/canary with tight auto-rollback).
+- **ok:** proceed normally.
+
+**AI-age rationale:** AI raises deploy frequency, which the 2024 DORA report ties
+to lower delivery stability. The error-budget gate is the objective circuit
+breaker that stops AI-accelerated velocity from burning the SLO — it binds
+regardless of how fast a change was produced. If no SLO/error budget exists yet,
+that is itself a release blocker: invoke `observability-standards` first.
+
 ## Process
 
 1. **Detect what changed** — DB migrations? New endpoints? Breaking changes? Config changes?
