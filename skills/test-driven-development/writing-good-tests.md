@@ -168,6 +168,29 @@ should fail for each realistic mutation:
 A mutation nothing catches marks the behavior as unprotected — or the
 test as tautological.
 
+### Run it as a tool, not just in your head
+
+The mental check is the intuition; a mutation-testing tool is the proof.
+Run one and gate on the **mutation score** (killed ÷ non-equivalent mutants):
+
+| Language | Tool |
+|---|---|
+| JS / TS | Stryker |
+| Java | PIT |
+| Python | mutmut |
+
+Typical CI gate: **break below ~50%**, aim ≥60–80% on load-bearing code
+(Stryker's default `high:80 / low:60 / break:50`). Review surviving mutants
+to separate equivalent mutants from real assertion gaps, then add the missing
+assertion.
+
+**Why this matters most for AI-written tests:** line coverage is gameable — a
+test that calls a function and asserts nothing scores 100% coverage. Mutation
+score is not gameable. An AI-generated suite with **80%+ coverage but <50–60%
+mutation score is mostly tautological** — it executes the code without checking
+it. Coverage is a floor (don't ship untouched code); mutation score is the real
+signal that the tests would catch a regression.
+
 ## Quick Reference
 
 | When you... | Do |

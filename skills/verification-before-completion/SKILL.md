@@ -164,6 +164,39 @@ Agent(linter-reviewer, {
 
 ---
 
+## Test-Strength Gate (mutation score, not just coverage)
+
+**Required when this change added or modified tests.** Line coverage is
+gameable — a test that runs a function and asserts nothing scores 100%
+coverage. Mutation score (killed ÷ non-equivalent mutants) is not gameable, so
+it is the real signal that the tests would catch a regression.
+
+| Language | Tool | Gate |
+|---|---|---|
+| JS / TS | Stryker | break < 50%, aim 60–80% |
+| Java | PIT | `mutationThreshold` ~60 |
+| Python | mutmut | survivors reviewed, gap closed |
+
+- Coverage is a **floor** (don't ship untested code); mutation score is the
+  strength check on top of it.
+- **AI-generated tests especially:** 80%+ coverage with **< 50–60% mutation
+  score means the assertions are tautological** — the suite executes the code
+  without checking it. Feed surviving mutants back as the next assertions to add;
+  do not accept a green-but-tautological suite.
+
+## Structural Quality Measure (ISO/IEC 5055 / CISQ)
+
+**For source changes**, quality must be *measured*, not only eyeballed. ISO/IEC
+5055 (CISQ) defines automated source-code measures for four characteristics —
+Reliability, Security, Performance Efficiency, Maintainability — as sets of CWE
+structural weaknesses. Run a CWE-oriented static scan (e.g., the SAST/SCA tools
+already configured in `ci-pipeline-setup`) and a maintainability check:
+- No new Critical/High CWE structural weaknesses introduced by the change.
+- Maintainability not materially worsened (function length, nesting, duplication
+  — the same signals `pr-reviewer` Dimension 1 flags, here as a measured floor).
+
+---
+
 ## When To Apply
 
 **ALWAYS before:**

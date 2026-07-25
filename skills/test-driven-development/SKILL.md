@@ -326,6 +326,7 @@ Before marking work complete:
 - [ ] Output pristine (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Test cases cover boundary values, equivalence classes, and error inputs — not just happy paths
+- [ ] Test-strength gate: mutation score meets the threshold (Stryker/PIT/mutmut), not just line coverage — a green suite with a low mutation score is tautological (`verification-before-completion` Test-Strength Gate)
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
 - [ ] Linter gate passed: format check + lint + type check for this language — zero issues, no new suppressions (run `verification-before-completion` linter gate, dispatch `linter-reviewer`)
 - [ ] If component has external dependencies: integration tests written using `integration-testing` skill (Testcontainers, no mocks at boundary, transaction rollback isolation)
