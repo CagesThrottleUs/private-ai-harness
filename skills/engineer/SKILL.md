@@ -21,6 +21,7 @@ Read the request. Apply the signal table. When signals conflict or span two lane
 | **quick-fix** | Defect/bug/typo, single symbol broken, no new API or data model, obvious root cause | Minutes |
 | **task** | Bounded feature, extending existing patterns, may add 1 endpoint or component, no new service | Hours |
 | **epic** | New service/system, new data model, external integration, PII/auth/payment, multiple parallel workstreams | Days–weeks |
+| **portfolio** | 2+ epics/initiatives to sequence against finite capacity, a roadmap, "which should we do first", cross-epic dependencies, a standing backlog | Weeks–months |
 | **research** | "spike", "POC", "feasibility", "compare A vs B", "design doc", "evaluate X", "is X possible" — answer is the deliverable, not code | Hours |
 | **refactoring** | "refactor", "clean up", "extract", "split class/method", "reduce duplication", "decouple", "restructure", "simplify", "rename module" — code is correct, shape is wrong; zero new behavior | Hours |
 
@@ -28,6 +29,7 @@ Read the request. Apply the signal table. When signals conflict or span two lane
 - fix-vs-refactor: "Is something broken, or does the code work but have the wrong shape?"
 - refactor-vs-task: "Will callers need to change, or does the external contract stay identical?"
 - task-vs-epic: "Is this extending an existing service, or creating something new?"
+- epic-vs-portfolio: "Is this one initiative, or several competing initiatives to prioritize and sequence?"
 - any-vs-research: "Is the deliverable committed code or a decision document?"
 
 ## Step 2 — Present to user (MANDATORY — no skill fires before this)
@@ -98,6 +100,21 @@ artifacts: {}
 
 ---
 
+### PORTFOLIO lane
+
+Footprint: portfolio manifest + N epic runs · weeks–months. The layer above the
+epic — sequences many epics against finite capacity.
+
+**First:** create `.ai/portfolio/manifest.md`.
+
+1. **portfolio-management** *(⊘ portfolio-reviewer)* — run the SAFe Portfolio Kanban: place each initiative in a state (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), score by **WSJF** (cost of delay ÷ job size), enforce **WIP limits** (Little's Law), validate the cross-epic dependency DAG, link each epic to an OKR
+2. **Pull loop:** when Implementing WIP < limit, pull the highest-WSJF backlog epic whose dependencies are all done, and dispatch it as `/engineer "<epic>"` at the **epic lane** — recursive orchestration one level down
+3. On each epic `done`: record for **delivery-metrics**, then pull the next. Never exceed the WIP limit to get ahead — Little's Law says that lengthens every in-flight epic
+
+Hold the WIP limit regardless of how cheaply AI can start epics; the 2024 DORA report ties undisciplined AI throughput to lower delivery stability.
+
+---
+
 ### EPIC lane
 
 Footprint: ~all 44 skills · epic manifest + N child manifests · days–weeks.
@@ -156,6 +173,7 @@ The main session model cannot change mid-run. Pick the launch model by lane:
 |------|-----------|-----|
 | quick-fix, refactoring, task | Sonnet | judgment work is in pinned-model subagents; orchestration is thin |
 | epic design phases (brainstorm, HLD) | Opus | these reason in the main session and cannot be offloaded |
+| portfolio | Sonnet | Kanban bookkeeping + WSJF ranking + dispatch is thin; each dispatched epic picks its own launch model |
 | research | Sonnet; Opus for hard trade-offs | spike judgment is sometimes deep |
 
 Named subagents ignore the chat model (their frontmatter `model:` is pinned).

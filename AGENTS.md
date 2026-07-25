@@ -54,6 +54,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
 | `engineer` | `/engineer` | **Universal entry point** — routes any request to the right lane (quick-fix/task/epic/research), classifies complexity from observable signals, proposes a skill chain, waits for user confirmation, then starts the flow |
 | `epic-decomposition` | `/epic-decomposition` | After HLD human approval in the epic lane — breaks epic into bounded stories, creates child work-item manifests under `.ai/work/<epic>/children/`, identifies parallel vs sequential dependency waves |
+| `portfolio-management` | `/portfolio-management` | The layer ABOVE a single epic — SAFe Portfolio Kanban (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), WSJF ranking (cost of delay ÷ job size), WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; pulls the top-WSJF epic into the epic lane when WIP allows; the engineer PORTFOLIO lane routes here; runs `portfolio-reviewer` |
 | `load-testing` | `/load-testing` | Before `finishing-a-development-branch` when spec has NFR targets — generates k6 scripts (smoke/load/stress/spike/soak), thresholds tied to spec NFRs, CI performance job against staging; runs `load-test-reviewer` |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
@@ -111,6 +112,7 @@ inheriting the parent Codex model.
 | `hld-reviewer` | opus | Pre-human HLD quality gate — validates C4 diagrams, technology selection, STRIDE threat model, failure modes, capacity planning, ADR completeness, spec coverage, and AWS Well-Architected alignment. Invoked by `high-level-design` skill before human review. |
 | `spec-quality-reviewer` | opus | Spec quality gate — validates falsifiability, TC coverage, TC honesty, error path ownership, consistency, and dependency declaration against SQLite/RFC 8446/DO-178C standards. Invoked by `spec-quality-gate` skill. |
 | `plan-reviewer` | opus | Implementation plan quality gate — validates spec coverage, task granularity (incl. Right-Sizing), Karpathy anti-patterns, placeholder detection, type/interface + Interfaces-block chain consistency, design principle compliance, Global Constraints section presence, and commit discipline. Invoked by `writing-plans` skill before execution handoff. |
+| `portfolio-reviewer` | opus | Portfolio Kanban quality gate — WSJF computed from cost-of-delay components (not gut-ranked), every non-Funnel state within its WIP limit (Little's Law), `depends_on` a valid DAG with no cycles, each epic links an OKR, pull order respects WSJF and dependencies. Invoked by `portfolio-management` skill. |
 | `ci-reviewer` | opus | CI/CD pipeline quality gate — validates stage completeness, fail-fast ordering, security hygiene, coverage gate, artifact immutability, environment gates, DORA readiness, and branch protection alignment. Platform-agnostic: GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket. Invoked by `ci-pipeline-setup` skill. |
 | `observability-reviewer` | opus | Observability quality gate — validates OTel logging compliance (6 mandatory fields), golden signal coverage (all 4 signals), SLO quality vs spec NFRs, alert design (symptom-based, burn rate), runbook completeness (7 required sections), distributed tracing, SLO-to-alert alignment. Invoked by `observability-standards` skill. |
 | `deployment-reviewer` | opus | Deployment quality gate — validates rollback procedure (7 sections, tested), DB migration safety (expand-contract pattern, dangerous patterns), smoke test coverage, deployment runbook, release notes quality (Keep a Changelog format), strategy-migration alignment. Invoked by `deployment-workflow` skill. |
@@ -152,6 +154,7 @@ Visual regression agents (`visual-regression-reviewer`) require `TEST_FILES` and
 Chaos agents (`chaos-reviewer`) require `TEST_FILES`; `HLD_PATH` and `SPEC_PATH` optional.
 Incident response agents (`incident-response-reviewer`) require `PROCESS_PATH` and `POSTMORTEM_PATH`; `SLO_PATH` optional.
 Production readiness agents (`production-readiness-reviewer`) require `PRR_PATH`; `SLO_PATH`, `ROLLBACK_PATH`, and `SPEC_PATH` optional.
+Portfolio agents (`portfolio-reviewer`) require `PORTFOLIO_PATH`; `WIP_LIMIT` optional.
 Onboarding agents (`onboarding-reviewer`) require `ONBOARDING_PATH`; `HLD_PATH` and `SPEC_PATH` optional.
 DAST agents (`dast-reviewer`) require `CI_CONFIG_PATH`; `OPENAPI_PATH` and `ZAP_RULES_PATH` optional.
 Accessibility agents (`accessibility-reviewer`) require `TEST_FILES`; `SPEC_PATH` and `BUSINESS_CONTEXT_PATH` optional.
@@ -182,6 +185,7 @@ See each `agents/<name>.md` for the full input contract.
 | `hld-reviewer` | opus | High — architecture quality judgment, threat model adequacy, ADR reasoning quality | ✅ Correct |
 | `spec-quality-reviewer` | opus | High — falsifiability judgment, TC honesty ("would a wrong impl pass this?") | ✅ Correct (Sonnet handles format checks; Opus needed for quality checks 2a-2d) |
 | `plan-reviewer` | opus | Medium-high — Karpathy anti-pattern judgment, YAGNI/SOLID violations, type consistency tracking | ✅ Correct |
+| `portfolio-reviewer` | opus | High — distinguishing genuine WSJF economic sequencing from gut-ranking, and judging whether a WIP-limit breach is a real capacity call or AI-throughput rationalization, is reasoning a checklist-matcher would miss | ✅ Correct |
 | `ci-reviewer` | opus | Medium-high — security hygiene judgment (OIDC vs secrets, pinning), DORA readiness reasoning, environment gate adequacy | ✅ Correct |
 | `observability-reviewer` | opus | Medium-high — SLO quality judgment (are targets meaningful?), alert design (symptom vs cause reasoning), runbook adequacy ("investigate" ≠ remediation) | ✅ Correct |
 | `deployment-reviewer` | opus | High — DB migration safety requires deep judgment (subtle lock patterns, backward-compatibility reasoning), rollback adequacy ("revert" ≠ command), strategy-migration alignment requires systems reasoning | ✅ Correct |

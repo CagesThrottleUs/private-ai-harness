@@ -61,6 +61,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
+| `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; the engineer PORTFOLIO lane; runs `portfolio-reviewer` |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
@@ -90,6 +91,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `hld-reviewer` | Pre-human HLD quality gate — validates C4 diagrams, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment |
 | `spec-quality-reviewer` | Spec quality gate — falsifiability, TC coverage, TC honesty, error path ownership, consistency, dependency declaration against SQLite/RFC/DO-178C standards |
 | `plan-reviewer` | Plan quality gate — spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type consistency, design principles, commit discipline |
+| `portfolio-reviewer` | Portfolio Kanban gate — WSJF computed not gut-ranked, WIP limits respected (Little's Law), depends_on a valid DAG, OKR linkage, pull order respects WSJF + dependencies |
 | `ci-reviewer` | CI/CD pipeline quality gate — stage completeness, fail-fast ordering, coverage gate, security hygiene, artifact immutability, DORA readiness. Platform-agnostic. |
 | `observability-reviewer` | Observability quality gate — OTel logging compliance, golden signal coverage, SLO quality, alert design, runbook completeness, distributed tracing, SLO-to-alert alignment |
 | `deployment-reviewer` | Deployment quality gate — rollback procedure, DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes, strategy-migration alignment |
