@@ -142,6 +142,16 @@ For open-ended questions ("describe your problem"), continue using prose — the
 - Present options conversationally with your recommendation and reasoning
 - Lead with your recommended option and explain why
 - YAGNI ruthlessly - remove unnecessary features from every approach and design
+- **Score the options against named quality-attribute scenarios, not vibes**
+  (ATAM, SEI). List the scenarios that matter for this system — e.g. "p99 read
+  latency < 200ms under 10× load" (performance), "a new payment provider added
+  without touching checkout" (modifiability), "one region fails, service stays
+  up" (availability) — and rate each option against them. Surface **sensitivity
+  points** (a decision that strongly moves one attribute) and **tradeoff points**
+  (improving one attribute hurts another); name them in the recommendation.
+- **Name the riskiest assumption** each approach rests on and how you'd cheaply
+  test it before committing (RAT). The approach that looks best but hides an
+  untested load-bearing assumption is not yet the safe choice.
 
 **Presenting the design:**
 
