@@ -259,6 +259,53 @@ The goal is to improve our systems, monitoring, and procedures — not to assign
 
 ---
 
+## 3. Action-Item Closure Tracking
+
+A postmortem's corrective actions are worthless if they are written and
+forgotten. Google files each action item as a bug in the tracker and **monitors
+its closure**, because unclosed action items are how a service drifts toward
+"increasingly unstable" one un-fixed root cause at a time.
+
+**The loop (not just the list):**
+1. Every Corrective Action becomes a **tracked ticket** (Jira/GitHub issue) with
+   an owner and a due date — not a table row that lives only in the postmortem.
+2. A standing **open-action-item review** (e.g. weekly ops/reliability sync) walks
+   every open item; P1s block the next production deploy until closed.
+3. Track **action-item closure rate and age** as a reliability metric — an
+   accumulating backlog of open postmortem actions is a leading indicator of the
+   next incident, the same way a growing bug backlog predicts defects.
+4. **Feed findings back into the SLOs and error budget** (`observability-standards`):
+   if the incident burned budget or exposed a missing SLI, the corrective action
+   includes adjusting the SLO/alerts — the postmortem changes the guardrails, it
+   does not just get filed.
+
+```markdown
+# Open Postmortem Action Items — [Service]
+| Item | From incident | Owner | Opened | Due | Priority | Status |
+|------|--------------|-------|--------|-----|----------|--------|
+| [action] | [YYYY-MM-DD title] | @name | YYYY-MM-DD | YYYY-MM-DD | P1 | open/closed |
+```
+
+An action item still open past its due date is escalated, not silently rolled
+over.
+
+## 4. Resilience Verification (DiRT / Game Days)
+
+Incident-response skill is muscle that atrophies between real incidents. Verify
+it on purpose rather than waiting for production to test it for you:
+
+- **DiRT-style drills (Google Disaster & Recovery Testing):** on a schedule,
+  inject a controlled, contained failure in staging (or a blast-radius-limited
+  production exercise) and run the real response process — declare, IC, runbook,
+  resolve. This proves the runbooks, alerts, and on-call actually work *before*
+  an outage relies on them. Pair with `chaos-engineering` for the fault injection.
+- **Wheel of Misfortune:** periodically re-enact a past postmortem as a role-play
+  so on-call builds decision muscle and new engineers learn the process safely.
+- **Every drill produces its own action items** and feeds the same closure loop
+  above — a drill that surfaces a broken runbook is a success, not a failure.
+
+---
+
 ## Reviewer Dispatch Discipline
 
 When dispatching the reviewer agent:

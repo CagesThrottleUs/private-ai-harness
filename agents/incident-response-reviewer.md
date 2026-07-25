@@ -1,6 +1,6 @@
 ---
 name: incident-response-reviewer
-description: Sonnet-powered incident response documentation reviewer. Validates that the severity matrix has SEV-1/2/3 with response SLAs, IC role is documented, postmortem template has all 7 required sections (summary/timeline/RCA/impact/went-well/went-wrong/corrective-actions), MTTD/MTTR targets are defined, and communication templates are present. Invoked by incident-response skill.
+description: Sonnet-powered incident response documentation reviewer. Validates that the severity matrix has SEV-1/2/3 with response SLAs, IC role is documented, postmortem template has all 7 required sections (summary/timeline/RCA/impact/went-well/went-wrong/corrective-actions), MTTD/MTTR targets are defined, communication templates are present, corrective actions have a closure-tracking loop (not just a table), and a DiRT/game-day drill cadence exists. Invoked by incident-response skill.
 model: sonnet
 ---
 
@@ -98,6 +98,28 @@ Check for at least one communication template:
 
 ---
 
+### D6 — Action-Item Closure Loop Present
+
+A corrective-actions *table* is not a closure *loop*. Check for:
+- Each corrective action becoming a tracked ticket with an owner and due date (not only a postmortem row).
+- A standing open-action-item review / closure-tracking mechanism.
+- A feedback path from findings into the SLOs / error budget or alerts.
+
+**Critical:** Corrective actions listed with no closure-tracking mechanism at all — action items that are written and forgotten are the documented path to an increasingly unstable service.
+**Important:** No owner/due-date on actions, or no escalation for items past due.
+
+---
+
+### D7 — Resilience Verification (DiRT / Game Days)
+
+Check for a scheduled drill practice that exercises the response before a real incident:
+- DiRT-style controlled failure drills, and/or Wheel-of-Misfortune postmortem re-enactments.
+- Drills feed their findings back into the same action-item closure loop.
+
+**Important:** No drill cadence — incident-response process is never verified until a real outage tests it. **Advisory:** Drills mentioned but with no schedule or no action-item follow-through.
+
+---
+
 ## Output Format
 
 ```
@@ -114,6 +136,8 @@ Check for at least one communication template:
 | D3 — Postmortem template (7 sections) | ✅ / ⚠️ / 🔴 | |
 | D4 — MTTD/MTTR targets | ✅ / ⚠️ / 🔴 | |
 | D5 — Communication templates | ✅ / ⚠️ / 🔴 | |
+| D6 — Action-item closure loop | ✅ / ⚠️ / 🔴 | |
+| D7 — DiRT / game-day drills | ✅ / ⚠️ / 🔴 | |
 
 ### Findings
 
