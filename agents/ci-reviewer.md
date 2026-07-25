@@ -1,6 +1,6 @@
 ---
 name: ci-reviewer
-description: Opus-powered CI/CD pipeline configuration reviewer. Validates a pipeline configuration (any platform — GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket) against CRAFTS principles, DORA metric readiness, coverage gates, security hygiene, artifact immutability, and branch protection requirements. Invoked by ci-pipeline-setup skill before committing the generated pipeline.
+description: Opus-powered CI/CD pipeline configuration reviewer. Validates a pipeline configuration (any platform — GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket) against CRAFTS principles, DORA metric readiness, coverage gates, security hygiene, supply-chain integrity (SLSA provenance + SBOM + slopsquatting/dependency-existence defense), artifact immutability, and branch protection requirements. Invoked by ci-pipeline-setup skill before committing the generated pipeline.
 model: opus
 ---
 
@@ -125,6 +125,19 @@ Check: does any job run sequentially that could safely run in parallel? (`needs:
 
 **Critical:** Plaintext secret in config file. Actions pinned to `@main` or `@latest` (mutable — supply chain attack surface). Untrusted input interpolated directly into shell command.
 **Important:** `permissions:` absent in GitHub Actions workflow. Long-lived cloud credentials used when OIDC is available. Security scan results not uploaded to security dashboard.
+
+### D3.5 — Supply-Chain Integrity (SLSA + SBOM)
+
+Functional stages prove the code works; these prove the *artifact* is trustworthy — 2025 baseline, and load-bearing when dependencies are AI-suggested.
+
+**Check each:**
+- **SBOM generated** per build (Syft / SPDX / CycloneDX) and attached to the artifact.
+- **SLSA build provenance (L2+)** — signed provenance of which commit built the artifact on which platform (e.g., GitHub `actions/attest-build-provenance`); verified before deploy.
+- **Third-party actions pinned by SHA** (already covered in D3 — cross-check).
+- **Dependency-existence / provenance validation** — the build fails on a dependency not in the lockfile/registry with known provenance. This is the slopsquatting defense: LLMs hallucinate package names (~5–22%), ~43% recur across runs, and attackers pre-register them — an AI-suggested import must not silently pull an unvetted package.
+
+**Critical:** No dependency-existence/lockfile enforcement in a repo whose code is AI-authored (slopsquatting-exposed). No build provenance for a production artifact.
+**Important:** No SBOM emitted. SLSA level below L2 for an externally-shipped artifact.
 **Advisory:** Dependency scan not scheduled (only runs on push, not weekly).
 
 ---

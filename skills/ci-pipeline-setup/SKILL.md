@@ -158,6 +158,28 @@ Save to: `.ai/ci/YYYY-MM-DD-pipeline-spec.md`
 - SCA: [Dependabot | Renovate | OWASP Dependency-Check | Trivy fs]
 - Container scan (if applicable): [Trivy image | Snyk container]
 
+## Supply-Chain Integrity (SLSA + SBOM)
+
+Functional stages prove the code works; these prove the *artifact* is what it
+claims to be. This is 2025 table-stakes, and doubly so when dependencies are
+AI-suggested (see the slopsquatting note).
+
+- **SBOM generation** — emit a Software Bill of Materials per build (Syft →
+  **SPDX** (Linux Foundation) or **CycloneDX** (OWASP)); attach it to the
+  release artifact so included libraries are enumerable for CVE checks.
+- **SLSA build provenance (target L2+)** — a cryptographically signed record of
+  *which commit* built the artifact on *which verified platform*. On GitHub
+  Actions use **artifact attestations** (`actions/attest-build-provenance`);
+  L2 adds hosted build + signed provenance, L3 adds isolation. Verify provenance
+  before deploy.
+- **Pin third-party actions/steps by commit SHA**, not floating tags — the 2025
+  GhostAction attack exfiltrated secrets through a mutated third-party action.
+- **Dependency-existence / provenance validation (slopsquatting defense)** —
+  LLMs hallucinate package names (GPT-class ~5.2%, some OSS models ~21.7%), and
+  ~43% of hallucinated names recur across runs, so attackers pre-register them.
+  Fail the build on a dependency not present in the lockfile/registry with known
+  provenance; do not let an AI-suggested import silently pull an unvetted package.
+
 ## Secrets Management
 
 - [OIDC federation with cloud provider | GitHub/GitLab secrets | Vault | Azure Key Vault]
