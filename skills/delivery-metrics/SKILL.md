@@ -23,19 +23,31 @@ human-in-loop signal exists).
 
 ### DORA — the four keys + reliability
 
-| Metric | Definition | Elite threshold |
-|---|---|---|
-| Deployment frequency | Delivered work-items reaching `phase: done` per unit time | On-demand / multiple per day |
-| Lead time for change | First commit (or work-item created) → merged/deployed | < 1 day |
-| Change failure rate | Deployments causing a degraded service (linked incident) ÷ total deployments | < 5% (elite < 15% band; elite ~5%) |
-| Failed-deployment recovery time | Incident start → service restored (MTTR) | < 1 hour |
-| Reliability (5th key) | Meeting the service's SLO / staying in error budget | SLO met, budget not exhausted |
+Bands are the **2024 DORA State of DevOps performance clusters** (elite / high /
+medium / low), not invented thresholds.
 
-### Flow Framework — flow of value
+| Metric | Definition | Elite | High | Medium | Low |
+|---|---|---|---|---|---|
+| Deployment frequency | Delivered work-items reaching `phase: done` per unit time | On-demand (multiple/day) | Daily–weekly | Weekly–monthly | < monthly |
+| Lead time for change | First commit / work-item created → deployed | < 1 day | 1 day–1 week | 1 week–1 month | 1–6 months |
+| Change failure rate | Deployments causing degraded service (linked incident) ÷ total | < 5% | 0–15% | 0–15% | 46–60% |
+| Failed-deployment recovery (MTTR) | Incident start → service restored | < 1 hour | < 1 day | < 1 day | 1 week–1 month |
+| Reliability (5th key) | Meeting the service's SLO / staying in error budget | SLO met, budget not exhausted | — | — | — |
+
+**AI-age caveat (why the stability keys matter more, not less):** the 2024 DORA
+report found a **25% increase in AI adoption associated with ~1.5% lower
+throughput and ~7.2% lower delivery *stability*** — "teams shipped more code but
+broke more things." AI raises apparent velocity while pushing change failure
+rate and MTTR the wrong way. So when deployment frequency and lead time improve
+under AI assistance, **read CFR and MTTR as the guardrail** — velocity gains that
+degrade stability are the documented AI failure mode, and small batch sizes plus
+robust testing are the documented mitigations.
+
+### Flow Framework — flow of value (Kersten)
 
 | Metric | Definition |
 |---|---|
-| Flow efficiency | active work time ÷ (active + wait time) across manifest phases. Most orgs sit at 5–15%; the wait time between phases is the improvement target. |
+| Flow efficiency | **active time ÷ total flow time** (the standard lean formula). Active vs wait is a *workflow-state* distinction — value-adding work vs queued/blocked — not a time-gap guess. Typical software teams run **15–40%**; top orgs reach **40–50%**; most start **below 10%**. |
 | Flow time | work-item created → done (wall clock) |
 | Flow load | work-items in-progress at once (WIP — ties to `portfolio-management`) |
 
@@ -43,9 +55,12 @@ human-in-loop signal exists).
 
 - **Work-item manifests** `.ai/work/<id>/manifest.md` — `phase:` transitions.
 - **Engineer cost-ledger** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl`
-  (or `$CODEX_HOME/...`) — one row per checkpoint with a timestamp, so each
-  phase has a `start` and `end`. Active time = Σ(end − start); wait time = the
-  gaps between a phase's `end` and the next phase's `start`.
+  (or `$CODEX_HOME/...`) — one row per phase checkpoint with a timestamp. The
+  first→last timestamp gives **cycle/flow time** directly. **Flow efficiency
+  additionally needs active work time**: `cost-checkpoint` should record
+  `active_seconds` per step (its `start`→`end` delta). Without `active_seconds`
+  the report *withholds* flow efficiency rather than approximating it — a
+  time-gap heuristic is not the flow-efficiency formula.
 - **git** — commit timestamps for lead time; merge commit for delivery time.
 - **Incident artifacts** `.ai/` / `wiki/` postmortems and `observability`
   SLO docs — for change failure rate, MTTR, and reliability (the two DORA keys
@@ -57,16 +72,17 @@ Run the report script (from this skill's directory):
 ```bash
 scripts/dora-report [--since 30d] [--repo owner/name] [--ledger PATH]
 ```
-It groups the cost-ledger by `session_id`, joins the manifests, and prints:
-deployment frequency, lead time (p50/p90), flow efficiency, and flow time.
-Change failure rate, MTTR, and reliability are emitted only if an incident /
-deployment linkage file is present — otherwise the script prints
-`needs incident linkage` for those rows rather than a fabricated number.
+It groups the cost-ledger by `session_id` and prints the **timestamp-derived**
+keys (deployment frequency, harness cycle time, and flow efficiency *iff*
+`active_seconds` is present). DORA **lead time** (commit→deploy), **change
+failure rate**, **MTTR**, and **reliability** come only from the delivery
+ledger; without it the script prints `needs delivery ledger` /
+`needs incident linkage` rather than a fabricated number.
 
-**Never fabricate the failure-dependent keys.** Deployment frequency, lead
-time, and flow efficiency come free from the timestamps. CFR, MTTR, and
-reliability require a real failure signal; report them as unavailable until
-that linkage exists rather than reporting 0%.
+**Never fabricate a key.** Deployment frequency and cycle time come free from
+the timestamps. Flow efficiency needs captured active time. Lead time, CFR,
+MTTR, and reliability need a real change/failure signal. Report any of these as
+unavailable until its input exists rather than reporting a 0.
 
 ## The delivery-metrics ledger (optional enrichment)
 

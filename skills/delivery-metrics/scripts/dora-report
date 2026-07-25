@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """Derive DORA + Flow metrics from the engineer cost-ledger and an optional
-delivery ledger. Timestamp-derived keys (deployment frequency, lead time, flow
-efficiency, flow time) always print; failure-dependent keys (change failure
-rate, MTTR, reliability) print only when a delivery ledger supplies the signal,
-never fabricated.
+delivery ledger.
+
+Grounding: performance bands are the 2024 DORA State of DevOps clusters, not
+invented thresholds. Flow efficiency uses the standard formula
+(active time / total flow time) and is reported ONLY when active time is
+actually captured per step — it is never approximated with a time-gap
+heuristic. Failure-dependent keys (change failure rate, MTTR, reliability)
+print only when a delivery ledger supplies a real failure signal.
 
 Usage: dora-report [--since 30d] [--repo owner/name] [--ledger PATH]
                    [--delivery-ledger PATH]
@@ -14,6 +18,10 @@ import os
 import sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
+
+# 2024 DORA State of DevOps performance clusters (elite/high/medium/low).
+# Source: 2024 DORA report; see SKILL.md for citations.
+DONE_PHASES = {"done", "deliver"}
 
 
 def parse_ts(s):
@@ -85,15 +93,38 @@ def fmt_hours(h):
 
 
 def band_lead_time(hours):
+    # DORA 2024: elite <1d, high 1d-1wk, medium 1wk-1mo, low 1mo-6mo.
     if hours is None:
         return ""
     if hours < 24:
-        return "elite (<1d)"
+        return "elite (<1 day)"
     if hours < 24 * 7:
-        return "high (<1w)"
+        return "high (1 day-1 week)"
     if hours < 24 * 30:
-        return "medium (<1mo)"
-    return "low (>1mo)"
+        return "medium (1 week-1 month)"
+    return "low (1-6 months)"
+
+
+def band_recovery(hours):
+    # DORA 2024: elite <1h, high/medium <1d, low 1wk-1mo.
+    if hours is None:
+        return ""
+    if hours < 1:
+        return "elite (<1 hour)"
+    if hours < 24:
+        return "high/medium (<1 day)"
+    return "low (1 week-1 month)"
+
+
+def band_cfr(pct):
+    # DORA 2024: elite <5%, high/medium 0-15%, low 46-60%.
+    if pct is None:
+        return ""
+    if pct < 5:
+        return "elite (<5%)"
+    if pct <= 15:
+        return "high-medium (0-15%)"
+    return "below standard (DORA low band 46-60%)"
 
 
 def main():
@@ -109,8 +140,11 @@ def main():
     if args.repo:
         rows = [r for r in rows if r.get("repo") == args.repo]
 
-    # Group cost-ledger rows into sessions -> phases with start/end timestamps.
-    sessions = defaultdict(list)
+    # Group cost-ledger rows into sessions. Each row is a phase checkpoint with
+    # a timestamp; some rows may carry active_seconds (the step's start->end
+    # working duration) if cost-checkpoint recorded it.
+    sessions = defaultdict(lambda: {"ts": [], "active": 0.0, "has_active": False,
+                                    "done": False})
     for r in rows:
         sid = r.get("session_id")
         ts = parse_ts(r.get("timestamp"))
@@ -118,77 +152,92 @@ def main():
             continue
         if since and ts < since:
             continue
-        sessions[sid].append(ts)
+        s = sessions[sid]
+        s["ts"].append(ts)
+        if r.get("phase") in DONE_PHASES:
+            s["done"] = True
+        act = r.get("active_seconds")
+        if isinstance(act, (int, float)):
+            s["active"] += act / 3600.0
+            s["has_active"] = True
 
-    lead_hours, flow_eff, flow_time_hours = [], [], []
-    for sid, tss in sessions.items():
-        tss.sort()
+    cycle_hours, flow_eff = [], []
+    for sid, s in sessions.items():
+        tss = sorted(s["ts"])
         span = (tss[-1] - tss[0]).total_seconds() / 3600.0
-        flow_time_hours.append(span)
-        lead_hours.append(span)  # proxy; delivery ledger refines below
-        # Flow efficiency proxy: active = sum of consecutive gaps under a
-        # working threshold (2h); longer gaps count as wait. Timestamps are
-        # per-checkpoint, so this approximates active-vs-wait.
-        active = 0.0
-        for a, b in zip(tss, tss[1:]):
-            gap = (b - a).total_seconds() / 3600.0
-            active += gap if gap <= 2 else 0.0
-        flow_eff.append((active / span) if span > 0 else 0.0)
+        cycle_hours.append(span)
+        if s["has_active"] and span > 0:
+            flow_eff.append(min(s["active"] / span, 1.0))
 
-    deploys = len(sessions)
-    print("=== Delivery Metrics (DORA + Flow) ===")
+    total_sessions = len(sessions)
+    delivered = sum(1 for s in sessions.values() if s["done"])
+
+    print("=== Delivery Metrics (DORA 2024 bands + Flow) ===")
     if args.repo:
         print(f"repo: {args.repo}")
     if args.since:
         print(f"window: last {args.since}")
     print(f"ledger: {args.ledger}")
     print()
-    print("DORA — timestamp-derived:")
-    print(f"  Deployment frequency : {deploys} delivered work-item(s) in window")
-    p50 = percentile(lead_hours, 0.5)
-    p90 = percentile(lead_hours, 0.9)
-    print(f"  Lead time for change : p50 {fmt_hours(p50)}  p90 {fmt_hours(p90)}"
-          f"  [{band_lead_time(p50)}]")
-    eff = (sum(flow_eff) / len(flow_eff) * 100) if flow_eff else None
-    print(f"  Flow efficiency      : "
-          + (f"{eff:.0f}% (active vs wait across phases)" if eff is not None else "n/a"))
-    ftp50 = percentile(flow_time_hours, 0.5)
-    print(f"  Flow time (p50)      : {fmt_hours(ftp50)}")
+    print("Timestamp-derived (always available):")
+    print(f"  Deployment frequency : {delivered} delivered "
+          f"(of {total_sessions} work-item session(s)) in window")
+    cp50 = percentile(cycle_hours, 0.5)
+    cp90 = percentile(cycle_hours, 0.9)
+    print(f"  Cycle time (harness) : p50 {fmt_hours(cp50)}  p90 {fmt_hours(cp90)}"
+          "   (first->last phase; not DORA commit->deploy lead time)")
+    if flow_eff:
+        eff = sum(flow_eff) / len(flow_eff) * 100
+        print(f"  Flow efficiency      : {eff:.0f}%  "
+              "(active/total; DORA-adjacent: most teams 15-40%, top 40-50%)")
+    else:
+        print("  Flow efficiency      : needs active-time capture "
+              "(record active_seconds per step in the cost-ledger)")
     print()
 
-    # Failure-dependent keys: only from the delivery ledger. Never fabricate.
+    # DORA lead time is commit->deploy: only the delivery ledger has it.
     dl = read_jsonl(args.delivery_ledger)
     if args.repo:
         dl = [d for d in dl if d.get("repo") == args.repo]
     if since:
-        dl = [d for d in dl if (parse_ts(d.get("merged_at")) or datetime.now(timezone.utc)) >= since]
+        dl = [d for d in dl
+              if (parse_ts(d.get("merged_at")) or datetime.now(timezone.utc)) >= since]
 
-    print("DORA — failure-dependent (need a real failure signal):")
+    print("DORA — from delivery ledger (real change/failure signal):")
     if not dl:
-        print("  Change failure rate  : needs incident linkage "
-              "(populate delivery-ledger.jsonl)")
+        print("  Lead time for change : needs delivery ledger "
+              "(created_at/deployed_at)")
+        print("  Change failure rate  : needs incident linkage")
         print("  MTTR (recovery)      : needs incident linkage")
         print("  Reliability (SLO)    : needs incident linkage")
     else:
+        leads = []
+        for d in dl:
+            c = parse_ts(d.get("created_at"))
+            dep = parse_ts(d.get("deployed_at")) or parse_ts(d.get("merged_at"))
+            if c and dep:
+                leads.append((dep - c).total_seconds() / 3600.0)
+        lp50 = percentile(leads, 0.5)
+        print(f"  Lead time for change : p50 {fmt_hours(lp50)}  [{band_lead_time(lp50)}]")
         total = len(dl)
         failed = sum(1 for d in dl if d.get("caused_incident"))
-        cfr = failed / total * 100 if total else 0.0
-        band = "elite (<5%)" if cfr < 5 else "high (<10%)" if cfr < 10 else \
-            "medium (<15%)" if cfr < 15 else "low (>15%)"
-        print(f"  Change failure rate  : {cfr:.0f}%  ({failed}/{total})  [{band}]")
+        cfr = failed / total * 100 if total else None
+        print(f"  Change failure rate  : "
+              + (f"{cfr:.0f}%  ({failed}/{total})  [{band_cfr(cfr)}]"
+                 if cfr is not None else "n/a"))
         mttrs = []
         for d in dl:
-            s, r = parse_ts(d.get("incident_start")), parse_ts(d.get("restored_at"))
-            if s and r:
-                mttrs.append((r - s).total_seconds() / 3600.0)
+            st, rt = parse_ts(d.get("incident_start")), parse_ts(d.get("restored_at"))
+            if st and rt:
+                mttrs.append((rt - st).total_seconds() / 3600.0)
         mttr = percentile(mttrs, 0.5)
-        print(f"  MTTR (p50)           : {fmt_hours(mttr)}"
-              + ("  [elite <1h]" if mttr is not None and mttr < 1 else ""))
+        print(f"  MTTR (recovery, p50) : {fmt_hours(mttr)}"
+              + (f"  [{band_recovery(mttr)}]" if mttr is not None else ""))
         slo_met = sum(1 for d in dl if d.get("slo_met"))
         print(f"  Reliability          : {slo_met}/{total} deliveries met SLO")
     print()
-    print("Flow efficiency < ~15% => wait time between phases dominates; "
-          "target the slowest inter-phase gap, not raw speed.")
+    print("Flow efficiency is active/total flow time; a low value means wait "
+          "time between phases dominates — target the slowest inter-phase gap.")
 
 
 if __name__ == "__main__":
