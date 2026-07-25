@@ -594,3 +594,20 @@ Document concurrency behavior when the construct touches shared state.
 - Changelog entries ("Fixed bug in v2.3") → git history / CHANGELOG.md; but `@since 1.4.0` marking API availability IS appropriate for library authors
 - Author attribution → git blame
 - Comments that will go stale ("// Replace when we migrate to X")
+
+## Where prose docs go — organize `wiki/` by Diátaxis
+
+Docstrings are **reference** (one of Diátaxis's four modes). Prose that doesn't
+belong in a docstring goes to `wiki/`, and `wiki/` is organized by the four
+distinct documentation needs — never a single undifferentiated "docs" pile:
+
+| Diátaxis mode | Purpose | Lives in |
+|---|---|---|
+| **Tutorial** | Learning by doing — a guided first success | `wiki/` tutorial / onboarding |
+| **How-to guide** | Goal-oriented steps for someone already proficient | `wiki/guides/` |
+| **Reference** | Information lookup (API, config, this docstring) | docstrings, `wiki/api/` |
+| **Explanation** | Understanding — the why, the design rationale, ADRs | `wiki/architecture/` |
+
+Don't conflate them: reference that drifts into tutorial, or explanation buried
+in a how-to, is the failure Diátaxis prevents. Route each piece of prose to the
+need it serves.

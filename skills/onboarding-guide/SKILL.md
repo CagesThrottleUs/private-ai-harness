@@ -181,6 +181,14 @@ We use Architecture Decision Records (ADRs) stored in `wiki/architecture/`. Here
 
 ## 6. Your First Contribution
 
+*This section is a **Diátaxis tutorial** — learning by doing, not a reference.
+It must walk a brand-new engineer through one real, small, guaranteed-to-succeed
+change end-to-end (clone → change → test → PR), holding their hand at each step.
+Keep it distinct from the how-to guides (§7 ops) and the reference (§5 API): a
+tutorial's job is a first success, not completeness. The other seven sections map
+to the remaining Diátaxis modes — §1/§3/§4 explanation (understanding), §5
+reference (lookup), §7 how-to (operational steps).*
+
 **The development workflow** (defined by this project's engineering harness):
 
 ```
