@@ -216,8 +216,42 @@ with open(ledger_path, "a") as f:
     f.write(json.dumps(entry) + "\n")
 PYEOF
     ;;
+  budget)
+    # Circuit breaker: compare cumulative session tokens against a hard cap.
+    # Monitoring (start/end rows) records what was spent; this ENFORCES a
+    # ceiling before the next step spends more. Prints machine-readable JSON;
+    # exits 3 on breach so a caller can gate the dispatch on $?.
+    shift 1
+    cap="" warn_ratio="0.8"
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --cap) cap=$2; shift 2 ;;
+        --warn-ratio) warn_ratio=$2; shift 2 ;;
+        *) echo "unknown flag: $1" >&2; exit 2 ;;
+      esac
+    done
+    : "${cap:?--cap is required (total-token ceiling for this session)}"
+    used_json=$(snapshot)
+    python3 - "$used_json" "$cap" "$warn_ratio" <<'PYEOF'
+import json, sys
+used_json, cap_s, warn_s = sys.argv[1:4]
+by_model = json.loads(used_json)
+used = sum(v for model in by_model.values() for v in model.values())
+cap = int(cap_s)
+warn_ratio = float(warn_s)
+ratio = used / cap if cap else 0.0
+if ratio >= 1.0:
+    status = "breach"
+elif ratio >= warn_ratio:
+    status = "warning"
+else:
+    status = "ok"
+print(json.dumps({"status": status, "used": used, "cap": cap, "ratio": round(ratio, 3)}))
+sys.exit(3 if status == "breach" else 0)
+PYEOF
+    ;;
   *)
-    echo "usage: cost-checkpoint start <id> | cost-checkpoint end <id> --row phase|agent ..." >&2
+    echo "usage: cost-checkpoint start <id> | end <id> --row phase|agent ... | budget --cap N [--warn-ratio R]" >&2
     exit 2
     ;;
 esac

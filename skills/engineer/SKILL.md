@@ -198,6 +198,24 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   lane name as `--phase`. This appends one row to a global, cross-repo
   ledger — tokens only, no dollar figure, since pricing drifts and token
   counts don't. See "Cost ledger" below for the row schema and location.
+- **Spend circuit breaker (enforcement, not just monitoring):** the ledger
+  *records* what was spent; a runaway agentic loop needs a ceiling that
+  *stops* spend before it happens. When the user (or a repo/session policy)
+  sets a per-session token cap, run `scripts/cost-checkpoint budget --cap N`
+  before each step. On `status: breach` (exit 3), **halt exactly like BLOCKED**
+  — do not dispatch the next step; surface the ledger's per-phase breakdown and
+  the cap to the human and wait. On `warning` (≥80% of cap — the FinOps
+  budget-alert convention), tell the user the run is approaching its ceiling so
+  they can decide to continue, raise the cap, or narrow scope. No cap set = no
+  gate (opt-in), but always report `warning`/`breach` if a cap is present.
+- **Per-subagent cost attribution (required at every dispatch):** bracket every
+  named-subagent dispatch — reviewers inside a gate, workers inside SDD, the
+  `/review all` agents — with `cost-checkpoint start <agent-slug>` … `end
+  <agent-slug> --row agent --lane <lane> --agent NAME --role ROLE --model MODEL
+  [--dispatch-mode parallel_batch]`. Without this, cost is attributed only to the
+  coarse phase and the single most expensive dispatch (usually a reviewer) hides
+  inside it. Attribution is what makes the circuit breaker and the delivery
+  ledger honest about where tokens actually go.
 - **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising
 - **Artifact-by-reference:** each phase writes its output to a file and records
   the path in the manifest. Hold only the manifest pointer, the ledger, and the
@@ -238,10 +256,17 @@ up at that time — the ledger deliberately does not store or estimate cost.
 - Cross-repo total: the file already spans every repo — no aggregation step needed.
 - One repo only: filter by `repo`.
 
-**Scope note:** this tracks the main orchestrator's per-step cost. It does
-NOT yet attribute cost to individual named subagent dispatches (e.g., which
-specific reviewer inside `subagent-driven-development` or `/review all` cost
-the most) — that would mean instrumenting dispatch call sites across a dozen
-other skills, which is out of scope here. `cost-checkpoint` already supports
-an `agent` row type (`--row agent --agent NAME --role ROLE --model MODEL`)
-for exactly that, ready to be adopted by those skills later.
+**Enforcement:** `cost-checkpoint budget --cap N` reads cumulative session
+tokens and returns `{"status": "ok|warning|breach", "used", "cap", "ratio"}`,
+exiting 3 on breach so a caller can gate on `$?`. This is the circuit breaker —
+the difference between *reading* spend after the fact and *stopping* it before a
+runaway loop blows the ceiling. `warning` fires at 80% of cap (the conventional
+FinOps/cloud-budget alert point); the cap itself is caller-supplied — there is no
+baked-in magic number, since a reasonable ceiling depends on the work.
+
+**Attribution:** `agent` rows (`--row agent --agent NAME --role ROLE --model
+MODEL`) attribute cost to each named-subagent dispatch, not just the coarse
+phase. The Universal-constraints "per-subagent cost attribution" bullet makes
+these required at every dispatch site — a `phase` row alone hides which reviewer
+or worker actually spent the tokens, and both the circuit breaker and
+delivery-metrics are only as honest as that attribution.
