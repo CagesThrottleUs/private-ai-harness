@@ -22,7 +22,7 @@ The caller must provide:
 | `{BASE_SHA}` | Base commit (e.g., `origin/main`, `abc1234`) |
 | `{HEAD_SHA}` | Head commit (e.g., `HEAD`, `def5678`) |
 | `{REQUIREMENTS}` | **MANDATORY.** Spec file path (`.ai/specs/X.md`) or explicit `REQ-NNN` IDs. Empty = review blocked. |
-| `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |
+| `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package PLAN_FILE BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 | `{PR_NUMBER}` | Optional. GitHub PR number or URL. If present, read the existing review threads via `gh` to flag adverse prior advice and amplify sound unresolved suggestions. Pure `gh` — no code-index dependency. |
 | `{REVIEW_POLICY}` | Optional. Path to a repo review-policy file. If absent, auto-check `.ai/review-policy.md` then repo-root `review-policy.md`. Its rules bind as additions to the five dimensions. |
