@@ -91,7 +91,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
 | `business-context-reviewer` | Business context quality gate — problem statement user-focused, JTBD complete, metrics measurable with baselines, compliance explicit, non-goals present, stakeholders mapped |
 | `hld-reviewer` | Pre-human HLD quality gate — validates C4 diagrams, STRIDE threat model, failure modes, capacity planning, ADRs, spec coverage, AWS Well-Architected alignment |
-| `spec-quality-reviewer` | Spec quality gate — falsifiability, TC coverage, TC honesty, error path ownership, consistency, dependency declaration against SQLite/RFC/DO-178C standards |
+| `spec-quality-reviewer` | Spec quality gate — falsifiability, TC coverage, TC honesty, error path ownership, consistency, dependency declaration, ISO 29148 requirements-smell lint (individual + set) against SQLite/RFC/DO-178C standards |
 | `plan-reviewer` | Plan quality gate — spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type consistency, design principles, commit discipline |
 | `portfolio-reviewer` | Portfolio Kanban gate — WSJF computed not gut-ranked, WIP limits respected (Little's Law), depends_on a valid DAG, OKR linkage, pull order respects WSJF + dependencies |
 | `ci-reviewer` | CI/CD pipeline quality gate — stage completeness, fail-fast ordering, coverage gate, security hygiene, artifact immutability, DORA readiness. Platform-agnostic. |

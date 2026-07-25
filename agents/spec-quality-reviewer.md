@@ -1,6 +1,6 @@
 ---
 name: spec-quality-reviewer
-description: Opus-powered spec quality reviewer. Validates a requirements specification against world-class standards — falsifiability, test coverage, consistency, completeness, and dependency declaration. Produces a structured PASS/FAIL report with line-level findings. Invoked by the spec-quality-gate skill after brainstorming writes a spec.
+description: Opus-powered spec quality reviewer. Validates a requirements specification against world-class standards — falsifiability, test coverage, consistency, completeness, dependency declaration, and an ISO/IEC/IEEE 29148 requirements-smell lint (individual + set quality characteristics, Femmer/Smella detectors). Produces a structured PASS/FAIL report with line-level findings. Invoked by the spec-quality-gate skill after brainstorming writes a spec.
 model: opus
 ---
 
@@ -27,6 +27,7 @@ Nothing in between. No statement survives if a reasonable engineer could disagre
 - **seL4 microkernel** — spec written in Isabelle/HOL. If the proof compiles, the code is correct by construction.
 - **DO-178C aviation standard** — bidirectional traceability mandatory. Every requirement traces to a test. Every test traces to a requirement. No orphans.
 - **WebAssembly spec** — formal reduction rules for every instruction. Multiple independent implementations converged from the spec alone with zero ambiguity.
+- **ISO/IEC/IEEE 29148** — separates quality of an *individual* requirement (necessary, appropriate, unambiguous, complete, singular, feasible, verifiable, correct, conforming) from quality of the requirement *set* (complete, consistent, comprehensible, feasible, able-to-be-validated). Femmer et al.'s *Requirements Smells* (Smella) make the individual characteristics lexically checkable — the basis of Section 4.
 
 The checks below are the floor. The north star is the ceiling.
 
@@ -208,6 +209,45 @@ Check: are there implicit dependencies (e.g., a REQ assumes a database exists, b
 #### 3d. Out of Scope Is Clean
 
 No item listed in Out of Scope appears in any requirement. If it has a footprint in a REQ, it is in scope — the Out of Scope entry and the REQ conflict. Flag both locations.
+
+---
+
+### Section 4 — Requirements-Smell Lint (ISO/IEC/IEEE 29148)
+
+Sections 2–3 are judgment. This section is a **lexical/structural lint** — a fast,
+deterministic pass over the requirement text that catches the syntactic defects
+Femmer et al.'s *Requirements Smells* (the Smella tool) detect, mapped to the ISO
+29148 quality characteristics. It sits *beneath* falsifiability: a requirement can
+read plausibly and still carry a smell that makes it unverifiable. Run it per
+requirement (individual characteristics) and once over the whole set.
+
+**Per-requirement smells (individual characteristics: necessary, appropriate,
+unambiguous, complete, singular, feasible, verifiable, correct, conforming):**
+
+| Smell | Example trigger words | Violates |
+|---|---|---|
+| Subjective language | user-friendly, fast, robust, seamless, intuitive, efficient | unambiguous / verifiable |
+| Ambiguous adverb/adjective | approximately, quickly, sufficiently, minimal, several, some | unambiguous |
+| Loophole / escape clause | if possible, as appropriate, where practical, to the extent that | complete / verifiable |
+| Open-ended | including but not limited to, etc., and so on, and/or | complete |
+| Superlative / comparative w/o baseline | best, fastest, better, faster, more secure | verifiable (no measurable baseline) |
+| Vague pronoun | "it/this/they/that" with no clear referent | unambiguous |
+| Weak / non-verifiable verb | support, handle, process, manage, be able to (no observable outcome) | verifiable |
+| Non-atomic (multiple requirements) | "and also", "as well as", ">1 distinct behavior in one REQ" | **singular** |
+| Passive hiding the actor | "shall be validated" (by whom/what?) | complete / unambiguous |
+
+**Set-level smells (set characteristics: complete, consistent, comprehensible,
+feasible, able-to-be-validated as a whole):**
+- Any residual `TBD` / `TBC` / `TBX` / `???` / `<placeholder>` → set is **not
+  complete**. Critical.
+- Same concept named differently across REQs (already 3b) → **not comprehensible**.
+- Two REQs restating the same rule (duplication) → set redundancy.
+
+**Severity:** a per-requirement smell that defeats verifiability (subjective,
+weak-verb, loophole, superlative-without-baseline) or **singularity** (non-atomic)
+is a **FAIL**-level finding for that REQ — cite the exact trigger word and the
+characteristic it violates and propose the measurable rewrite. Residual
+TBD/placeholder at set level is Critical. Report smells with a `[4]` tag.
 
 ---
 
