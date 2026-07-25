@@ -133,10 +133,19 @@ Save to: `.ai/business-context/YYYY-MM-DD-<feature>.md`
 
 *Success must be measurable before the feature ships, not after. If we can't define the metric now, we can't know if we succeeded.*
 
-| Metric | Baseline | Target | Measurement method | Timeline |
-|--------|---------|--------|-------------------|---------|
-| [Primary KPI] | [current value] | [goal value] | [how tracked — analytics, dashboard, support ticket count] | [by when] |
-| [Secondary KPI] | [current] | [target] | [method] | [when] |
+**North-star metric (exactly one):** the single measure that best captures the
+customer value this delivers. One north star prevents the "improved five
+dashboards, moved the business on none" failure. State it, its baseline, and its
+target.
+
+**Input metrics (2–4):** the leading indicators the team can move directly that
+are expected to drive the north star. These are what you steer on week to week.
+
+| Role | Metric | Baseline | Target | Measurement method | Timeline |
+|------|--------|---------|--------|-------------------|---------|
+| **North star** | [the one measure of value] | [current] | [goal] | [how tracked] | [by when] |
+| Input | [leading indicator] | [current] | [target] | [method] | [when] |
+| Input | [leading indicator] | [current] | [target] | [method] | [when] |
 
 **Definition of done (for users):** [One sentence: what will users be able to do that they cannot do today?]
 
@@ -189,9 +198,15 @@ Save to: `.ai/business-context/YYYY-MM-DD-<feature>.md`
 
 ---
 
-## 8. Amazon PR/FAQ (Use for significant features; skip for small enhancements)
+## 8. Amazon PR/FAQ (REQUIRED for epic-lane new capabilities; skip only for small enhancements)
 
-*Written as if the feature has already launched. This forces clarity on what "success" looks and feels like.*
+*Written as if the feature has already launched — the Amazon Working Backwards
+forcing function. This is not optional decoration for a new service or product
+line: writing the future press release before any spec surfaces customer-value
+gaps, business-model questions, and risks while they are still cheap to fix. The
+press release must be **solution-free and customer-outcome-framed** — if it reads
+like a feature list, the working-backwards discipline has not happened yet. The
+Internal FAQ must include the **riskiest assumptions** and how they'd be tested.*
 
 ### Internal Press Release
 
