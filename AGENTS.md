@@ -35,6 +35,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 
 | Skill name | Invocation | When to use |
 |------------|------------|-------------|
+| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — for Android/Kotlin/Compose/KMP work with multiple overlapping installed global skills, resolves which specialist wins per sub-task (precedence table + tie-break reason), maps each to an engineer lane step, defines the hamen+skydoves-perf pre-review audit gate; activated by the engineer Universal-constraints domain-overlay hook |
 | `brainstorming` | `/brainstorming` | Before any feature/component work |
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — structured interview capturing user problem, JTBD, measurable success metrics, compliance, non-goals, stakeholder map; runs `business-context-reviewer`; hard gate before brainstorming |
 | `caveman` | `/caveman` | Ultra-compressed comms, ~75% token reduction |
@@ -43,6 +44,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `commit-discipline` | `/commit-discipline` | Generating compliant commit messages |
 | `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | 2+ independent tasks |
+| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one technology domain — defines the four-part contract each `<domain>-advisor` instance must provide (detection signals, precedence table with tie-break reasons, lane-step mapping, pre-review audit gate); engineer's Universal-constraints hook activates the matching instance |
 | `executing-plans` | `/executing-plans` | Running a `.ai/plans/` plan with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — detects CI platform, generates platform-agnostic pipeline spec + config (GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket), runs `ci-reviewer` before committing |

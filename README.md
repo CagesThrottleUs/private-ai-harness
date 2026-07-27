@@ -25,6 +25,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
+| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — routes overlapping installed Android/Kotlin/Compose/KMP global skills to a single winner per sub-task with a stated tie-break reason; activated by engineer on Android work |
 | `brainstorming` | `/brainstorming` | Explore intent before implementing |
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — captures user problem, JTBD, measurable success metrics, compliance constraints, non-goals; hard gate before design |
 | `caveman` | `/caveman` | 75% token reduction, full technical accuracy |
@@ -32,6 +33,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `commit-discipline` | `/commit-discipline` | Conventional Commits + micro-commit rules |
 | `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | Parallel agent patterns for independent tasks |
+| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one tech domain; engineer activates the matching `<domain>-advisor` inside each construct/test/verify step |
 | `executing-plans` | `/executing-plans` | Structured plan execution with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — platform-agnostic pipeline spec + config for GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket |

@@ -216,6 +216,7 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   coarse phase and the single most expensive dispatch (usually a reviewer) hides
   inside it. Attribution is what makes the circuit breaker and the delivery
   ledger honest about where tokens actually go.
+- **Domain overlay:** when the working files/task match a recognized technology domain (Android/Kotlin/Compose/KMP — detected from `.kt`/`.kts`, `build.gradle(.kts)`, `@Composable`, `androidx.*`), activate the matching `<domain>-advisor` overlay (e.g. `android-advisor`) FIRST inside each construct/test/verify step. The overlay decides which installed global domain skill fills each already-existing lane step, and suppresses the ones that would contradict it. Without it, overlapping community skills feed conflicting guidance. See `domain-overlay` for the pattern.
 - **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising
 - **Artifact-by-reference:** each phase writes its output to a file and records
   the path in the manifest. Hold only the manifest pointer, the ledger, and the
