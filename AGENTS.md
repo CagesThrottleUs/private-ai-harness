@@ -231,6 +231,7 @@ These are installed via `scripts/install-tools.sh` and available alongside this 
 | `pbakaus/impeccable` | UI quality review |
 | `emilkowalski/skill` | Frontend component patterns |
 | `Leonxlnx/taste-skill` | Visual taste heuristics |
+| Android skill pack (step 16) | Kotlin/Compose/KMP: `chrisbanes/skills`, `skydoves/android-testing-skills`, `skydoves/compose-performance-skills`, `rcosteira79/android-skills`, `new-silvermoon/awesome-android-agent-skills`, `aldefy/compose-skill`, `hamen/compose_skill`, `Meet-Miyani/compose-skill`, `Drjacky/claude-android-ninja`, `ceorkm/mobile-app-ui-design`, `jimliu/baoyu-skills` — overlapping by design; the `android-advisor` overlay resolves precedence per sub-task |
 
 > `mukul975/Anthropic-Cybersecurity-Skills` (754 skills) is commented out in `scripts/install-tools.sh` — uncomment to enable.
 

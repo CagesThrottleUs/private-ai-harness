@@ -164,6 +164,7 @@ This script installs (in order):
 11. **This repo for Codex** — registers the same local marketplace, installs the native Codex plugin, generates custom-agent TOML adapters, and synchronizes global Codex guidance
 12. **Global Claude guidance** — caveman, commit discipline, workflow, and Karpathy blocks
 13. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
+14. **Android team skills** — Kotlin/Compose/KMP pack (chrisbanes, skydoves testing + performance, rcosteira79, new-silvermoon, aldefy, hamen, Meet-Miyani, Drjacky, ceorkm, baoyu); overlapping on purpose — the `android-advisor` overlay resolves which wins per sub-task
 
 Host-specific steps are skipped when their CLI is not installed.
 

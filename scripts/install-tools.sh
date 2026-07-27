@@ -312,6 +312,79 @@ if [[ -n "$CWD_GIT_ROOT" && "$CWD_GIT_ROOT" != "$REPO_ROOT" ]]; then
 fi
 echo ""
 
+# ── 16. Android team skills ──────────────────────────────────────────────────
+# Kotlin / Jetpack Compose / KMP skill pack. Overlapping on purpose — the
+# `android-advisor` overlay (this repo) resolves which one wins per sub-task.
+echo "16. Android skills (Kotlin, Compose, KMP, testing, performance)"
+
+ANDROID_SKILLS_SRC="$HOME/.claude/skills-sources"
+GLOBAL_SKILLS="$HOME/.claude/skills"
+mkdir -p "$ANDROID_SKILLS_SRC" "$GLOBAL_SKILLS"
+
+# clone fresh, or fast-forward an existing checkout
+clone_or_pull() {  # $1=git url  $2=dest
+  if [[ -d "$2/.git" ]]; then
+    git -C "$2" pull --ff-only --quiet && ok "updated $(basename "$2")" || warn "pull failed: $(basename "$2")"
+  else
+    rm -rf "$2"
+    git clone --depth 1 --quiet "$1" "$2" && ok "cloned $(basename "$2")" || warn "clone failed: $(basename "$2")"
+  fi
+}
+
+# 16a. npx skills add — chrisbanes, ceorkm, baoyu, hamen, drjacky
+if check_cmd npx; then
+  info "npx skills add chrisbanes/skills";            npx --yes skills add chrisbanes/skills            && ok "chrisbanes/skills"      || warn "chrisbanes/skills failed"
+  info "npx skills add ceorkm/mobile-app-ui-design";  npx --yes skills add ceorkm/mobile-app-ui-design  && ok "mobile-app-ui-design"   || warn "mobile-app-ui-design failed"
+  info "npx skills add jimliu/baoyu-skills";          npx --yes skills add jimliu/baoyu-skills          && ok "baoyu-skills"           || warn "baoyu-skills failed"
+  info "npx skills add hamen/compose_skill";          npx --yes skills add hamen/compose_skill --skill '*' -y && ok "compose_skill"    || warn "compose_skill failed"
+  info "npx skills add drjacky/claude-android-ninja"; npx --yes skills add drjacky/claude-android-ninja -g && ok "claude-android-ninja" || warn "claude-android-ninja failed"
+else
+  warn "npx not found — skipping chrisbanes, ceorkm, baoyu, hamen, drjacky"
+fi
+
+# 16b. skydoves — clone then run each repo's own install-skills.sh
+for repo in android-testing-skills compose-performance-skills; do
+  dest="$ANDROID_SKILLS_SRC/$repo"
+  clone_or_pull "https://github.com/skydoves/$repo.git" "$dest"
+  if [[ -x "$dest/scripts/install-skills.sh" ]]; then
+    bash "$dest/scripts/install-skills.sh" && ok "skydoves/$repo installed" || warn "skydoves/$repo install-skills.sh failed"
+  else
+    warn "skydoves/$repo install-skills.sh not found — check the repo"
+  fi
+done
+
+# 16c. new-silvermoon — skills live in .github/skills/; copy each into the global dir
+SILVERMOON="$ANDROID_SKILLS_SRC/awesome-android-agent-skills"
+clone_or_pull "https://github.com/new-silvermoon/awesome-android-agent-skills.git" "$SILVERMOON"
+if [[ -d "$SILVERMOON/.github/skills" ]]; then
+  # rcosteira79 (installed as a plugin below) is the breadth base; android-advisor
+  # tells the agent to prefer it for shared skills and use silvermoon for its uniques.
+  find "$SILVERMOON/.github/skills" -name SKILL.md -exec dirname {} \; \
+    | while read -r d; do cp -R "$d" "$GLOBAL_SKILLS/"; done \
+    && ok "silvermoon skills copied to $GLOBAL_SKILLS" || warn "silvermoon copy failed"
+else
+  warn "silvermoon .github/skills not found — check the repo layout"
+fi
+
+# 16d. Meet-Miyani — single-file skill cloned straight into the global skills dir
+clone_or_pull "https://github.com/Meet-Miyani/compose-skill.git" "$GLOBAL_SKILLS/compose-skill"
+
+# 16e. Claude plugins — rcosteira79 (breadth base) and aldefy (compose-expert)
+if check_cmd claude; then
+  info "Registering rcosteira79/android-skills marketplace..."
+  claude plugin marketplace add rcosteira79/android-skills && ok "android-skills marketplace" || warn "android-skills marketplace add failed"
+  claude plugin install android-skills@android-skills && ok "android-skills installed" || warn "android-skills install failed"
+
+  info "Registering aldefy/compose-skill marketplace..."
+  claude plugin marketplace add aldefy/compose-skill && ok "compose-expert marketplace" || warn "compose-expert marketplace add failed"
+  claude plugin install compose-expert && ok "compose-expert installed" || warn "compose-expert install failed"
+else
+  warn "claude CLI not found — run these manually:"
+  warn "  claude plugin marketplace add rcosteira79/android-skills && claude plugin install android-skills@android-skills"
+  warn "  claude plugin marketplace add aldefy/compose-skill && claude plugin install compose-expert"
+fi
+echo ""
+
 echo "═══════════════════════════════════════════"
 echo -e "${YELLOW}ACTIVATION STEPS:${RESET}"
 echo ""
