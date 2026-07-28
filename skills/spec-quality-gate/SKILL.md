@@ -40,6 +40,16 @@ When dispatching the reviewer agent:
 
 ## Execution
 
+### Step 0 — Mechanical Pre-Lint (zero LLM cost)
+
+Run before dispatching the agent, every cycle:
+
+```bash
+bash skills/spec-quality-gate/scripts/pre-lint.sh .ai/specs/YYYY-MM-DD-<feature>.md
+```
+
+This is a deterministic pass over the exact Section 1 (format) checks the agent runs first, plus the Section 4 placeholder scan. If it exits non-zero, the agent will fail on the identical grounds — fix the reported findings and re-run the script until it exits 0 before spending any Opus tokens. Do not dispatch the agent while this script is failing.
+
 ### Step 1 — Dispatch Agent
 
 ```
@@ -58,7 +68,7 @@ Wait for author to fix all blocking failures in the spec file.
 
 ### Step 4 — Re-run (if needed)
 
-Re-dispatch `spec-quality-reviewer` with the same `SPEC_PATH`. Increment cycle counter. Stop at Cycle 2 regardless of result — escalate persistent failures to human.
+Re-run Step 0's pre-lint first — if it now fails on a different mechanical finding, fix that before spending another Opus call. Once pre-lint is clean, re-dispatch `spec-quality-reviewer` with the same `SPEC_PATH`. Increment cycle counter. Stop at Cycle 2 regardless of result — escalate persistent failures to human.
 
 ### Step 5 — Transition
 

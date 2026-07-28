@@ -321,17 +321,21 @@ One TC per AC minimum. Each TC must state inputs and exact expected output.
 **Spec Self-Review:**
 After writing the spec document, check before running the formal quality gate:
 
-1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
-3. **Scope check:** Focused enough for a single implementation plan, or needs decomposition?
-4. **Ambiguity check:** Any requirement interpretable two different ways? Pick one, state it.
-5. **Requirement completeness:** Every REQ-NNN has Statement, Acceptance Criteria, Dependencies, Test Cases.
-6. **Emotional language scan:** Any "intuitive", "clean", "fast", "good"? Replace with measurable equivalents.
-7. **NFR completeness:** Does the `## Non-Functional Requirements` section exist? Are performance, security, and scalability tables filled with numeric targets? Are any cells "TBD" or blank? Is compliance explicitly addressed? If any cell is blank or "TBD", fix it now — spec-quality-gate will fail.
-7. **Test Coverage Matrix:** Present and every REQ has at least one TC.
-8. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
+0. **Run the mechanical pre-lint** — `bash skills/spec-quality-gate/scripts/pre-lint.sh <spec-path>`. This is a deterministic, zero-cost pass over the exact Section 1 format checks `spec-quality-reviewer` (Opus) will run: frontmatter, REQ-NNN numbering, REQ subsection completeness, Test Coverage Matrix consistency, Out of Scope heading, NFR presence/placeholders. Fix every finding before spending any review-agent tokens on this spec. This step alone eliminates most round-trips: those checks are 100% mechanical — if the script fails, the agent will fail on the identical grounds.
+1. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
+2. **Scope check:** Focused enough for a single implementation plan, or needs decomposition?
+3. **Ambiguity check:** Any requirement interpretable two different ways? Pick one, state it.
+4. **Forbidden-word scan** — grep the Requirements and NFR sections for the exact words `spec-quality-reviewer` treats as FAIL (2a/Section 4 smells). If any appear, rewrite that statement with a number, threshold, or named mechanism before moving on:
+   - Subjective/vague: `TBD` `intuitive` `fast enough` `user-friendly` `clean` `seamless` `appropriate` `should work` `simple` `easy` `nice` `obvious` `high-quality` `reasonable` `robust` `efficient`
+   - Loophole: `if possible` `as appropriate` `where practical` `to the extent that`
+   - Open-ended: `including but not limited to` `etc.` `and so on` `and/or`
+   - Superlative without baseline: `best` `fastest` `better` `faster` `more secure`
+   - Non-atomic: `and also` `as well as` inside one AC/Statement line — split into separate REQs/ACs
+   - Weak verb with no observable outcome: `support` `handle` `process` `manage` `be able to` — only OK if the same line names the exact mechanism/output
+5. **Honest-test check:** For each TC, ask: "if the implementation were subtly wrong — off-by-one, inverted condition, missing field — would this TC catch it?" If not, rewrite the assertion.
+6. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
 
-Fix inline, then invoke `spec-quality-gate` skill (which dispatches `spec-quality-reviewer` agent) for the formal pass.
+Fix inline, then invoke `spec-quality-gate` skill (which dispatches `spec-quality-reviewer` agent) for the formal pass. The agent still owns judgment calls the script can't make (2b/2c/2d, 3a-3d, north star) — the pre-lint only removes the mechanical failures that would otherwise cost a full round-trip for a typo-class issue.
 
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
