@@ -66,7 +66,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
 | `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; the engineer PORTFOLIO lane; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffold for a NEW service (CNCF Platform Eng L3) — CI, observability, contract stub, tests, runbook, resource limits, catalog entry, scorecard from birth; runs `service-scaffolding-reviewer` |
-| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding |
+| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — zero-cost `pre-lint.sh` format check runs before the Opus reviewer |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
