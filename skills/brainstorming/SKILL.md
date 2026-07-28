@@ -182,6 +182,7 @@ For open-ended questions ("describe your problem"), continue using prose — the
 - Write the validated design (spec) to `.ai/specs/YYYY-MM-DD-<topic>-design.md`
   - (User preferences for spec location override this default)
 - Use the Requirement Format below — every statement is a REQ-NNN with measurable acceptance criteria
+- Pick `spec_id` by checking `grep -h '^spec_id:' .ai/specs/*.md 2>/dev/null` for the highest existing `SPEC-N` and incrementing; use `SPEC-1` if none exist
 - Commit the design document to git
 
 **Requirement Format (Living Requirement Document):**
@@ -189,9 +190,15 @@ For open-ended questions ("describe your problem"), continue using prose — the
 Every spec must follow this structure. This is not optional.
 
 ```markdown
+---
+spec_id: SPEC-N
+title: [Feature Name]
+status: draft
+---
+
 # [Feature Name] — Specification
 
-**Version:** 1.0 | **Date:** YYYY-MM-DD | **Status:** Draft
+**Version:** 1.0 | **Date:** YYYY-MM-DD
 
 ---
 
@@ -202,7 +209,11 @@ Every spec must follow this structure. This is not optional.
 ## Scope
 
 **In scope:** [explicit list]
-**Out of scope:** [explicit list — state what could be assumed but isn't included]
+
+## Out of Scope
+
+- [explicit exclusion — state what could be assumed but isn't included]
+- [another exclusion, if any]
 
 ---
 
