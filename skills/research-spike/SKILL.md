@@ -82,11 +82,25 @@ Evidence: ...
 
 If the decision involves architecture: write an ADR at `wiki/architecture/YYYY-MM-DD-<topic>-adr.md` instead (same content, ADR format with Status/Context/Decision/Consequences).
 
+### Phase 3.5 — Decision Quality Self-Gate (mandatory)
+
+The spike artifact drives a build-or-kill decision, so it must clear a gate before it is presented — the same standard as a spec's self-review. Unlike code, this artifact has no downstream reviewer to catch a bad call; the gate is here or nowhere.
+
+Run this checklist against the artifact. Every item must pass or the artifact is not ready to present:
+
+1. **No fabricated evidence.** Every `Evidence:` line cites a *real, re-runnable or verifiable* source — a benchmark you actually ran (with the command/infra noted), a doc URL, a prototype result, a linked case study. A plausible-looking number with no source is the AI failure mode this gate exists to stop (SDD-2025: "spec quality equals output quality" — a spike's output is only as good as its evidence). Delete or mark any number you cannot back.
+2. **Riskiest assumption addressed.** The single riskiest assumption from Phase 2 was either validated by the prototype, or is explicitly listed under Open questions as untested — never silently assumed.
+3. **Decision is falsifiable.** The recommendation names the decision criteria it met. "Feels right" is not a decision; "meets the 50k events/sec criterion, measured at 62k on the staging tier" is.
+4. **Caveats stated.** Benchmarks on non-representative infra (e.g. localhost), short time budgets, or partial coverage are noted as caveats, not hidden.
+5. **Confidence matches evidence.** `Confidence: high` requires evidence for every option; if a load-bearing option rests on an untested assumption, confidence is `medium` or `low`.
+
+If any item fails, fix the artifact before Phase 4. If the honest answer is "not enough evidence to decide," that is outcome 2 below — say so; do not manufacture confidence.
+
 ### Phase 4 — Present and close
 
 Present findings. Three outcomes:
 
-1. **Decision clear** → artifact committed to `.ai/` (or `wiki/architecture/`), spike branch deleted. If continuing to build: re-invoke `/engineer "<task>"` with the artifact as context.
+1. **Decision clear** → artifact committed to `.ai/` (or `wiki/architecture/`), spike branch deleted. If continuing to build: re-invoke `/engineer "<task>"` with the artifact as context. **If the decision is architectural (new service, data model, external integration, security boundary), the build does not start from the spike artifact directly — it enters `high-level-design`, where the ADR and its consequences are gated by `hld-reviewer`.** The spike self-gate proves the decision is honest; the HLD gate proves the architecture is sound. A kill / "don't build" decision (outcome 3) needs only the self-gate.
 2. **Decision blocked on more info** → artifact states what is missing and why. Spike ends; human decides next step.
 3. **Decision is "don't build this"** → artifact states why. This is a valid and valuable outcome — it prevents the wrong work.
 
