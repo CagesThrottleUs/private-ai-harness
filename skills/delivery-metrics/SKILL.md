@@ -119,6 +119,27 @@ what someone remembered to log — the difference between a real DORA read and a
 fabricated one. Without any recorded event, only the timestamp-derived keys are
 reported (never a fabricated 0).
 
+## Review Gate
+
+Before relying on the report — feeding it to `portfolio-management`, an
+error-budget decision, or a stakeholder — capture it to a file and dispatch the
+reviewer:
+
+```
+Agent(delivery-metrics-reviewer, {
+  REPORT_PATH: ".ai/reports/YYYY-MM-DD-delivery-metrics.md",
+  LEDGER_PATH: "~/.claude/private-ai-harness/delivery-ledger.jsonl"  // omit if none
+})
+```
+
+This is the one producing skill that used to self-score with no independent
+gate. The reviewer is mechanical (Sonnet): it confirms the DORA bands match the
+2024 clusters, that no failure-dependent key was fabricated when its signal is
+absent, that flow efficiency is formula-correct or withheld, that every key
+cites its source, and that no delivery metric is presented as a business
+outcome. Fix any **Critical** finding before the report is used — a fabricated
+key is worse than a withheld one.
+
 ## Interpreting
 
 - Report the four keys as an elite/high/medium/low band, not a bare number.
