@@ -19,6 +19,13 @@ shipped" becomes a report, not a guess.
 efficiency / time / load), SPACE / DX Core 4 (human signals — only when a
 human-in-loop signal exists).
 
+> **These are delivery metrics, not a business north-star.** They answer "how
+> fast and how reliably do we ship," never "did the feature succeed." An elite
+> DORA band is a healthy machine, not a moved needle — the business outcome is
+> `outcome-review`'s job, measured against the spec `north_star`. See
+> `AGENTS.md` → *Metrics vocabulary*. Never present a key here as evidence a
+> shipped feature achieved its goal.
+
 ## The metric set
 
 ### DORA — the four keys + reliability

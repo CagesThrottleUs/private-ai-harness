@@ -225,6 +225,21 @@ See each `agents/<name>.md` for the full input contract.
 
 ---
 
+## Metrics vocabulary: delivery metric ≠ business north-star
+
+The harness measures two different things, and conflating them is a documented failure mode. Every skill and agent that touches a metric must respect this split:
+
+| Aspect | **Delivery / operational metric** | **Business north-star** |
+|---|---|---|
+| Question | How fast and how reliably do we ship? | Did the shipped thing move the outcome it was justified by? |
+| Examples | DORA four keys, flow efficiency, SLO/error budget, p99 latency, MTTD/MTTR, uptime | weekly active creators, activation rate, paid conversion, tickets deflected |
+| Framework | DORA (dora.dev), Flow Framework | North Star Metric (Amplitude/Sean Ellis), HEART/GSM (Google) |
+| Owned by | `delivery-metrics`, `observability-standards`, `ci-pipeline-setup`, `deployment-workflow`, `incident-response` | `business-context-intake` (defines) → spec `north_star` → `outcome-review` (measures) |
+
+A delivery metric is a **guardrail**, not the needle. "Deployment frequency is elite" or "p99 is under target" says the machine runs well — it does **not** say the feature succeeded. That question belongs to `outcome-review` against the business north-star. A skill that presents a DORA/SLO number as evidence of business success has confused the layers; `delivery-metrics-reviewer` (D5) and `spec-quality-reviewer` (§2f) both reject that confusion.
+
+---
+
 ## External skills loaded at install time
 
 These are installed via `scripts/install-tools.sh` and available alongside this plugin.
