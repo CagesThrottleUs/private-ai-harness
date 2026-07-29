@@ -221,3 +221,17 @@ Agent(dast-reviewer, {
 ```
 
 Fix all **Critical** findings (no authentication in authenticated app, scan pointing to production, HIGH findings configured to warn not fail) before committing.
+---
+
+## Completion Report
+
+When this skill's work is done, report to the user in chat — do not let a commit
+message be the only trace of what happened:
+
+- **Produced:** what was created or changed (artifact type + exact path).
+- **Verdict:** the reviewer's PASS / NEEDS WORK / BLOCKED result, if a gate ran.
+- **Coverage:** which spec REQ / NFR this satisfies, where applicable.
+- **Next:** the next step in the flow, or "ready for review / merge".
+
+One line per item is enough. The point is that the user sees what shipped and
+its verdict without having to read the diff.

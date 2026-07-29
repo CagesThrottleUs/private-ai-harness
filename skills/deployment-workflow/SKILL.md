@@ -484,3 +484,17 @@ feat(deployment): add rollback procedure, smoke tests, and deploy runbook
 ```
 
 Deployment artifacts commit before or alongside the PR — never after.
+---
+
+## Completion Report
+
+When this skill's work is done, report to the user in chat — do not let a commit
+message be the only trace of what happened:
+
+- **Produced:** what was created or changed (artifact type + exact path).
+- **Verdict:** the reviewer's PASS / NEEDS WORK / BLOCKED result, if a gate ran.
+- **Coverage:** which spec REQ / NFR this satisfies, where applicable.
+- **Next:** the next step in the flow, or "ready for review / merge".
+
+One line per item is enough. The point is that the user sees what shipped and
+its verdict without having to read the diff.
