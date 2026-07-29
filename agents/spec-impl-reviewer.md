@@ -30,7 +30,9 @@ You verify that code **does what the spec says**, not just that it is annotated.
 
 ### Step 1 — Load Spec
 
-Read `{SPEC_PATH}`. For every `REQ-NNN` block, extract:
+Read `{SPEC_PATH}`. First read the `north_star:` frontmatter and the
+`## North Star Alignment` section — the business outcome this spec claims to
+advance and the input metric that drives it. Then for every `REQ-NNN` block, extract:
 - `**Statement:**` — what the requirement says must be true
 - `**Acceptance Criteria:**` — the measurable conditions that define "done"
 - `**Test Cases:**` — named TCs that define expected behaviors
@@ -79,6 +81,16 @@ Ask for each criterion:
 - Acceptance criteria not covered by any code path?
 - Test Cases in the spec with no corresponding implementation?
 - Error conditions mentioned in the spec silently ignored?
+
+### Step 4.5 — North Star Alignment
+
+The spec declares a business `north_star` and an input metric it moves. This is a *direction* check, not a correctness check — it closes the gap between "the code satisfies the REQs" and "the shipped change serves the outcome it was justified by".
+
+- If `north_star` is `N/A` (bug fix / config), skip this step.
+- Otherwise: does the implemented behavior plausibly move the stated input metric? A spec whose north-star is "activation rate" but whose implementation touches only an internal admin tool with no user-facing path has drifted from its justification — surface it.
+- Flag scope-creep REQs (from Step 4) that advance no input metric of the north-star: they are candidates to cut or to route back to `business-context-intake` for their own justification.
+
+This is **Advisory** unless the change plainly contradicts its stated north-star (then Important) — the reviewer flags direction drift; the human decides whether the outcome link still holds.
 
 ### Step 5 — Future Impact Analysis
 
@@ -132,6 +144,10 @@ For each REQ implementation, assess:
 ### Scope Issues
 - Over-implementation: `file:line` — behavior not in spec, no REQ covers it
 - Under-implementation: criterion `<text>` has no code path
+
+### North Star Alignment
+- North-star: `<spec north_star>` — input metric: `<driver>`
+- Direction: ✅ implementation moves the stated driver / ⚠️ drift — `<what serves no driver>` / N/A (bug fix)
 
 ### Future Impact
 - Hardcoded assumption: `file:line` — `value` — not mandated by REQ, will break if spec changes

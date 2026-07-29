@@ -183,6 +183,7 @@ For open-ended questions ("describe your problem"), continue using prose — the
   - (User preferences for spec location override this default)
 - Use the Requirement Format below — every statement is a REQ-NNN with measurable acceptance criteria
 - Pick `spec_id` by checking `grep -h '^spec_id:' .ai/specs/*.md 2>/dev/null` for the highest existing `SPEC-N` and incrementing; use `SPEC-1` if none exist
+- Set `north_star` by copying the one north-star metric (and target) verbatim from the business-context doc read in the Pre-Condition gate. If this is a bug fix / config change with no business-context doc, set it to `N/A — <reason>`. This value threads forward into the plan's Global Constraints and the PR body — do not leave it blank.
 - Commit the design document to git
 
 **Requirement Format (Living Requirement Document):**
@@ -194,6 +195,7 @@ Every spec must follow this structure. This is not optional.
 spec_id: SPEC-N
 title: [Feature Name]
 status: draft
+north_star: [the ONE business-context north-star metric this spec advances — verbatim from .ai/business-context/YYYY-MM-DD-<feature>.md, including its target; or "N/A — <bug fix / config / no business-context>"]
 ---
 
 # [Feature Name] — Specification
@@ -205,6 +207,14 @@ status: draft
 ## Context
 
 [Why this exists. What problem it solves. 1-3 paragraphs. No requirements here.]
+
+## North Star Alignment
+
+*This is the "inputs a team influences" layer of the North Star framework (Amplitude/Sean Ellis): the north-star is a lagging outcome; a feature earns its place by moving a named input metric that drives it. A delivery metric (latency, DORA, SLO) is NOT a business north-star — do not put one here.*
+
+**Business north-star:** [metric + target, verbatim from `.ai/business-context/` — matches the `north_star:` frontmatter value; or "N/A" with reason]
+
+**Input metric this feature moves:** [the specific driver of the north-star this work advances, e.g. "activation rate (signup → first successful action)". If N/A, say why — e.g. "bug fix restoring existing behavior, no metric movement expected".]
 
 ## Scope
 
@@ -334,6 +344,7 @@ After writing the spec document, check before running the formal quality gate:
    - Weak verb with no observable outcome: `support` `handle` `process` `manage` `be able to` — only OK if the same line names the exact mechanism/output
 5. **Honest-test check:** For each TC, ask: "if the implementation were subtly wrong — off-by-one, inverted condition, missing field — would this TC catch it?" If not, rewrite the assertion.
 6. **North star check:** For each REQ, ask: "Could a new engineer implement exactly this from the spec alone, without asking anyone?" If not, the requirement is incomplete.
+7. **North Star Alignment check:** Is the `north_star:` frontmatter field present and non-blank? Does `## North Star Alignment` name a business metric (not a delivery/latency/DORA metric) and the specific input metric this feature moves — or an explicit `N/A — <reason>` for bug fixes/config? A feature spec with a blank or delivery-metric north-star has not been anchored to a business outcome.
 
 Fix inline, then invoke `spec-quality-gate` skill (which dispatches `spec-quality-reviewer` agent) for the formal pass. The agent still owns judgment calls the script can't make (2b/2c/2d, 3a-3d, north star) — the pre-lint only removes the mechanical failures that would otherwise cost a full round-trip for a typo-class issue.
 

@@ -86,10 +86,16 @@ independently testable deliverable.
 
 ## Global Constraints
 
-[The spec's project-wide requirements — version floors, dependency limits,
-naming and copy rules, platform requirements — one line each, with exact
-values copied verbatim from the spec. Every task's requirements implicitly
-include this section.]
+**North Star:** [copy the spec's `north_star:` value verbatim, and the input
+metric from its `## North Star Alignment`. Every task should be answerable to
+"which input metric of the north-star does this advance?" — a task that moves
+no driver and traces to no REQ is scope creep. If the spec's north_star is
+`N/A`, state that here too.]
+
+[Then the spec's other project-wide requirements — version floors, dependency
+limits, naming and copy rules, platform requirements — one line each, with
+exact values copied verbatim from the spec. Every task's requirements
+implicitly include this section.]
 
 ---
 ```
