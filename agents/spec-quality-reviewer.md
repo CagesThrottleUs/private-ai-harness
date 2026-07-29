@@ -64,9 +64,11 @@ File must begin with YAML frontmatter containing:
 spec_id: SPEC-N
 title: <title>
 status: draft | approved
+north_star: <business north-star metric verbatim, or "N/A — <reason>">
 ---
 ```
 `spec_id` must match pattern `SPEC-N` (positive integer, no zero-padding). Missing or malformed = FAIL.
+`north_star` must be present and non-blank. A blank field, or a *delivery* metric (latency, throughput, DORA, SLO, uptime) where a *business* outcome is expected, = FAIL — those are the wrong layer. `N/A — <reason>` is acceptable only for bug-fix/config specs with no business-context doc. The judgment pass (§2) also verifies `## North Star Alignment` names an input metric that plausibly drives the stated north-star, not a restatement of the feature.
 
 **1b. REQ-NNN structure**
 
@@ -185,6 +187,16 @@ For each row in the `## Non-Functional Requirements` section, apply the same nor
 **Important:** Load condition absent from performance NFR (can't know if target is for 1 user or 10,000). Enforceability column says "will" instead of MUST/SHOULD/MAY.
 **Advisory:** p95 target absent (only p99 — missing early warning signal). Scalability NFRs absent when the spec describes a new traffic-bearing endpoint.
 
+#### 2f. North Star Alignment
+
+The `north_star:` frontmatter and `## North Star Alignment` section carry the "inputs a team influences" layer of the North Star framework: a feature earns its place by moving a named input metric that drives a *business* outcome, not by shipping.
+
+- **Layer confusion (Critical):** the north-star is a delivery/operational metric — latency, throughput, uptime, DORA key, SLO, error rate. Those are guardrails, not the business needle. A business north-star reads like "weekly active creators", "activation rate", "paid conversion", "tickets deflected".
+- **Missing driver (Important):** `## North Star Alignment` names the north-star but not the *input metric* this feature moves, or the "input metric" is just a restatement of the feature ("ships the export button") rather than a measurable driver ("export adoption → retention").
+- **Unjustified N/A (Important):** `N/A` on a feature/enhancement spec (not a bug fix or config change) — every feature should trace to an outcome.
+
+`N/A — <reason>` is correct and passing for bug-fix/config specs.
+
 ---
 
 ### Section 3 — Consistency Checks
@@ -275,6 +287,7 @@ TBD/placeholder at set level is Critical. Report smells with a `[4]` tag.
 - [REQ-002 / 2b] AC: "returns error for invalid input" — no TC exercises it. Add TC with specific invalid input and exact expected error response.
 - [REQ-003 / 2c] TC-REQ003-01 asserts `result is not None` — passes if result is wrong type. Rewrite to assert `result == expected_value`.
 - [REQ-004 / 2d] Error path "DB unavailable" mentioned in §Context but no REQ handles it. Either add REQ or move to Out of Scope.
+- [2f] `north_star: p99 < 200ms` — that is a delivery guardrail, not a business north-star. State the business outcome this feature moves (e.g. "activation rate") and the input metric that drives it.
 
 ### Consistency Failures (blocking) — N findings
 

@@ -67,6 +67,20 @@ active Codex model.
 
 ---
 
+## Metrics vocabulary
+
+A **delivery metric** (DORA, flow efficiency, SLO, latency, MTTR) answers "how
+fast and how reliably do we ship" — a guardrail. A **business north-star**
+(activation, conversion, active users) answers "did the shipped thing move the
+outcome it was justified by." They are different layers; presenting a delivery
+number as evidence of business success is a documented failure mode. The
+canonical definition and ownership map live in `AGENTS.md` → *Metrics
+vocabulary*. When writing or reviewing any skill/agent that touches a metric,
+keep the two apart: `outcome-review` owns the north-star, `delivery-metrics`
+owns the delivery keys.
+
+---
+
 ## Version bumping
 
 Version is synchronized across `.claude-plugin/plugin.json`,

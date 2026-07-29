@@ -228,6 +228,13 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   REPORT_FILE path — never paste their findings into the orchestrator.
 - **After each phase:** tell the user "phase complete — safe to /compact; the
   manifest holds state." Context eviction needs /compact; a prompt cannot evict.
+- **Completion report (every lane step that produces work):** end each step with
+  a one-line user-facing report — *what* was produced, *where* it lives (path),
+  the reviewer *verdict* if a gate ran, and *what's next*. A step whose only
+  trace is a commit message leaves the user guessing; the report closes the
+  "Document → Review → Ship" loop visibly. Skills carry their own
+  `## Completion Report` block for when they run standalone; this constraint
+  makes it non-optional inside a lane.
 
 ## Cost ledger
 

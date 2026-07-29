@@ -132,7 +132,7 @@ Create the spec and plan, then re-run /pr-creator.
 ```
 
 Once paths are provided:
-- Read the spec → extract `spec_id`, all `REQ-NNN` IDs, title
+- Read the spec → extract `spec_id`, `north_star`, all `REQ-NNN` IDs, title
 - Read the plan → extract the task list and what was implemented
 
 ---
@@ -185,6 +185,10 @@ What breaks without this change? Never list files. Never say "I added X to Y.">
 Spec: .ai/specs/<name>.md (SPEC-N)
 Plan: .ai/plans/<name>.md
 Requirements: REQ-001, REQ-002, REQ-003
+North Star: <spec's north_star value — the business metric this change advances, or "N/A — <reason>">
+
+<one line: which input metric of the north-star this PR moves — the reviewer and
+outcome-review read this to close the "measure what you shipped" loop. Omit for N/A.>
 
 ## Traceability
 <auto-populated in Step 4>

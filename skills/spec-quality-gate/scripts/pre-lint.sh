@@ -39,6 +39,7 @@ else
   echo "$FRONTMATTER" | grep -qE '^spec_id:[[:space:]]*SPEC-[0-9]+' || fail "1a" "frontmatter missing 'spec_id: SPEC-N'"
   echo "$FRONTMATTER" | grep -qE '^title:[[:space:]]*[^[:space:]]' || fail "1a" "frontmatter missing 'title:'"
   echo "$FRONTMATTER" | grep -qE '^status:[[:space:]]*(draft|approved)' || fail "1a" "frontmatter missing 'status: draft|approved'"
+  echo "$FRONTMATTER" | grep -qE '^north_star:[[:space:]]*[^[:space:]]' || fail "1a" "frontmatter missing 'north_star:' (business north-star metric verbatim, or 'N/A — <reason>' for bug fixes/config)"
 fi
 
 # ── 1b. REQ-NNN sequential, no gaps/dupes ───────────────────────────────────

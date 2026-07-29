@@ -58,7 +58,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `visual-regression` | `/visual-regression` | For UI features — Playwright toHaveScreenshot(), animations disabled, baselines in git, pinned Docker CI |
 | `chaos-engineering` | `/chaos-engineering` | For resilience NFR services — k6 fault injection, Toxiproxy network faults, steady state hypothesis, CI chaos job |
 | `incident-response` | `/incident-response` | For production services — severity matrix, IC role, postmortem template (Google SRE standard), MTTD/MTTR targets |
-| `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery — DORA four keys + reliability and Flow Framework flow efficiency, derived from manifest phase timestamps + cost-ledger; never fabricates failure-dependent keys |
+| `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery — DORA four keys + reliability and Flow Framework flow efficiency, derived from manifest phase timestamps + cost-ledger; never fabricates failure-dependent keys; runs `delivery-metrics-reviewer` |
 | `onboarding-guide` | `/onboarding-guide` | On first production release — synthesizes HLD, ADRs, OpenAPI, SLOs into wiki/ONBOARDING.md with 8 required sections |
 | `outcome-review` | `/outcome-review` | After ship (and at HEART-aligned checkpoints) — measures north-star + input metrics vs target with cited sources, renders persevere/iterate/kill, feeds the portfolio; rejects fabricated numbers; closes the measurement loop |
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
@@ -66,7 +66,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
 | `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; the engineer PORTFOLIO lane; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffold for a NEW service (CNCF Platform Eng L3) — CI, observability, contract stub, tests, runbook, resource limits, catalog entry, scorecard from birth; runs `service-scaffolding-reviewer` |
-| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — zero-cost `pre-lint.sh` format check runs before the Opus reviewer |
+| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — zero-cost `pre-lint.sh` format check (incl. required `north_star` field) runs before the Opus reviewer |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
@@ -116,6 +116,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `dast-reviewer` | **Sonnet** — DAST config gate: ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF uploaded, auth configured |
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |
+| `delivery-metrics-reviewer` | **Sonnet** — Delivery-metrics honesty gate: DORA bands match 2024 clusters, no fabricated failure-dependent key, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome |
 
 ---
 

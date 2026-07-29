@@ -118,3 +118,17 @@ All tests pass. Run `verification-before-completion` (lint gate). Then the final
 - "I'll just fix this bug while I'm here" → no; separate commit, separate lane
 - Renaming something without updating all callers → `codegraph_impact` first
 - Skipping the test baseline → this is the whole safety net; skipping it makes it rewriting
+---
+
+## Completion Report
+
+When this skill's work is done, report to the user in chat — do not let a commit
+message be the only trace of what happened:
+
+- **Produced:** what was created or changed (artifact type + exact path).
+- **Verdict:** the reviewer's PASS / NEEDS WORK / BLOCKED result, if a gate ran.
+- **Coverage:** which spec REQ / NFR this satisfies, where applicable.
+- **Next:** the next step in the flow, or "ready for review / merge".
+
+One line per item is enough. The point is that the user sees what shipped and
+its verdict without having to read the diff.

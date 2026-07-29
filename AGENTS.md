@@ -75,14 +75,14 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `chaos-engineering` | `/chaos-engineering` | For services with resilience NFRs (circuit breakers, retries) — k6 fault injection (HTTP errors, timeouts, latency spikes), Toxiproxy for network faults, steady state + hypothesis per scenario, CI chaos job post-staging; runs `chaos-reviewer` |
 | `incident-response` | `/incident-response` | For any production service — severity matrix (SEV-1/2/3 with SLAs), IC role, declaration process, response playbook, blameless postmortem template, MTTD/MTTR targets; runs `incident-response-reviewer` |
 | `production-readiness-review` | `/production-readiness-review` | Before first production traffic — one go/no-go PRR artifact over the SRE Launch Coordination Checklist's seven dimensions (Service Levels, Architecture & Dependencies, Performance & Capacity, Observability, Deployment & Rollback, Operability, Testing & Security); accepts a readiness claim only when evidenced, not when plausibly written; runs `production-readiness-reviewer`; hard gate in the epic lane |
-| `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery performance — DORA four keys + reliability and Flow Framework flow efficiency, derived from work-item manifest phase timestamps and the engineer cost-ledger via `scripts/dora-report`; withholds failure-dependent keys (CFR/MTTR/reliability) until a real incident linkage exists rather than fabricating them |
+| `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery performance — DORA four keys + reliability and Flow Framework flow efficiency, derived from work-item manifest phase timestamps and the engineer cost-ledger via `scripts/dora-report`; withholds failure-dependent keys (CFR/MTTR/reliability) until a real incident linkage exists rather than fabricating them; runs `delivery-metrics-reviewer` |
 | `onboarding-guide` | `/onboarding-guide` | On first production release or after major HLD changes — synthesizes HLD C4 diagrams, ADRs, OpenAPI spec, SLOs, runbooks into `wiki/ONBOARDING.md` with 8 required sections; runs `onboarding-reviewer` |
 | `outcome-review` | `/outcome-review` | After a feature ships (and at HEART-aligned checkpoints) — measures the business-context north-star + input metrics against target with cited re-runnable sources, renders persevere/iterate/kill, feeds the portfolio; rejects any metric lacking a real data source (AI-fabrication guard); closes the "measure what you shipped" loop; runs `outcome-review-reviewer`; last epic-lane step |
 | `dast-testing` | `/dast-testing` | Before `finishing-a-development-branch` for externally-facing services — ZAP baseline (every PR, passive), ZAP API scan (post-staging, uses OpenAPI spec), Nuclei targeted API scan, SARIF to Security tab, fails on HIGH; runs `dast-reviewer` |
 | `api-versioning` | `/api-versioning` | During api-contract-first or HLD for externally-facing APIs — produces versioning strategy ADR, breaking change policy, deprecation timeline with Sunset headers, migration guide template, CI oasdiff check; runs `api-versioning-reviewer` |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for flows crossing 3+ components — Mermaid sequenceDiagram with auth boundary, error paths, sync/async arrows, retry blocks; runs `sequence-diagram-reviewer` |
 | `review` | `/review` | Central entry point for all review types |
-| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — runs `scripts/pre-lint.sh` (zero-cost mechanical Section 1 format check) before ever dispatching the Opus reviewer, so specs stop failing the gate on frontmatter/heading defects the author can fix for free |
+| `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — runs `scripts/pre-lint.sh` (zero-cost mechanical Section 1 format check) before ever dispatching the Opus reviewer, so specs stop failing the gate on frontmatter/heading defects the author can fix for free; pre-lint also requires the `north_star:` frontmatter field so a feature spec cannot pass without a declared business outcome |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation — file-based handoffs (`scripts/task-brief` + `scripts/review-package`), single-pass unified task reviewer (`task-reviewer-prompt.md`), plan-scoped progress ledger (`.ai/sdd/<plan>/`), pre-flight plan scan, 5-round fix loop (resume implementer rounds 1-3, escalate fresh+stronger model rounds 4-5, scoped re-review via `re-review-prompt.md`, park/BLOCK adjudication at the cap) |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
@@ -137,6 +137,7 @@ inheriting the parent Codex model.
 | `e2e-reviewer` | opus | E2E test quality gate — validates critical journey coverage, semantic selectors (CSS class selectors = Critical), no hardcoded waits (waitForTimeout = Critical), test independence, POM structure, auth fixtures, CI integration against staging. 7 dimensions. Invoked by `e2e-testing` skill. |
 | `load-test-reviewer` | opus | Load test quality gate — validates NFR-aligned thresholds (arbitrary numbers = Critical), smoke test presence, realistic traffic modeling, appropriate test types (no soak for 99.9% availability = Critical), CI integration against staging (localhost = Critical), script quality. 6 dimensions. Invoked by `load-testing` skill. |
 | `linter-reviewer` | **sonnet** | Linter gate validator — detects language from manifests, verifies correct 2025 tool used (Ruff/Biome/golangci-lint/Clippy), confirms zero output, type checker run, no new suppression comments. 4 checks. Invoked by `verification-before-completion`. First Sonnet review agent. |
+| `delivery-metrics-reviewer` | **sonnet** | Delivery-metrics honesty gate — DORA bands match the 2024 clusters, no failure-dependent key (lead time/CFR/MTTR/reliability) fabricated when its signal is absent, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome. 5 checks. Invoked by `delivery-metrics` skill. |
 
 Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`). `pr-reviewer` and `spec-impl-reviewer` accept optional `DIFF_FILE` (pre-generated by `scripts/review-package PLAN_FILE BASE HEAD`) — if present, the agent reads it instead of running git commands. `pr-reviewer` also accepts optional `PR_NUMBER` (read existing review threads via `gh` to flag adverse prior advice and amplify sound suggestions) and `REVIEW_POLICY` (repo review-policy file; auto-checks `.ai/review-policy.md` then repo-root `review-policy.md`) — both portable, `gh`/file-read only, no code-index dependency.
 All reviewer agents accept optional `REPORT_FILE` — if present, full findings are written there and only the verdict summary is returned to context.
@@ -167,6 +168,7 @@ Outcome review agents (`outcome-review-reviewer`) require `OUTCOME_PATH` and `CO
 DAST agents (`dast-reviewer`) require `CI_CONFIG_PATH`; `OPENAPI_PATH` and `ZAP_RULES_PATH` optional.
 Accessibility agents (`accessibility-reviewer`) require `TEST_FILES`; `SPEC_PATH` and `BUSINESS_CONTEXT_PATH` optional.
 Linter agents (`linter-reviewer`) require `PROJECT_ROOT` and `CHANGED_FILES`.
+Delivery-metrics agents (`delivery-metrics-reviewer`) require `REPORT_PATH`; `LEDGER_PATH` optional.
 See each `agents/<name>.md` for the full input contract.
 
 ### Model Right-Sizing Criteria
@@ -217,8 +219,24 @@ See each `agents/<name>.md` for the full input contract.
 | `dast-reviewer` | sonnet | Mechanical — ZAP action present? (pattern match), fail_action set? (config check), SARIF upload present? (step detection), auth configured? (secret reference check) | ✅ Correct — Sonnet |
 | `accessibility-reviewer` | sonnet | Mechanical — is axe called? (pattern match), correct tags? (set comparison), assertion pattern? (code pattern), exclusion comments? (text search). No accessibility judgment required. | ✅ Correct — Sonnet |
 | `linter-reviewer` | sonnet | Mechanical — tool detection via manifest pattern matching, output-clean check is deterministic, suppression scan is regex. No architectural judgment required. First Sonnet review agent. | ✅ Correct |
+| `delivery-metrics-reviewer` | sonnet | Mechanical — band label vs 2024 DORA cluster (table lookup), fabricated-key detection (number present with no ledger/incident row = deterministic cross-check), flow-efficiency formula/withhold check, source-citation presence, delivery-vs-outcome keyword scan. No performance judgment. | ✅ Correct — Sonnet |
 
 **When adding a new agent:** fill in the right-size verdict before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.
+
+---
+
+## Metrics vocabulary: delivery metric ≠ business north-star
+
+The harness measures two different things, and conflating them is a documented failure mode. Every skill and agent that touches a metric must respect this split:
+
+| Aspect | **Delivery / operational metric** | **Business north-star** |
+|---|---|---|
+| Question | How fast and how reliably do we ship? | Did the shipped thing move the outcome it was justified by? |
+| Examples | DORA four keys, flow efficiency, SLO/error budget, p99 latency, MTTD/MTTR, uptime | weekly active creators, activation rate, paid conversion, tickets deflected |
+| Framework | DORA (dora.dev), Flow Framework | North Star Metric (Amplitude/Sean Ellis), HEART/GSM (Google) |
+| Owned by | `delivery-metrics`, `observability-standards`, `ci-pipeline-setup`, `deployment-workflow`, `incident-response` | `business-context-intake` (defines) → spec `north_star` → `outcome-review` (measures) |
+
+A delivery metric is a **guardrail**, not the needle. "Deployment frequency is elite" or "p99 is under target" says the machine runs well — it does **not** say the feature succeeded. That question belongs to `outcome-review` against the business north-star. A skill that presents a DORA/SLO number as evidence of business success has confused the layers; `delivery-metrics-reviewer` (D5) and `spec-quality-reviewer` (§2f) both reject that confusion.
 
 ---
 
