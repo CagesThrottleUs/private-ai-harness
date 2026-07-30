@@ -184,7 +184,8 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
 
 - **karpathy lens:** surgical changes, no over-build, verifiable success criteria
 - **design-principles:** SOLID, DRY, YAGNI applied during construction
-- **Pattern propagation on review fixes:** when a review finding (from `requesting-code-review`, SDD's task reviewer, or a human) is accepted, search the current PR's diff — changed files only — for the same defect pattern before marking it fixed, and fix every occurrence in one pass. See `receiving-code-review`'s Pattern Propagation Check. A reviewer re-finding the same pattern in the next file over next round is the turnaround cost this exists to cut.
+- **Pattern propagation on review fixes:** when a review finding (from `requesting-code-review`, SDD's task reviewer, or a human) is accepted, search the current PR's diff — changed files only — for the same defect pattern before marking it fixed, and fix every occurrence in one pass. This includes analogous paths (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, and a determinism self-check on any new concurrency. See `receiving-code-review`'s Pattern Propagation Check. A reviewer re-finding the same pattern in the next file over next round is the turnaround cost this exists to cut.
+- **Zero negotiable review rounds:** never re-trigger an external reviewer until an internal self-review returns clean on the current diff — batch every open finding, fix in one pass, self-review (hunting the same failure classes plus fix-introduced regressions), push once, then re-trigger. Strong default; override only with a recorded reason. See `closing-review-loops`.
 - **Confirmation required at:** initial plan (Step 2), every gate FAIL, every BLOCKED subagent status, HLD approval (epic only)
 - **Never auto-continue past BLOCKED or FAIL** — surface to human, wait for resolution
 - **Manifest updated at each phase transition** (task/epic lanes)
