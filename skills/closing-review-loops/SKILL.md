@@ -58,7 +58,9 @@ The default is: do not override.
              Do NOT fix comment-by-comment. Do NOT push per comment.
 2. FIX     — one pass. For each finding apply receiving-code-review:
              verify → fix → Pattern Propagation Check (parity checklist,
-             shared-helper blast radius, concurrency determinism).
+             shared-helper blast radius, concurrency determinism) →
+             Proportionality Gate (is fixing this NOW still proportional,
+             or does it deserve its own ticket?).
 3. SELF-   — dispatch pr-reviewer / security-reviewer (or /scout-pr-review)
    REVIEW    against the CURRENT diff, explicitly instructed to:
                • hunt the SAME failure classes already found in this PR
@@ -106,6 +108,13 @@ This is the `karpathy` *Verify Load-Bearing Claims* posture turned on your own
 fix: build the smallest input that would falsify "it's fixed now" before you
 believe it.
 
+**Scope bound:** "hunt anything the fix introduced" means close *this* round
+cleanly — regressions, broken call sites, new edge cases from the actual
+diff. It is not license to harden everything imaginable adjacent to the fix.
+A real, in-scope finding that would need a disproportionate rewrite to
+"fully" close goes through `receiving-code-review`'s Proportionality Gate —
+simpler fix now, or a follow-up ticket — not into this round.
+
 ---
 
 ## Receiving comments on an existing PR (not just opening one)
@@ -133,8 +142,8 @@ every repo the harness touches, not just this one.
 ## Integration
 
 - **receiving-code-review** — how to fix and verify each finding (verify before
-  implementing, Pattern Propagation Check, parity/blast-radius/concurrency). This
-  skill wraps the loop around those per-finding fixes.
+  implementing, Pattern Propagation Check, parity/blast-radius/concurrency,
+  Proportionality Gate). This skill wraps the loop around those per-finding fixes.
 - **requesting-code-review** — the internal self-review in step 3 uses the same
   reviewer roster; dispatch via that skill's agents.
 - **engineer** — the Universal-constraints zero-round bullet points here for any
