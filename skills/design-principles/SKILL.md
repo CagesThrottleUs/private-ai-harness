@@ -405,6 +405,7 @@ Run **after implementation, before marking complete** in `executing-plans` and `
 - [ ] **CQS:** No method both returns data and mutates state?
 - [ ] **Immutability:** Parameters not mutated? Shared objects not modified in place?
 - [ ] **Explicit:** No magic, hidden config, or order-dependent calls without type enforcement?
+- [ ] **No comment-synced constants:** a literal constant (threshold, cap, multiplier) duplicated across ≥2 call sites, kept in sync only by a comment referencing the other site, not a shared named const? Fail — a comment is not enforcement; the next edit desyncs them silently.
 
 **Craft**
 - [ ] **POLA:** Every function does exactly what its name implies — no hidden side effects?
