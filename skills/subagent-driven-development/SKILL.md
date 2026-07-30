@@ -233,6 +233,11 @@ verbatim. Its context is intact: it knows the task, the code, and its own
 choices. If your harness cannot send another message to a live subagent,
 dispatch a fresh implementer carrying the brief path, the report-file path,
 and the findings — the report file is the persistent memory either way.
+Tell it to apply `receiving-code-review`'s Pattern Propagation Check: grep
+this task's own diff for the same defect pattern in sibling files it already
+touched, and fix every occurrence in this round. A resumed implementer that
+patches only the exact flagged line hands the re-reviewer the same pattern
+in the next file, burning a round that a two-minute grep would have closed.
 
 **Rounds 4-5 — dispatch a fresh implementer on a more capable model** (per
 Model Selection), with the brief path, the report-file path, the open
