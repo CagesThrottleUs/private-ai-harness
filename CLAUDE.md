@@ -112,6 +112,26 @@ Scopes: `skills` `agents` `scripts` `plugin` `docs`
 
 ---
 
+## PR Review Protocol
+
+A session that opens on an already-open PR — answering bot comments (Talos,
+CodeRabbit), a queued human review, or "address the review" — is **re-entering**
+work, not starting fresh. Before the first fix:
+
+- Invoke `closing-review-loops` explicitly. Its step 0 (MEASURE) re-checks the
+  branch's cumulative LOC/commit count against `requesting-code-review`'s PR
+  Size Gate and asks "is this still one describable change?" — run it even if
+  you don't yet know the branch's full history, because a branch can cross
+  the 1000-LOC/30-commit line through many individually-small rounds that
+  never re-trigger a first-submission-only gate.
+- Never fix comment-by-comment. Batch every open finding, fix in one pass,
+  run an internal self-review, push once, then re-trigger the external
+  reviewer — the Iron Law in `closing-review-loops`.
+
+This binds in every repo the harness touches, not just this one.
+
+---
+
 ## Meta-doc sync rule
 
 `AGENTS.md`, `CLAUDE.md`, and `README.md` are a synchronized triple.
