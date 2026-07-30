@@ -197,6 +197,30 @@ load, exactly where a later review round is most expensive.
 
 **If the same defect keeps recurring across separate, unrelated PRs over time** — not just within one diff — that's not a fix-it-here problem, it's a missing guardrail. Flag it for a persistent rule (`AGENTS.md`/`CLAUDE.md`, a lint rule, a reviewer-agent check) so future PRs don't reintroduce it, the same way modern AI review tools turn recurring past-PR feedback into enforced per-repo rules rather than re-litigating it every time.
 
+## Proportionality Gate (a different question than Pattern Propagation)
+
+Pattern Propagation Check answers "which files does this finding's fix touch" — the *scope* question. This gate answers a different one, for a finding that is already accepted as real and in scope: **is fixing it right now, in this round, still proportional — or does it deserve its own ticket?**
+
+Two signals the answer is "own ticket," not "fix now":
+
+- **Fix-complexity signal.** If defending the fix needs a formal-ish equivalence proof, a multi-call-site truth table, or similar heavyweight justification, that complexity is itself evidence the fix may be disproportionate to the finding. Pause and ask: would a simpler version satisfy the actual defect — not the most "complete" version imaginable of it?
+- **Running-total signal.** `closing-review-loops`' RECEIPT (cumulative commits + LOC delta vs base, reported every round) is the forced checkpoint for this. Don't wait to notice growth by accident — read the receipt every round and ask whether the next fix still fits inside this PR.
+
+```
+FOR each finding accepted as correct AND in scope:
+  1. Would defending this fix need a formal proof or a multi-site truth table?
+     → disproportionate. Ask: does a simpler fix satisfy the actual defect?
+  2. Has the receipt already crossed a split threshold this round?
+     → disproportionate. File a follow-up ticket instead of fixing now.
+  3. Neither? Fix now, in this round.
+```
+
+"Hunt anything the fix introduced" (`closing-review-loops` step 3) means close *this*
+round cleanly — regressions, broken call sites, new edge cases from the actual
+diff. It is not license to harden everything imaginable adjacent to the fix. A
+real, in-scope finding that fails this gate goes to a follow-up ticket, not
+into the current round.
+
 ## Style vs. Substance Triage
 
 Not every disagreement is worth the same fight:
@@ -274,6 +298,7 @@ State the correction factually and move on.
 | Fixed a shared helper for one caller, broke another | Verify the fix at every call site, not just the prompting one |
 | "Looks equivalent" on concurrent code | Run the adversarial reordering case; verify byte-identical to the sequential path |
 | Pushed / replied comment-by-comment | Batch all findings, self-review clean, push once — see `closing-review-loops` |
+| Fixed a real, in-scope finding with a disproportionate rewrite (formal proof, multi-site truth table) instead of the simplest fix | Run the Proportionality Gate — simpler fix, or file a follow-up ticket |
 
 ## Real Examples
 
