@@ -137,10 +137,59 @@ A review comment on one line is usually evidence of a pattern, not an isolated t
 FOR each finding accepted as correct:
   1. Name the underlying defect in one phrase, not "this line"
      (e.g. "missing null check before use", "unbounded query", "copy-pasted validation logic")
-  2. Search the CURRENT PR's diff — changed files only — for the same defect
-  3. Fix every occurrence found, in this pass, not just the one quoted
-  4. State which other files/lines got the same fix — don't make the reviewer re-discover them
+  2. Sweep the CURRENT PR's diff for the same defect — literal duplicates AND
+     every analogous code path (see Parity Checklist below). A pattern hides
+     behind different-looking code, not just copy-pasted lines.
+  3. If the fix touches a shared helper, verify EVERY call site
+     (see Shared-Helper Blast Radius below)
+  4. Fix every occurrence found, in this pass, not just the one quoted
+  5. State which other files/lines/paths got the same fix — don't make the reviewer re-discover them
 ```
+
+### Parity Checklist (analogous paths, not just duplicate lines)
+
+A defect pattern usually recurs across *analogous* paths that don't look
+identical — so a literal-duplicate grep misses it. When a finding is accepted,
+walk the PR's parallel surfaces and confirm each carries the same fix:
+
+- **CLI path vs MCP/tool path vs HTTP handler** — is the same input validated at
+  every entry point, or only the one the reviewer happened to read?
+- **Primary path vs fallback / degraded path** — the fallback is where the pattern
+  most often survives, because it's exercised less.
+- **Read path vs write path**, **sync vs async variant**, **happy path vs error path**.
+- **Each platform / OS / version branch.**
+
+"No literal duplicate found" is not "clear" — check the analogous path before you
+call the pattern closed.
+
+### Shared-Helper Blast Radius
+
+A fix to a function with **2+ call sites is not done until verified against ALL
+call sites**, not just the one that surfaced it. Changing a shared helper's
+behavior can fix caller A and silently break caller B.
+
+```
+IF the fix changes a function/helper with ≥2 callers:
+  list every call site (grep / codegraph / LSP references)
+  verify the new behavior is correct at each — not just the prompting one
+  a caller that relied on the OLD behavior is a regression you just introduced
+```
+
+### Concurrency Determinism Check
+
+"Looks equivalent" is not verification for concurrent code. Any new or changed
+`rayon` / `spawn_blocking` / threadpool / parallel-iterator / shared-ordering code
+requires an explicit self-check **before commit**:
+
+- Does output ordering depend on completion order — and is that ordering now
+  nondeterministic across runs?
+- Is shared state written from multiple workers without synchronization?
+- Does the parallel version produce byte-identical results to the sequential one
+  on the same input?
+
+Build the smallest input that would expose a reordering and run it. Do not reason
+"it should be fine" — determinism regressions pass the happy path and fail under
+load, exactly where a later review round is most expensive.
 
 **Scope stays the current PR's diff, not the whole repo.** Google's engineering practices explicitly warn against scope creep: a fix PR that starts touching unrelated files is harder to review and regression-test. Propagation searches the files this PR already changed. If the same defect exists in untouched, unrelated files, name it as a follow-up instead of pulling it into this PR.
 
@@ -221,6 +270,10 @@ State the correction factually and move on.
 | Partial implementation | Clarify all items first |
 | Can't verify, proceed anyway | State limitation, ask for direction |
 | Fixed only the quoted line, left sibling occurrences in the diff | Search the current PR's diff for the same pattern, fix every occurrence in this pass |
+| Only grepped literal duplicates | Check analogous paths too — CLI vs MCP, primary vs fallback, sync vs async |
+| Fixed a shared helper for one caller, broke another | Verify the fix at every call site, not just the prompting one |
+| "Looks equivalent" on concurrent code | Run the adversarial reordering case; verify byte-identical to the sequential path |
+| Pushed / replied comment-by-comment | Batch all findings, self-review clean, push once — see `closing-review-loops` |
 
 ## Real Examples
 
@@ -255,6 +308,14 @@ Reviewer: "This handler doesn't check `user` for nil before calling .Role()"
 ✅ "Fixed. Same missing nil check was in the other 2 handlers this PR touched
    (auth.go:88, session.go:41) — fixed those too."
 ```
+
+## Before Re-Triggering Review
+
+Once findings are fixed, do not re-trigger the external reviewer directly. Run
+`closing-review-loops`: batch every open finding, fix in one pass, self-review the
+current diff (hunting the same failure classes plus anything the fix introduced),
+and push once — only then re-trigger. A round closed any other way tends to spawn
+the next one.
 
 ## GitHub Thread Replies
 
