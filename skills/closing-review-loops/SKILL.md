@@ -38,6 +38,22 @@ The default is: do not override.
 ## The loop — run every round, not just the first
 
 ```
+0. MEASURE  — before BATCH, re-run both checks below against the branch's
+              base. Every round, not just before the first submission — a
+              branch crosses these through many individually-small,
+              individually-justified rounds that never re-trigger a
+              one-time, first-submission-only gate.
+              a. SIZE — requesting-code-review's PR Size Gate command:
+                 `git diff --numstat <base>...HEAD | awk '$1!="-"{a+=$1}
+                 $2!="-"{m+=$2} END{print a+m}'` plus `git rev-list --count
+                 <base>...HEAD`. Crossed 1000 LOC or 30 commits since the
+                 branch opened? Stop. Show the RECEIPT (step 6) now and ask
+                 the human "split now?" before FIX.
+              b. COHESION — "is this still one describable change?"
+                 (design-principles' Cohesion test, applied to the whole
+                 branch, not one module). Picked up a second or third
+                 concern since the last round? Flag it for a split
+                 conversation now — don't wait for merge to notice.
 1. BATCH   — collect EVERY open finding across all threads and all reviewers.
              Do NOT fix comment-by-comment. Do NOT push per comment.
 2. FIX     — one pass. For each finding apply receiving-code-review:
@@ -52,10 +68,16 @@ The default is: do not override.
 4. CONVERGE — if the internal pass returns findings, go back to step 2.
 5. PUSH ONCE — only when internal review is clean: a single push, THEN
               re-trigger the external reviewer.
+6. RECEIPT  — after the push, report cumulative commits and LOC delta vs
+              base since the branch opened. Unconditional, every round — not
+              only when step 0a trips — so growth is visible before it forces
+              the question three rounds later instead of at round one.
 ```
 
 **Never:** push after each comment · re-trigger the external bot before the
-internal pass is clean · reply "fixed" before the fix is verified.
+internal pass is clean · reply "fixed" before the fix is verified · skip step
+0 because this round felt small — cumulative growth is exactly what it exists
+to catch.
 
 ---
 
@@ -93,6 +115,15 @@ reviewer leaves N comments on an open PR: batch all N, fix in one pass,
 self-review, push once, re-trigger — never a push-and-reply per comment. Reply to
 each thread only after the single verified push, so every "fixed" reply points at
 code that is already proven and already pushed.
+
+**Cold session re-entry:** if the first substantive message in a session
+references an existing PR, bot comments, or "address the review," that
+session is re-entering this loop at whatever round it's already in — not
+starting fresh. Run step 0 (MEASURE) immediately, before the first fix, even
+before you know the branch's full history. A branch that grew past the PR
+Size Gate through several prior sessions is invisible to a new session unless
+it measures on entry instead of assuming the diff in front of it is the whole
+story.
 
 Surface this Iron Law in a project's `CLAUDE.md` PR Review Protocol so it binds in
 every repo the harness touches, not just this one.
