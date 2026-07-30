@@ -21,7 +21,7 @@ WHEN receiving code review feedback:
 3. VERIFY: Check against codebase reality
 4. EVALUATE: Technically sound for THIS codebase?
 5. RESPOND: Technical acknowledgment or reasoned pushback
-6. IMPLEMENT: One item at a time, test each
+6. IMPLEMENT: One item at a time, test each — including sibling occurrences of the same pattern (see Pattern Propagation Check below)
 ```
 
 ## Forbidden Responses
@@ -129,6 +129,25 @@ FOR multi-item feedback:
   4. Verify no regressions
 ```
 
+## Pattern Propagation Check (Fix It Everywhere, Not Just Here)
+
+A review comment on one line is usually evidence of a pattern, not an isolated typo. Superficial compliance — patch the exact line quoted, ignore the same defect three files over — costs another review round when the reviewer finds the sibling instance. Real compliance closes the whole pattern in one pass.
+
+```
+FOR each finding accepted as correct:
+  1. Name the underlying defect in one phrase, not "this line"
+     (e.g. "missing null check before use", "unbounded query", "copy-pasted validation logic")
+  2. Search the CURRENT PR's diff — changed files only — for the same defect
+  3. Fix every occurrence found, in this pass, not just the one quoted
+  4. State which other files/lines got the same fix — don't make the reviewer re-discover them
+```
+
+**Scope stays the current PR's diff, not the whole repo.** Google's engineering practices explicitly warn against scope creep: a fix PR that starts touching unrelated files is harder to review and regression-test. Propagation searches the files this PR already changed. If the same defect exists in untouched, unrelated files, name it as a follow-up instead of pulling it into this PR.
+
+**Why this shrinks turnaround:** every extra review round is a full reviewer pass plus wait time, not just the diff line. Software testing's defect-clustering principle (defects concentrate rather than scatter uniformly) predates AI code review by decades and still applies to LLM-authored diffs — where one instance of a pattern was written, a sibling usually was too, because the same prompt or the same copy-paste produced both.
+
+**If the same defect keeps recurring across separate, unrelated PRs over time** — not just within one diff — that's not a fix-it-here problem, it's a missing guardrail. Flag it for a persistent rule (`AGENTS.md`/`CLAUDE.md`, a lint rule, a reviewer-agent check) so future PRs don't reintroduce it, the same way modern AI review tools turn recurring past-PR feedback into enforced per-repo rules rather than re-litigating it every time.
+
 ## Style vs. Substance Triage
 
 Not every disagreement is worth the same fight:
@@ -201,6 +220,7 @@ State the correction factually and move on.
 | Avoiding pushback | Technical correctness > comfort |
 | Partial implementation | Clarify all items first |
 | Can't verify, proceed anyway | State limitation, ask for direction |
+| Fixed only the quoted line, left sibling occurrences in the diff | Search the current PR's diff for the same pattern, fix every occurrence in this pass |
 
 ## Real Examples
 
@@ -227,6 +247,13 @@ Reviewer: "Implement proper metrics tracking with database, date filters, CSV ex
 your human partner: "Fix items 1-6"
 You understand 1,2,3,6. Unclear on 4,5.
 ✅ "Understand 1,2,3,6. Need clarification on 4 and 5 before implementing."
+```
+
+**Pattern Propagation (Good):**
+```
+Reviewer: "This handler doesn't check `user` for nil before calling .Role()"
+✅ "Fixed. Same missing nil check was in the other 2 handlers this PR touched
+   (auth.go:88, session.go:41) — fixed those too."
 ```
 
 ## GitHub Thread Replies
