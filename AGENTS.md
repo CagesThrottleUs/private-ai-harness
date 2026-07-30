@@ -64,7 +64,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
 | `giving-code-review` | `/giving-code-review` | Acting as reviewer on a PR via `gh` — someone else's, or self-review of your own before requesting external review; walks every commit, applies `pr-reviewer`'s dimensions, runs a trust-but-verify pass on claims, doubles rigor in self-review mode |
-| `receiving-code-review` | `/receiving-code-review` | Acting on review feedback |
+| `receiving-code-review` | `/receiving-code-review` | Acting on review feedback — verify before implementing, and run the Pattern Propagation Check: fix every sibling occurrence of an accepted finding's pattern within the current PR's diff, not just the flagged line |
 | `refactoring` | `/refactoring` | Behavior-preserving restructure with test guard at every step — names the smell (god class/duplication/nesting/coupling), establishes test baseline, one structural move per micro-commit, behavior verified after each; zero new behavior |
 | `requesting-code-review` | `/requesting-code-review` | Requesting a review |
 | `research-spike` | `/research-spike` | Time-boxed feasibility, comparison, or POC investigation — answer is the deliverable, not code; produces decision artifact in `.ai/` or ADR in `wiki/architecture/`; spike code is throwaway |

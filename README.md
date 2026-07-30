@@ -49,7 +49,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `pr-creator` | `/pr-creator` | Draft and open PRs with compliant messages |
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/ast before LLM |
 | `giving-code-review` | `/giving-code-review` | Act as reviewer via `gh` on someone else's PR, or self-review your own first — doubled rigor + trust-but-verify in self-review mode |
-| `receiving-code-review` | `/receiving-code-review` | How to act on review feedback |
+| `receiving-code-review` | `/receiving-code-review` | How to act on review feedback — verify before implementing, propagate the fix to every sibling occurrence of the same pattern within the current PR's diff |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review |
 | `review` | `/review` | Multi-dimension code review |
 | `feature-flags` | `/feature-flags` | For gradual rollout/A/B test/kill switch — OpenFeature SDK, naming conventions, flag registry, CI hygiene |
