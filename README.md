@@ -49,7 +49,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `pr-creator` | `/pr-creator` | Draft and open PRs with compliant messages |
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/ast before LLM |
 | `giving-code-review` | `/giving-code-review` | Act as reviewer via `gh` on someone else's PR, or self-review your own first — doubled rigor + trust-but-verify in self-review mode |
-| `receiving-code-review` | `/receiving-code-review` | How to act on review feedback — verify before implementing, propagate the fix to every sibling occurrence and analogous path (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, plus a determinism check on new concurrency |
+| `receiving-code-review` | `/receiving-code-review` | How to act on review feedback — verify before implementing, propagate the fix to every sibling occurrence and analogous path (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, plus a determinism check on new concurrency; then a Proportionality Gate — simpler fix or a follow-up ticket, not a maximal rewrite |
 | `closing-review-loops` | `/closing-review-loops` | Close a review round to zero negotiable rounds — batch findings, fix once, internal self-review clean before re-triggering any external reviewer, push once; re-checks cumulative size/cohesion every round and reports a commits/LOC receipt |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review; gates external re-trigger on `closing-review-loops` |
 | `review` | `/review` | Multi-dimension code review |
