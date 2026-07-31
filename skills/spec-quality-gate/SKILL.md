@@ -21,13 +21,10 @@ If no spec path is known, check `.ai/specs/` for the most recent file. If ambigu
 
 ## Convergence Rule
 
-**Max 2 re-run cycles.** Do not loop beyond this.
+**Loop until PASS.** No fixed cycle cap — matches every other reviewer-dispatching skill in this harness (`repeat until PASS`, see Reviewer Dispatch Discipline below).
 
-- **Cycle 0** — initial run. Present all failures to author.
-- **Cycle 1** — re-run after author fixes Cycle 0 failures. Present remaining.
-- **Cycle 2** — re-run after Cycle 1 fixes. If still failing, output a **Persistent Failures** report and stop. Escalate to human review.
-
-A spec that cannot pass in 2 fix cycles has a design problem the gate cannot resolve.
+- Each re-run: re-dispatch `spec-quality-reviewer` against the fixed spec. Present remaining failures to the author.
+- Escalate to human only on genuine non-convergence — a re-run returns the SAME failure the author already attempted to fix, with no forward progress. That is a design problem the gate cannot resolve; a cycle count cannot detect it and an arbitrary cap would either stop short of a fixable spec or let a stuck one loop forever.
 
 ## Reviewer Dispatch Discipline
 
@@ -37,6 +34,7 @@ When dispatching the reviewer agent:
 - If the reviewer returns findings: dispatch ONE fix agent with the complete findings list, not one fixer per finding
 - Re-dispatch the same reviewer after fixes; repeat until PASS
 - A ⚠️ item from the reviewer is yours to resolve — you hold cross-document context the reviewer lacks; treat confirmed gaps as a failed review
+- Pattern check before re-dispatch: does this finding's pattern recur elsewhere in the artifact? Fix every occurrence in the same pass — a finding that resurfaces next cycle in a new spot is the cost this discipline exists to cut
 
 ## Execution
 
@@ -64,11 +62,11 @@ Show the full report to the author. Do not summarize or soften findings. Every b
 
 ### Step 3 — Author Fixes
 
-Wait for author to fix all blocking failures in the spec file.
+Wait for author to fix all blocking failures in the spec file. For each finding, check whether its pattern recurs elsewhere in the spec (a vague term flagged in REQ-3 was likely copy-pasted into REQ-7) and fix every occurrence in the same pass — a finding that resurfaces next cycle in a new section is the cost this rule exists to cut.
 
-### Step 4 — Re-run (if needed)
+### Step 4 — Re-run (loop until PASS)
 
-Re-run Step 0's pre-lint first — if it now fails on a different mechanical finding, fix that before spending another Opus call. Once pre-lint is clean, re-dispatch `spec-quality-reviewer` with the same `SPEC_PATH`. Increment cycle counter. Stop at Cycle 2 regardless of result — escalate persistent failures to human.
+Re-run Step 0's pre-lint first — if it now fails on a different mechanical finding, fix that before spending another Opus call. Once pre-lint is clean, re-dispatch `spec-quality-reviewer` with the same `SPEC_PATH`. Repeat Steps 2-4 until PASS. Stop and escalate only on genuine non-convergence (see Convergence Rule) — never on a cycle count.
 
 ### Step 5 — Transition
 
@@ -76,7 +74,7 @@ On PASS:
 - For architectural changes (new services, data models, external integrations, security boundaries): invoke `high-level-design` skill.
 - For non-architectural changes (bug fixes, config, isolated utilities): invoke `writing-plans` skill.
 
-On FAIL after Cycle 2: present the **Persistent Failures** block. Do not proceed. The spec needs human-level design intervention.
+On genuine non-convergence: present the **Persistent Failures** block. Do not proceed. The spec needs human-level design intervention.
 
 ## Integration
 
