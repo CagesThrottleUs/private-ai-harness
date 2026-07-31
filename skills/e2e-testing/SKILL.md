@@ -549,6 +549,7 @@ When dispatching the reviewer agents (this skill dispatches both `e2e-reviewer` 
 - If the reviewer returns findings: dispatch ONE fix agent with the complete findings list, not one fixer per finding
 - Re-dispatch the same reviewer after fixes; repeat until PASS
 - A ⚠️ item from the reviewer is yours to resolve — you hold cross-document context the reviewer lacks; treat confirmed gaps as a failed review
+- Pattern check before re-dispatch: does this finding's pattern recur elsewhere in the artifact? Fix every occurrence in the same pass — a finding that resurfaces next cycle in a new spot is the cost this discipline exists to cut
 
 ## Self-Review: Run both `e2e-reviewer` and `accessibility-reviewer` Agents
 

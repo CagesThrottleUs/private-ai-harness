@@ -157,6 +157,7 @@ When dispatching any reviewer agent:
 - Re-dispatch the same reviewer after fixes; repeat until PASS
 - Before re-triggering any *external* reviewer (Talos, CodeRabbit, a queued human), run `closing-review-loops` — an internal self-review must return clean on the current diff first (strong default; override only with a recorded reason). This is what keeps a fixed round from spawning the next.
 - A ⚠️ item from the reviewer is yours to resolve — you hold cross-document context the reviewer lacks; treat confirmed gaps as a failed review
+- Pattern check before re-dispatch: does this finding's pattern recur elsewhere in the artifact? Fix every occurrence in the same pass — a finding that resurfaces next cycle in a new spot is the cost this discipline exists to cut
 
 ## How to Request
 
