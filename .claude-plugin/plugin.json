@@ -1,7 +1,7 @@
 {
   "name": "private-ai-harness",
   "description": "Personal AI harness: Karpathy guidelines, commit discipline, parallel agent patterns, TDD, debugging, code review workflows, and caveman mode",
-  "version": "3.9.3",
+  "version": "3.9.4",
   "author": {
     "name": "CagesThrottleUs"
   },
