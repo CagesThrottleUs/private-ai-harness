@@ -56,22 +56,27 @@ Confirm? (or tell me what to adjust — I'll re-plan before starting)
 
 Do NOT invoke any skill until the user says yes. If they adjust scope, re-classify and re-present the full block.
 
+**Spec+plan loop default:** brainstorming → spec-quality-gate → writing-plans belongs in "Proposed skill chain" for every lane — quick-fix and refactoring included. No lane hard-skips it by classification alone. It may appear under "Skipping" only with reason "user asked to skip"; "not needed at this lane" is not a valid reason for these three skills.
+
 ## Step 3 — Execute the confirmed lane
 
 ---
 
 ### QUICK-FIX lane
 
-Footprint: ~4 skills · no manifest · minutes.
+Footprint: ~4 skills when spec+plan is explicitly skipped, ~7 when it runs (default) · no manifest · minutes-to-an-hour.
 
-Design phase entirely skipped — nothing to model in a one-function fix.
+Spec+plan loop ships by default here too (see Step 2) — scaled to a one-symbol fix, not skipped just because the lane is small. Skip steps 1–3 only if the user explicitly asked to skip at Step 2 confirmation; then start at step 4.
 
-1. Activate **karpathy** lens — surgical change only, no over-build, verifiable success criteria
-2. **systematic-debugging** — reproduce, isolate exact root cause before touching code
-3. **codebase-comprehension** (inline, 1–3 codegraph calls) — map broken symbol + its callers
-4. **test-driven-development** — RED: write failing test capturing the defect; GREEN: minimal fix; commit
-5. **verification-before-completion** — lint gate + run the covering test
-6. **commit-discipline** — WHY body: what was broken, what breaks without this fix
+1. **brainstorming** (lightweight, inline) — confirm root cause framing and fix approach
+2. **spec-quality-gate** *(⊘ spec-quality-reviewer)* — lints even a two-line spec; FAIL = fix + re-run
+3. **writing-plans** — usually a single task, still gets an exact file path + verification step
+4. Activate **karpathy** lens — surgical change only, no over-build, verifiable success criteria
+5. **systematic-debugging** — reproduce, isolate exact root cause before touching code
+6. **codebase-comprehension** (inline, 1–3 codegraph calls) — map broken symbol + its callers
+7. **test-driven-development** — RED: write failing test capturing the defect; GREEN: minimal fix; commit
+8. **verification-before-completion** — lint gate + run the covering test
+9. **commit-discipline** — WHY body: what was broken, what breaks without this fix
 
 ---
 
@@ -152,16 +157,21 @@ Research code lives in a throwaway branch (`spike/<topic>`), deleted when spike 
 
 ### REFACTORING lane
 
-Footprint: ~4 skills · no manifest · hours. Zero new behavior.
+Footprint: ~4 skills when spec+plan is explicitly skipped, ~7 when it runs (default) · no manifest · hours. Zero new behavior.
 
 **Hard gate:** the external contract — callers, return values, error behavior — must be identical before and after. If a caller needs to change, that is a task not a refactor.
 
-1. Name the smell in one phrase (god class / duplication / deep nesting / long method / tight coupling / dead code / primitive obsession)
-2. **codebase-comprehension** (inline) — map target symbols + callers + `codegraph_impact`; identify covering tests
-3. Test baseline — run covering tests NOW; all must pass; if any fail → STOP, fix first via `systematic-debugging` in a separate lane
-4. **refactoring** — one structural move per micro-commit; behavior check (tests pass) after every move; stop when the named smell is gone
-5. **verification-before-completion** — lint gate on final state
-6. **commit-discipline** — WHY body: which smell was removed and why that shape is better
+Spec+plan loop ships by default here too (see Step 2), scoped to naming the smell and sequencing the structural moves. Skip steps 1–3 only if the user explicitly asked to skip at Step 2 confirmation; then start at step 4.
+
+1. **brainstorming** (lightweight) — confirm the smell, scope, and the zero-new-behavior boundary
+2. **spec-quality-gate** *(⊘ spec-quality-reviewer)* — lints even a short refactor spec
+3. **writing-plans** — sequence of structural moves, one per micro-commit
+4. Name the smell in one phrase (god class / duplication / deep nesting / long method / tight coupling / dead code / primitive obsession)
+5. **codebase-comprehension** (inline) — map target symbols + callers + `codegraph_impact`; identify covering tests
+6. Test baseline — run covering tests NOW; all must pass; if any fail → STOP, fix first via `systematic-debugging` in a separate lane
+7. **refactoring** — execute the planned moves one micro-commit at a time; behavior check (tests pass) after every move; stop when the named smell is gone
+8. **verification-before-completion** — lint gate on final state
+9. **commit-discipline** — WHY body: which smell was removed and why that shape is better
 
 If you discover a bug mid-refactor: commit the refactor progress, open a quick-fix lane for the bug, then resume.
 
@@ -186,6 +196,7 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
 - **design-principles:** SOLID, DRY, YAGNI applied during construction
 - **Pattern propagation on review fixes:** when a review finding (from `requesting-code-review`, SDD's task reviewer, or a human) is accepted, search the current PR's diff — changed files only — for the same defect pattern before marking it fixed, and fix every occurrence in one pass. This includes analogous paths (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, and a determinism self-check on any new concurrency. See `receiving-code-review`'s Pattern Propagation Check. A reviewer re-finding the same pattern in the next file over next round is the turnaround cost this exists to cut.
 - **Zero negotiable review rounds:** never re-trigger an external reviewer until an internal self-review returns clean on the current diff — batch every open finding, fix in one pass, self-review (hunting the same failure classes plus fix-introduced regressions), push once, then re-trigger. Strong default; override only with a recorded reason. See `closing-review-loops`.
+- **Spec+plan loop is default, not lane-optional:** see Step 2 — every lane proposes brainstorming → spec-quality-gate → writing-plans by default, scaled to the change's size. It is never omitted because a lane is small; it is omitted only when the user explicitly asks to skip it.
 - **Proportionality Gate on every accepted finding:** a real, in-scope finding is not automatically "fix it now, fully." If defending the fix needs a formal proof or a multi-call-site truth table, that complexity signals the fix may be disproportionate — take the simpler fix or file a follow-up ticket instead. Read `closing-review-loops`' cumulative commits/LOC receipt every round; propagating and hardening a fix is not license to maximize scope. See `receiving-code-review`'s Proportionality Gate.
 - **Confirmation required at:** initial plan (Step 2), every gate FAIL, every BLOCKED subagent status, HLD approval (epic only)
 - **Never auto-continue past BLOCKED or FAIL** — surface to human, wait for resolution
