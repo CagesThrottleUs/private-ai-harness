@@ -102,6 +102,31 @@ before execution begins, not one interrupt per discovery mid-plan. If the
 scan is clean, proceed without comment. The review loop remains the net for
 conflicts that only emerge from implementation.
 
+## Oracle-Independent Tasks (Critical tier)
+
+A task whose brief carries `**Oracle:** independent` (set by `writing-plans`'
+Oracle-Independence Gate) is dispatched as two implementer calls, not one:
+
+1. Run `scripts/task-brief PLAN_FILE N`, then strip the brief to REQ
+   statement + Acceptance Criteria + Test Cases only before handing it to
+   the oracle dispatch — the oracle must not see any other task's
+   interfaces, any existing code in the touched files, or your own analysis
+   of how to implement it. Dispatch it with `test-driven-development`'s RED
+   step only: write the failing test(s), verify the failure reason, commit,
+   report DONE. This is a fresh subagent — never the same agent instance
+   that implements GREEN.
+2. Record the oracle's commit. Dispatch the implementer as normal (full
+   task brief, per File Handoffs), plus the oracle's test file path and the
+   instruction from the Oracle-Independence Gate: make it pass; flag,
+   don't edit, a suspected wrong assertion.
+3. The task reviewer for this task additionally verifies: GREEN didn't
+   modify the oracle's assertions, and the oracle's test file itself passes
+   `test-quality-reviewer`'s anti-pattern check — an independent test that's
+   vacuous (3a-3h, or 3i for a property test) defeats the point of the split.
+
+Everything else about the task — fix loop, ledger, review gate — is
+unchanged; only RED authorship is split into a separate, blinder dispatch.
+
 ## Model Selection
 
 Use the least powerful model that can handle each role to conserve cost and increase speed.
@@ -490,6 +515,8 @@ Done!
 - Skip documentation on public constructs — `code-documentation` required before spec compliance review
 - Skip karpathy lens before committing — catches speculative code, over-engineering, and weak success criteria
 - Skip `integration-testing` after a task that creates a component with external dependencies — a unit test with a mock DB does not verify the contract with the real database
+- Skip `property-based-testing` for a function with a checkable invariant (round-trip, idempotence, algebraic law) — hand-picked examples under-sample the input space no matter how many are added one at a time
+- Skip `deterministic-simulation-testing` after a task implementing a concurrent/distributed component — a passing example-based concurrency test proves one interleaving worked, not that the rare multi-fault interleaving that actually breaks it was ever tried
 - Skip `observability-standards` after a task that creates an API endpoint or service component — a deployed endpoint without metrics and a runbook is a production liability
 
 **If subagent asks questions:**
@@ -521,6 +548,8 @@ Done!
 - **superpowers:karpathy** - Anti-pattern lens applied before committing: no speculative code, surgical changes, verifiable success criteria
 - **superpowers:code-documentation** - Document every public construct written before committing (spec_id, req_id, full docstring)
 - **integration-testing** - After any task creating a component with external dependencies: Testcontainers-based integration tests with real DB/queue/cache, transaction rollback isolation, factory pattern
+- **property-based-testing** - During TDD's white-box step, for any function with a checkable invariant (round-trip, idempotence, algebraic law): generate inputs instead of hand-picking examples
+- **deterministic-simulation-testing** - After any task implementing a concurrent/distributed component (consensus, replication, multi-node coordination): seeded, replayable fault injection instead of (or alongside) example-based concurrency tests
 - **observability-standards** - After any task that creates an API endpoint or service component: instrument structured logging, golden signal metrics, SLOs, alert rules, and runbooks
 
 **Alternative workflow:**

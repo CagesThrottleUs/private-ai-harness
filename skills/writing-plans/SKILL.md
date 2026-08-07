@@ -60,6 +60,42 @@ deliverable needs them; split only where a reviewer could meaningfully
 reject one task while approving its neighbor. Each task ends with an
 independently testable deliverable.
 
+## Oracle-Independence Gate (Critical-tier tasks only)
+
+**Applies when:** the task implements a REQ that is Critical complexity per
+`workflow.md`'s table (auth, payment, PII, or a public API breaking change) —
+never to Small/Medium/Large tasks; doubling dispatch cost on every task buys
+nothing there. It exists because a single continuous-context agent that both
+reasons about the implementation and writes the "independent" RED test isn't
+actually independent — an LLM that has already planned the fix in-context
+tends to write tests asserting what it's about to build rather than what the
+spec requires (the misguidance-effect finding: buggy or intended code already
+visible in context steers test generation toward confirming it, not
+falsifying it).
+
+**Mark the task** with `**Oracle:** independent` in its header, alongside
+`Interfaces:`. This tells `subagent-driven-development` to split the task
+into two dispatches instead of one:
+
+1. **Oracle dispatch** — a fresh subagent whose brief contains ONLY the REQ
+   statement, its Acceptance Criteria, and its Test Cases from the spec —
+   never the current implementation, never a suggested approach, never the
+   controller's own reasoning about how to fix it. Its job stops at RED:
+   write the failing test(s), verify they fail for the right reason, commit,
+   report DONE. It never sees GREEN.
+2. **Implementer dispatch** — the normal task brief, plus the oracle's test
+   file path, with the instruction: "This test file was written by a
+   separate agent from the spec alone, before any implementation existed.
+   Make it pass. If an assertion looks wrong per the spec, stop and report
+   the discrepancy — do not edit the assertion yourself." Editing the
+   oracle's assertions is a Critical task-review finding, not a normal code
+   change — it collapses the independence the gate exists to buy.
+
+The task reviewer checks both: does GREEN satisfy the oracle's RED test
+unmodified, and does the oracle's test itself pass `test-quality-reviewer`'s
+anti-pattern check (3a-3h, or 3i for a property-based oracle test)?
+Independence buys nothing if the independent test is vacuous.
+
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
