@@ -241,6 +241,8 @@ After GREEN, look at the implementation. Use the code structure to find paths th
 **Condition coverage** — for compound conditions (`if (a && b)`), test each sub-expression independently so a bug that changes `&&` to `||` is caught:
 - `a=true, b=true` / `a=true, b=false` / `a=false, b=true`
 
+**Property-based testing** — for a function with a checkable invariant (round-trip, idempotence, an algebraic law — parsers, serializers, sort/dedup/normalize logic), hand-picked examples under-sample the input space no matter how many you add one at a time. Invoke the `property-based-testing` skill instead of writing more example cases.
+
 Write a new RED test for every uncovered branch or path white-box analysis reveals. If you can only think of happy-path tests, the interface may be hiding its error contracts from callers. Listen to that signal.
 
 ## Common Rationalizations
@@ -326,6 +328,7 @@ Before marking work complete:
 - [ ] Output pristine (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Test cases cover boundary values, equivalence classes, and error inputs — not just happy paths
+- [ ] Self-grading check (mandatory when no independent reviewer runs on this change — e.g. the quick-fix lane, which skips `requesting-code-review`): for every assertion just written, ask "would this fail if the implementation were subtly wrong — off-by-one, inverted condition, wrong error code, swallowed exception?" An assertion that can't clear that bar is exactly what `test-quality-reviewer` exists to catch (testing a mock, trivial assertion, happy-path-only, asserting an implementation detail) — rewrite it now, before commit, since no one else will check
 - [ ] Test-strength gate: mutation score meets the threshold (Stryker/PIT/mutmut), not just line coverage — a green suite with a low mutation score is tautological (`verification-before-completion` Test-Strength Gate)
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
 - [ ] Linter gate passed: format check + lint + type check for this language — zero issues, no new suppressions (run `verification-before-completion` linter gate, dispatch `linter-reviewer`)
