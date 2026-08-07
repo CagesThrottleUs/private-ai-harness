@@ -137,6 +137,7 @@ Save to: `.ai/ci/YYYY-MM-DD-pipeline-spec.md`
 | Lint + Format | every push | yes | block merge | < 1 min |
 | Type Check | every push | yes | block merge | < 2 min |
 | Unit Tests + Coverage | every push | yes | block merge (< 80% line) | < 5 min |
+| Mutation Testing | every push | yes (after unit tests) | block merge below threshold | < 15 min |
 | Integration Tests | every push | no (needs unit pass) | block merge | < 10 min |
 | Security Scan (SAST) | every push | yes | block merge on Critical | < 5 min |
 | Dependency Scan (SCA) | scheduled + every push | yes | block merge on Critical CVE | < 3 min |
@@ -151,6 +152,20 @@ Save to: `.ai/ci/YYYY-MM-DD-pipeline-spec.md`
 - Line coverage: ≥ 80% (minimum) — pipeline fails below this threshold
 - Branch coverage: ≥ 70% (minimum)
 - Tool: [pytest-cov | jest --coverage | go test -cover | cargo tarpaulin | jacoco]
+
+## Mutation Testing Gate
+
+Coverage proves the code executed; it does not prove the assertions would catch a wrong implementation — a test with no assertions still scores 100% line coverage. Mutation testing seeds small faults into the code and checks whether the suite kills them; this is what turns `verification-before-completion`'s Test-Strength Gate from a self-reported checklist line into an enforced CI gate.
+
+| Language | Tool | CI command | Threshold |
+|---|---|---|---|
+| JS / TS | Stryker | `npx stryker run` | break build < 50%, target 60–80% |
+| Java | PIT | `mvn org.pitest:pitest-maven:mutationCoverage` | `mutationThreshold` ~60 |
+| Python | mutmut | `mutmut run --CI` | survivors reviewed, gap closed |
+| Go | gremlins | `gremlins unleash --threshold-efficacy 60` | fail below threshold |
+| Rust | cargo-mutants | `cargo mutants --check` | fail on unaddressed survivors |
+
+Runs as its own stage after the coverage gate, not folded into the unit-test job — a mutation-score failure needs to be attributable separately from a test failure. Does not block on integration tests; runs in parallel with them.
 
 ## Security Scan Tools
 
@@ -257,6 +272,14 @@ jobs:
       - uses: actions/checkout@v4
       # [test command with --cov-fail-under=80 or equivalent]
 
+  mutation-testing:
+    name: Mutation Testing
+    needs: [unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # [language-specific mutation tool — Stryker / PIT / mutmut / gremlins / cargo-mutants — fail build below threshold]
+
   security-scan:
     name: Security Scan
     needs: [lint]
@@ -331,6 +354,12 @@ unit-tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+
+mutation-testing:
+  stage: test
+  needs: ["unit-tests"]
+  script:
+    # [language-specific mutation tool — Stryker / PIT / mutmut / gremlins / cargo-mutants — fail build below threshold]
 
 security-sast:
   stage: security

@@ -1,6 +1,6 @@
 ---
 name: ci-reviewer
-description: Opus-powered CI/CD pipeline configuration reviewer. Validates a pipeline configuration (any platform — GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket) against CRAFTS principles, DORA metric readiness, coverage gates, security hygiene, supply-chain integrity (SLSA provenance + SBOM + slopsquatting/dependency-existence defense), artifact immutability, and branch protection requirements. Invoked by ci-pipeline-setup skill before committing the generated pipeline.
+description: Opus-powered CI/CD pipeline configuration reviewer. Validates a pipeline configuration (any platform — GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket) against CRAFTS principles, DORA metric readiness, coverage gates, mutation-testing gates, security hygiene, supply-chain integrity (SLSA provenance + SBOM + slopsquatting/dependency-existence defense), artifact immutability, and branch protection requirements. Invoked by ci-pipeline-setup skill before committing the generated pipeline.
 model: opus
 ---
 
@@ -163,6 +163,21 @@ Functional stages prove the code works; these prove the *artifact* is trustworth
 
 ---
 
+### D4.5 — Mutation Testing Gate (CRAFTS: Reliable)
+
+Coverage proves the code executed; it does not prove the assertions would catch a wrong implementation. Verify:
+
+- A mutation-testing job exists, separate from the coverage-gate job (Stryker / PIT / mutmut / gremlins / cargo-mutants depending on detected language)
+- It runs after unit tests pass (mutants are seeded into code the coverage gate already accepted)
+- A hard failure threshold is configured — not report-and-continue
+- The threshold is realistic for the tool (Stryker/PIT ~60%, mutmut survivors reviewed) — not so low it's decorative (< 30%) or so high on day one that it blocks all merges (100%)
+
+**Critical:** No mutation-testing job exists — the coverage gate is the only test-strength signal in a codebase where line coverage is known to be gameable (a test with no assertions scores 100%). Load-bearing when tests are AI-generated: this harness's own `verification-before-completion` Test-Strength Gate names the same tautology risk directly.
+**Important:** Mutation-testing job exists but doesn't fail the build (report-only). Threshold below 30% (decorative — most mutants survive and the gate still passes).
+**Advisory:** Mutation-testing job runs on every PR instead of nightly/scheduled for a codebase large enough that per-PR runtime would violate the < 10 min CRAFTS target.
+
+---
+
 ### D5 — Artifact Immutability (CRAFTS: Artifact-first)
 
 **Verify:**
@@ -243,6 +258,7 @@ Functional stages prove the code works; these prove the *artifact* is trustworth
 | D2 — Fail-Fast Ordering | N/10 | |
 | D3 — Security Hygiene | N/10 | |
 | D4 — Coverage Gate | N/10 | |
+| D4.5 — Mutation Testing Gate | N/10 | |
 | D5 — Artifact Immutability | N/10 | |
 | D6 — Environment Gates | N/10 | |
 | D7 — DORA Readiness | N/10 | |
