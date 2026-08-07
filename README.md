@@ -42,6 +42,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `e2e-testing` | `/e2e-testing` | Before finishing a user-facing feature — Playwright POM + auth fixtures + semantic locators + CI post-deploy E2E job against staging |
 | `load-testing` | `/load-testing` | Before finishing a feature with NFR targets — k6 smoke/load/stress/spike/soak scripts with thresholds tied to spec NFRs, CI performance job |
 | `integration-testing` | `/integration-testing` | During TDD GREEN for components with external I/O — Testcontainers (real DB/queue/cache), transaction rollback isolation, factory pattern, Pact contract tests |
+| `property-based-testing` | `/property-based-testing` | During TDD's white-box pass for invariant-bearing functions (round-trip, idempotence, algebraic law) — generates Hypothesis/fast-check/jqwik/proptest tests instead of hand-picked examples |
 | `observability-standards` | `/observability-standards` | After first API endpoint — OTel structured logging, golden signal metrics, SLO doc, alert rules, per-alert runbooks |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs |
@@ -58,6 +59,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `database-erd` | `/database-erd` | During HLD or writing-plans for DB changes — Mermaid erDiagram with entities, FKs, cardinality, index strategy |
 | `visual-regression` | `/visual-regression` | For UI features — Playwright toHaveScreenshot(), animations disabled, baselines in git, pinned Docker CI |
 | `chaos-engineering` | `/chaos-engineering` | For resilience NFR services — k6 fault injection, Toxiproxy network faults, steady state hypothesis, CI chaos job |
+| `deterministic-simulation-testing` | `/deterministic-simulation-testing` | For concurrent/distributed components — seeded, replayable fault injection (TigerBeetle VOPR / FoundationDB style) so a failing multi-fault interleaving reproduces exactly from its seed |
 | `incident-response` | `/incident-response` | For production services — severity matrix, IC role, postmortem template (Google SRE standard), MTTD/MTTR targets |
 | `delivery-metrics` | `/delivery-metrics` | Score the harness's own delivery — DORA four keys + reliability and Flow Framework flow efficiency, derived from manifest phase timestamps + cost-ledger; never fabricates failure-dependent keys; runs `delivery-metrics-reviewer` |
 | `onboarding-guide` | `/onboarding-guide` | On first production release — synthesizes HLD, ADRs, OpenAPI, SLOs into wiki/ONBOARDING.md with 8 required sections |
@@ -86,10 +88,10 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 
 | Agent | Purpose |
 |-------|---------|
-| `pr-reviewer` | PR review across code, security, design, completeness |
+| `pr-reviewer` | PR review across code, security, design, completeness, and fix-commit regression-test presence |
 | `security-reviewer` | Threat modeling, attack surface, auth/authz chains |
 | `spec-impl-reviewer` | Verify implementation satisfies each REQ statement |
-| `test-quality-reviewer` | Verify tests are meaningful, not just annotated |
+| `test-quality-reviewer` | Verify tests (incl. property-based) are meaningful, not just annotated |
 | `full-project-reviewer` | Holistic audit across quality, security, reliability, performance |
 | `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
 | `business-context-reviewer` | Business context quality gate — problem statement user-focused, JTBD complete, metrics measurable with baselines, compliance explicit, non-goals present, stakeholders mapped |
@@ -97,7 +99,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `spec-quality-reviewer` | Spec quality gate — falsifiability, TC coverage, TC honesty, error path ownership, consistency, dependency declaration, ISO 29148 requirements-smell lint (individual + set) against SQLite/RFC/DO-178C standards |
 | `plan-reviewer` | Plan quality gate — spec coverage, task granularity, Karpathy anti-patterns, placeholder detection, type consistency, design principles, commit discipline |
 | `portfolio-reviewer` | Portfolio Kanban gate — WSJF computed not gut-ranked, WIP limits respected (Little's Law), depends_on a valid DAG, OKR linkage, pull order respects WSJF + dependencies |
-| `ci-reviewer` | CI/CD pipeline quality gate — stage completeness, fail-fast ordering, coverage gate, security hygiene, artifact immutability, DORA readiness. Platform-agnostic. |
+| `ci-reviewer` | CI/CD pipeline quality gate — stage completeness, fail-fast ordering, coverage gate, mutation-testing gate, security hygiene, artifact immutability, DORA readiness. Platform-agnostic. |
 | `observability-reviewer` | Observability quality gate — OTel logging compliance, golden signal coverage, SLO quality, alert design, runbook completeness, distributed tracing, SLO-to-alert alignment |
 | `deployment-reviewer` | Deployment quality gate — rollback procedure, DB migration safety (expand-contract), smoke test coverage, deployment runbook, release notes, strategy-migration alignment |
 | `integration-test-reviewer` | Integration test quality gate — no mocks at boundary, test isolation, factory pattern, Testcontainers config, spec AC coverage, contract tests, CI wiring |
@@ -109,7 +111,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `service-scaffolding-reviewer` | **Sonnet** — Scaffold completeness gate: CI, observability, contract stub, tests, runbook, resource limits (not unbounded), catalog entry with owner, scorecard all present |
 | `database-erd-reviewer` | **Sonnet** — ERD gate: PKs present, FKs valid, crow's foot cardinality, no money-as-float, index strategy, design decisions |
 | `visual-regression-reviewer` | **Sonnet** — VRT gate: screenshots on critical pages, animations off, baselines committed, dynamic content masked, pinned Docker CI |
-| `chaos-reviewer` | **Sonnet** — Chaos test gate: steady state/hypothesis, scenarios match HLD, thresholds allow degradation, abort criteria, CI on staging |
+| `chaos-reviewer` | **Sonnet** — Chaos + deterministic-simulation test gate: steady state/hypothesis, scenarios match HLD, thresholds allow degradation, abort criteria, CI on staging, seed reproducibility |
 | `incident-response-reviewer` | **Sonnet** — IR docs gate: severity matrix, IC role, 7-section postmortem, MTTD/MTTR, communication templates |
 | `production-readiness-reviewer` | PRR gate — SRE Launch Coordination Checklist seven dimensions; accepts a readiness claim only when evidenced (tested rollback, sourced SLO, verified dependency, exercised runbook), not when plausibly written; flags AI-plausible-but-unverified readiness |
 | `onboarding-reviewer` | Onboarding guide gate — 8 required sections, executable dev setup, C4 diagram, ADRs, contribution path, actionable ops section |
