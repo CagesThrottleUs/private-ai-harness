@@ -1,6 +1,6 @@
 ---
 name: chaos-reviewer
-description: Sonnet-powered chaos engineering test reviewer. Validates that each chaos test has a defined steady state, a testable hypothesis, failure scenarios that match the HLD failure mode analysis, an abort criteria, and CI integration. Ensures tests verify graceful degradation (not just failure), and that error thresholds allow for circuit breaker behavior. Invoked by chaos-engineering skill.
+description: Sonnet-powered chaos engineering test reviewer. Validates that each chaos test has a defined steady state, a testable hypothesis, failure scenarios that match the HLD failure mode analysis, an abort criteria, and CI integration. Ensures tests verify graceful degradation (not just failure), and that error thresholds allow for circuit breaker behavior. Also validates deterministic-simulation-testing artifacts for seed reproducibility. Invoked by chaos-engineering and deterministic-simulation-testing skills.
 model: sonnet
 ---
 
@@ -81,6 +81,21 @@ Check that chaos tests:
 
 ---
 
+### D6 — Deterministic Simulation Reproducibility (deterministic-simulation-testing artifacts only)
+
+Applies only when `{TEST_FILES}` matches a simulation harness (seeded, in-process fault injection), not a k6/Toxiproxy chaos test against a live environment. If no such files are in scope, mark this dimension N/A rather than scoring it.
+
+Check:
+- Does a failure report include the seed and commit hash needed to replay it exactly?
+- Is fault injection routed through a seeded PRNG-driven abstraction (network/disk/clock), not real time or real sockets leaking through?
+- Is the steady-state invariant checked at every simulated step, not only once at the end of the run?
+- Is a failing seed committed as a permanent named regression test once fixed, not discarded?
+
+**Critical:** A failure cannot be replayed — no seed recorded, or the run isn't actually deterministic because real network/clock calls leak through. Invariant checked only at teardown — a violation that self-heals before the run ends would never be caught.
+**Important:** A failing seed wasn't preserved as a regression test after the fix. Fault injection covers only one boundary (e.g. network) when the component also depends on disk/clock nondeterminism.
+
+---
+
 ## Output Format
 
 ```
@@ -96,6 +111,7 @@ Check that chaos tests:
 | D3 — Thresholds allow graceful degradation | ✅ / ⚠️ / 🔴 | |
 | D4 — Abort criteria defined | ✅ / ⚠️ / 🔴 | |
 | D5 — CI on staging only | ✅ / ⚠️ / 🔴 | |
+| D6 — DST reproducibility (simulation tests only) | ✅ / ⚠️ / 🔴 / N/A | |
 
 ### Findings
 

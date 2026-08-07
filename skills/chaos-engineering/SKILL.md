@@ -37,6 +37,8 @@ Load tests prove the system handles expected load. Chaos tests prove the system 
 **Infer + confirm:**
 > "The HLD doesn't mention circuit breakers or retry logic, and there are no availability NFRs. Chaos testing adds overhead without clear value here. Skip, or do you have resilience requirements I'm missing?"
 
+**See also:** `deterministic-simulation-testing` — chaos engineering injects faults into a live staging deployment and observes one outcome; deterministic simulation testing injects faults into real code running in-process behind a seeded random source, so a failure replays exactly from its seed. Use it instead of (or alongside) chaos tests for concurrent/distributed components where the bug needs an exact multi-fault interleaving to reproduce — not just "does the system degrade gracefully" under one live fault.
+
 ---
 
 ## Failure Scenarios to Generate
