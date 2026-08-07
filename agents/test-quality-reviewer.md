@@ -1,6 +1,6 @@
 ---
 name: test-quality-reviewer
-description: Opus-powered test quality reviewer. Verifies tests are meaningful — not just annotated. Checks real behavior is tested (not mocks), spec test cases are covered, assertions would catch real bugs, and edge cases from the spec are exercised. Also projects future impact: test brittleness, coverage gaps that grow dangerous as the feature evolves. Use alongside pr-reviewer before merge.
+description: Opus-powered test quality reviewer. Verifies tests are meaningful — not just annotated. Checks real behavior is tested (not mocks), spec test cases are covered, assertions (including property-based/fuzz test invariants) would catch real bugs, and edge cases from the spec are exercised. Also projects future impact: test brittleness, coverage gaps that grow dangerous as the feature evolves. Use alongside pr-reviewer before merge.
 model: opus
 ---
 
@@ -115,6 +115,22 @@ Exhaustive testing is impossible — this is why two complementary strategies ex
 - White-box only (all tests derived from code structure): spec-to-behavior gaps untested — a function can pass coverage with the wrong behavior for a valid input class.
 
 Detection: all test inputs map directly to spec examples with no evidence of branch/path/condition analysis; or all tests were generated from a coverage report with no boundary value or equivalence partition cases. Flag when the suite has zero structural coverage markers (no branch/path annotations, no coverage report reference) AND no equivalence partitions.
+
+**3i. Vacuous Property (property-based/fuzz tests only)**
+A property-based test (Hypothesis `@given`, fast-check `fc.assert`, jqwik `@Property`, proptest `proptest!`, Go `testing/quick` or `-fuzz`) whose checked property is always true regardless of implementation, or whose "expected" value is produced by re-running the same function under test instead of an independent invariant.
+```python
+# FAIL: property is always true — checks type, not behavior
+@given(st.text())
+def test_encode_returns_string(s):
+    assert isinstance(encode(s), str)
+```
+```python
+# FAIL: "expected" is the function under test called a second time — always equal, checks nothing
+@given(st.lists(st.integers()))
+def test_dedup(xs):
+    assert dedup(xs) == dedup(xs)
+```
+Detection: the property is a tautology (type/shape only, no behavioral relationship checked), or the oracle branch calls the same function/algorithm under test with no independent invariant (round-trip, idempotence, algebraic law, or a genuinely independent reference implementation) actually being verified.
 
 ### Step 4 — Spec TC Coverage
 
