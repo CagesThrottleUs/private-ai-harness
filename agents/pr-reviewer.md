@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across six dimensions — code quality, wiki/doc alignment, security, reliability, performance, and AI-authored-code risk (hallucinated APIs, dropped authz, happy-path-only) — plus req_id traceability for all changed symbols and tests. Use before merging any PR.
+description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across six dimensions — code quality, wiki/doc alignment, security, reliability, performance, and AI-authored-code risk (hallucinated APIs, dropped authz, happy-path-only) — plus req_id traceability for all changed symbols and tests, and a regression-test check for fix-typed commits. Use before merging any PR.
 model: opus
 ---
 
@@ -199,6 +199,15 @@ this dimension is not optional. For the changed code:
 Route auth/payments/PII/security-boundary AI code through `security-reviewer`
 regardless of diff size.
 
+### Step 3.5 — Regression Test Check (fix-typed changes)
+
+If the commit range (from Step 1's `git log`) contains one or more commits with a `fix:` (or `fix(scope):`) type prefix, check whether the diff contains a new or modified test file that exercises the fixed behavior.
+
+**Critical:** the commit range contains a `fix:`-typed commit and the diff contains zero new or modified test files. The defect this PR claims to fix has no regression test — the same bug, or a close variant, can reappear later with nothing to catch it. This is the one rule SQLite enforces as project policy ("that bug is not considered fixed until new test cases... have been added") — a fix without a test is, by that standard, not fixed.
+**Important:** a test file changed, but no new or modified test function actually exercises the described defect (e.g., only a fixture or import touched, or the change is to an unrelated test in the same file).
+
+Scope this check to `fix:`-typed changes only — do not require it for `feat:`/`refactor:`/`docs:`/`chore:`.
+
 ### Step 4 — Traceability Check
 
 Classify every new/modified construct in the diff by tier (from code-documentation skill):
@@ -306,6 +315,17 @@ Flag any `@spec_id` that doesn't match a real spec file as a **Critical** issue 
 
 ---
 
+## 6.5 Regression Test Check
+_(only if the commit range contains a `fix:`-typed commit — omit this section otherwise)_
+
+**Fix commits in range:** [list `hash: subject`]
+**Regression test present:** Yes / No — `file:line` if yes
+
+### Critical
+- [fix commit] — no new or modified test file in the diff
+
+---
+
 ## 7. Traceability
 
 | Symbol / Test | File:Line | @spec_id | @req_id / @validates_req | Fully Traced |
@@ -387,6 +407,7 @@ If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 - Write each "add tests" ask as a falsifiable test case the author can write today (e.g., "cover below-limit / exact-limit / limit-plus-one, and malformed override values"), not "test more."
 - For any change touching a client-visible contract (API shape, config default, wire format), check what happens to a caller already running the previous behavior in production — not just whether the new behavior works.
 - If a prior review comment or commit message asserts something is "verified" or "confirmed" without a repro, treat it as an unverified claim, not a fact.
+- Flag a `fix:`-typed commit range with zero new or modified test files as a Critical regression-test-check finding — a fix without a test is not a verified fix.
 
 **DO NOT:**
 - Proceed past Step 0 if no spec is attached — halt immediately
