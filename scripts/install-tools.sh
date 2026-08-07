@@ -2,10 +2,12 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-tools.sh
 #
-# Steps 1-15 run automatically. Step 9 self-installs this repo as a Claude plugin.
+# Steps 1-17 run automatically. Step 9 self-installs this repo as a Claude plugin.
 # Step 10 installs the Codex plugin and custom-agent adapters when Codex exists.
-# Steps 11-14 inject the global Claude Code guidance blocks.
+# Steps 11-14 inject the global Claude Code guidance blocks (step 11 also
+# installs the caveman output style and sets it as the default).
 # Step 15 installs the commit-msg git hook in the current project.
+# Step 17 installs cost-visibility plugins (context-guard, claude-context-optimizer).
 # VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
@@ -194,11 +196,33 @@ else
 fi
 echo ""
 
-# ── 11. Caveman mode — global CLAUDE.md ──────────────────────────────────────
-echo "11. Caveman mode (global CLAUDE.md)"
+# ── 11. Caveman mode — global output style + CLAUDE.md ──────────────────────
+echo "11. Caveman mode (global output style, default ultra)"
 
 GLOBAL_CLAUDE_MD="$HOME/.claude/CLAUDE.md"
 CAVEMAN_MARKER="## Caveman Mode"
+OUTPUT_STYLES_DIR="$HOME/.claude/output-styles"
+GLOBAL_SETTINGS="$HOME/.claude/settings.json"
+
+# Persistent default lives in the system prompt (output style), not a
+# CLAUDE.md-injected skill — CLAUDE.md content is conversation context and
+# drifts back to verbose over long sessions; an output style doesn't.
+mkdir -p "$OUTPUT_STYLES_DIR"
+cp "$REPO_ROOT/skills/caveman/output-style.md" "$OUTPUT_STYLES_DIR/caveman.md"
+ok "caveman output style installed → $OUTPUT_STYLES_DIR/caveman.md"
+
+if check_cmd python3; then
+  python3 - "$GLOBAL_SETTINGS" <<'PYEOF'
+import json, sys, pathlib
+path = pathlib.Path(sys.argv[1])
+data = json.loads(path.read_text()) if path.exists() else {}
+data["outputStyle"] = "Caveman"
+path.write_text(json.dumps(data, indent=2) + "\n")
+PYEOF
+  ok "outputStyle default set to Caveman in $GLOBAL_SETTINGS"
+else
+  warn "python3 not found — set outputStyle manually: /config → Output style → Caveman"
+fi
 
 if grep -q "$CAVEMAN_MARKER" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
   ok "caveman block already present in $GLOBAL_CLAUDE_MD"
@@ -207,11 +231,11 @@ else
 
 ## Caveman Mode
 
-**ALWAYS active. Every session. Every response.**
+**Persistent default (ultra) lives in the Output Style — see \`~/.claude/output-styles/caveman.md\`.**
 
 @$REPO_ROOT/skills/caveman/SKILL.md
 
-Default level: **full**. Active unless user says "stop caveman" or "normal mode".
+The skill above is for mid-session level switching only (\`/caveman lite|full|ultra|wenyan-*\`, "stop caveman" / "normal mode") — the output style is what actually holds the default across a long session.
 EOF
   ok "caveman block added to $GLOBAL_CLAUDE_MD"
 fi
@@ -382,6 +406,33 @@ else
   warn "claude CLI not found — run these manually:"
   warn "  claude plugin marketplace add rcosteira79/android-skills && claude plugin install android-skills@android-skills"
   warn "  claude plugin marketplace add aldefy/compose-skill && claude plugin install compose-expert"
+fi
+echo ""
+
+# ── 17. Cost-visibility plugins ──────────────────────────────────────────────
+echo "17. Cost-visibility plugins (context-guard, claude-context-optimizer)"
+if ! check_cmd claude; then
+  warn "claude CLI not found — run these manually:"
+  warn "  claude plugin marketplace add cdeust/session-optimizer"
+  warn "  claude plugin install context-guard@session-optimizer-marketplace"
+  warn "  claude plugin marketplace add egorfedorov/claude-context-optimizer"
+  warn "  claude plugin install claude-context-optimizer@cco"
+else
+  info "Registering session-optimizer marketplace..."
+  claude plugin marketplace add cdeust/session-optimizer \
+    && ok "session-optimizer marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+  claude plugin install context-guard@session-optimizer-marketplace \
+    && ok "context-guard installed" \
+    || warn "context-guard install failed"
+
+  info "Registering claude-context-optimizer marketplace..."
+  claude plugin marketplace add egorfedorov/claude-context-optimizer \
+    && ok "claude-context-optimizer marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+  claude plugin install claude-context-optimizer@cco \
+    && ok "claude-context-optimizer installed" \
+    || warn "claude-context-optimizer install failed"
 fi
 echo ""
 

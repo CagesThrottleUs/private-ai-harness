@@ -1,6 +1,6 @@
 {
   "name": "private-ai-harness",
-  "version": "3.9.5",
+  "version": "3.10.0",
   "description": "Personal AI engineering harness with structured planning, implementation, testing, debugging, review, and delivery workflows",
   "author": {
     "name": "CagesThrottleUs"
