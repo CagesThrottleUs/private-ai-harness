@@ -1,0 +1,15 @@
+{
+  "description": "Audio feedback before tool execution",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-beep.sh || true"
+          }
+        ]
+      }
+    ]
+  }
+}

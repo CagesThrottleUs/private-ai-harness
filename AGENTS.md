@@ -21,6 +21,9 @@ session after reinstalling the local plugin.
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, and global-guidance installer |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
+| `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
+| `hooks/*.json` | Claude Code hook manifests wiring events to `scripts/hook-beep.sh` (Claude Code only, not loaded by Codex) |
+| `assets/sounds/` | Default beep sound files, ported from voicemode (MIT) so the sound survives uninstalling that plugin |
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
 | `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
 | `.codex-plugin/plugin.json` | Native Codex plugin manifest and install-surface metadata |

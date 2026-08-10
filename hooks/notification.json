@@ -1,0 +1,15 @@
+{
+  "description": "Audio feedback on notification",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-beep.sh || true"
+          }
+        ]
+      }
+    ]
+  }
+}

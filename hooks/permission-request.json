@@ -1,0 +1,15 @@
+{
+  "description": "Audio feedback on permission request",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/hook-beep.sh || true"
+          }
+        ]
+      }
+    ]
+  }
+}

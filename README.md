@@ -121,6 +121,17 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |
 | `delivery-metrics-reviewer` | **Sonnet** — Delivery-metrics honesty gate: DORA bands match 2024 clusters, no fabricated failure-dependent key, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome |
 
+### Hooks
+
+Claude Code only. Plays a short sound on `PreToolUse`, `PostToolUse`,
+`Notification`, `Stop`, `PreCompact`, and `PermissionRequest` — the same
+default beep set shipped by [voicemode](https://github.com/mbailey/voicemode)
+(MIT), ported here so it keeps working if that plugin is uninstalled.
+
+- Script: `scripts/hook-beep.sh`
+- Sounds: `assets/sounds/<Event>/default.mp3`, falls back to `assets/sounds/fallback.mp3`
+- Disable: create `~/.private-ai-harness/beep-disabled`, or set `PAH_BEEP_ENABLED=false`
+
 ---
 
 ## Installation
