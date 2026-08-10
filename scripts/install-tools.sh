@@ -8,7 +8,6 @@
 # installs the caveman output style and sets it as the default).
 # Step 15 installs the commit-msg git hook in the current project.
 # Step 17 installs cost-visibility plugins (context-guard, claude-context-optimizer).
-# VoiceMode (/voicemode:install) must be run manually inside Claude Code.
 
 set -euo pipefail
 
@@ -146,17 +145,17 @@ else
 fi
 echo ""
 
-# ── 8. VoiceMode ─────────────────────────────────────────────────────────────
-echo "8.  VoiceMode"
-if ! check_cmd claude; then
-  warn "claude CLI not found — run VoiceMode steps manually inside Claude Code"
+# ── 8. FFmpeg ─────────────────────────────────────────────────────────────────
+echo "8.  FFmpeg"
+if check_cmd ffmpeg; then
+  ok "ffmpeg already installed ($(ffmpeg -version 2>/dev/null | head -1))"
 else
-  info "Adding VoiceMode marketplace..."
-  claude plugin marketplace add mbailey/voicemode && ok "marketplace added" || warn "marketplace add failed"
-
-  info "Installing VoiceMode plugin..."
-  claude plugin install voicemode@voicemode && ok "voicemode plugin installed" || warn "plugin install failed"
+  info "Installing ffmpeg..."
+  brew install ffmpeg && ok "ffmpeg installed" || warn "ffmpeg install failed"
 fi
+
+info "Installing ffmpeg-full..."
+brew install ffmpeg-full && ok "ffmpeg-full installed" || warn "ffmpeg-full install failed"
 echo ""
 
 # ── 9. Self-install: private-ai-harness plugin ──────────────────────────────
@@ -439,7 +438,6 @@ echo ""
 echo "═══════════════════════════════════════════"
 echo -e "${YELLOW}ACTIVATION STEPS:${RESET}"
 echo ""
-echo "  /voicemode:install    — installs VoiceMode CLI, FFmpeg, voice services"
 echo "  /reload-plugins       — activates private-ai-harness skills + agents"
 echo "  New Codex session     — activates updated plugin skills + custom agents"
 echo ""

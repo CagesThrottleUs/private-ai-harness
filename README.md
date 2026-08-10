@@ -163,7 +163,7 @@ This script installs (in order):
 6. **Claude plugins** — `code-review`, `code-simplifier`, `skill-creator`, `claude-md-management`, `security-guidance`
 7. **LSP plugins** — `clangd-lsp`, `gopls-lsp`, `jdtls-lsp`, `kotlin-lsp`, `rust-analyzer-lsp`, `typescript-lsp`
 8. **Understand-Anything** — multimodal analysis plugin (`Lum1104/Understand-Anything`)
-9. **VoiceMode** — marketplace + plugin install
+9. **FFmpeg** — `brew install ffmpeg` and `brew install ffmpeg-full`
 10. **This repo for Claude Code** — registers the harness as a local marketplace and installs it at user scope
 11. **This repo for Codex** — registers the same local marketplace, installs the native Codex plugin, generates custom-agent TOML adapters, and synchronizes global Codex guidance
 12. **Global Claude guidance** — caveman (output style, default ultra, plus the skill for mid-session level switching), commit discipline, workflow, and Karpathy blocks
@@ -189,7 +189,6 @@ to inspect reviewer agents.
 ### Claude Code manual steps
 
 ```
-/voicemode:install    — install VoiceMode CLI, FFmpeg, voice services
 /reload-plugins       — activate private-ai-harness skills + agents
 ```
 
