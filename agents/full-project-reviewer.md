@@ -64,6 +64,16 @@ Check:
 - Mutation of shared state
 - Missing input validation
 
+**Design & maintainability** — apply each as a falsifiable test (see `design-principles` skill for the full catalog):
+- **SRP** — class/module with 2+ unrelated public-method clusters, or >3-4 constructor collaborators? → split.
+- **OCP** — adding a new type/case requires editing the same `switch`/`if-else` chain in ≥2 existing files? → flag; a Strategy/implementor would avoid this.
+- **DRY** — 3+ near-identical blocks sharing the same reason to change? → extract. Similar-looking code with a different reason to change is not a violation — don't force premature abstraction.
+- **YAGNI** — public param/interface/generic/config flag with zero caller anywhere in the codebase? → flag as speculative generality.
+- **Feature Envy / coupling** — method calling ≥3 methods/fields on another object vs ≤1 of its own? → move method.
+- **God class** — class over ~300-400 LOC or ~15 public methods with low internal cohesion (methods don't share fields)? → flag for decomposition.
+- **Shotgun surgery** — does one logical change require touching >3 files/classes? → centralize behind one seam.
+- **Naming** — identifier requiring a comment to explain intent, or mismatched to actual behavior? → rename.
+
 #### Dimension 2: Wiki / Doc Alignment
 
 Check:

@@ -134,6 +134,15 @@ For every new/modified function or class:
 - Missing input validation on new system boundaries?
 - Premature abstraction or over-engineering beyond the stated requirement?
 
+**Design & maintainability pass** — apply each as a falsifiable test, not a vibe check (see `design-principles` skill for the full catalog):
+- **SRP** — does this class/module now have 2+ unrelated public-method clusters, or >3-4 constructor collaborators added? → split.
+- **OCP** — does this diff add a case to an existing `switch`/`if-else` chain on a type discriminant in ≥2 places, where a new Strategy/implementor would avoid touching existing code? → flag.
+- **DRY** — is this the 3rd+ near-identical block sharing the same reason to change (not just similar-looking code with a different reason)? → extract. Don't flag 2nd occurrence or coincidental similarity.
+- **YAGNI** — does any new public param/interface/generic/config flag in this diff have zero caller in this same diff? → flag as speculative generality (Critical if it's an abstraction/interface, Minor if dead config).
+- **Feature Envy / coupling** — does a new/modified method call ≥3 methods/fields on another object vs ≤1 of its own? → move method or pass the needed value directly.
+- **God class** — did this diff push a class over ~300-400 LOC or ~15 public methods with low internal cohesion (methods don't share fields)? → flag for decomposition.
+- **Naming** — does any new identifier require a comment to explain what it does, or mismatch what the code actually does? → rename.
+
 **Adversarial pass** — for each new/modified function, also check:
 - Empty/zero/negative/nil/max-size/unicode inputs, and concurrent duplicate calls
 - Loop bounds: 0/1/large-N; unbounded iteration on externally-controlled data
