@@ -90,17 +90,26 @@ digraph process {
 
 ## Pre-Flight Plan Review
 
-Before dispatching Task 1, scan the plan once for conflicts:
+Before dispatching Task 1, read the plan's `Spec:` pointer (if not `N/A`) and
+scan the plan once for conflicts, against the spec's actual text rather than
+a guess at what it meant:
 
 - tasks that contradict each other or the plan's Global Constraints
 - anything the plan explicitly mandates that the review rubric treats as a
   defect (a test that asserts nothing, verbatim duplication of a logic block)
 
-Present everything you find to your human partner as one batched question —
-each finding beside the plan text that mandates it, asking which governs —
-before execution begins, not one interrupt per discovery mid-plan. If the
-scan is clean, proceed without comment. The review loop remains the net for
-conflicts that only emerge from implementation.
+Record the scan in the ledger either way —
+`Pre-flight: clean` or `Pre-flight: N conflicts found` — so a resumed
+session can see the scan happened instead of re-running it.
+
+**Non-catastrophic conflicts and ambiguities do not stall the run.** Decide
+and record a ruling, then continue: `Pre-flight: <finding> — ruling: <what
+governs and why>`. Only stop for your human partner when the conflict is
+destructive or irreversible (deleting data, an auth/security boundary
+change, a decision that cannot be undone by a later task) — a session left
+blocked on a decision the controller could safely make is a wasted turn, not
+a caution. The review loop remains the net for conflicts that only emerge
+from implementation.
 
 ## Oracle-Independent Tasks (Critical tier)
 
@@ -126,6 +135,18 @@ Oracle-Independence Gate) is dispatched as two implementer calls, not one:
 
 Everything else about the task — fix loop, ledger, review gate — is
 unchanged; only RED authorship is split into a separate, blinder dispatch.
+
+## Batching Small Same-Shape Tasks
+
+When consecutive tasks are the same shape (e.g. "add field X to model A", "add
+field Y to model B", each touching one file with a complete, literal spec),
+dispatch them as one implementer call carrying all the briefs, not one
+dispatch per task. Batch only when: each task is independently a cheap-model
+task per Model Selection below, none depends on another's output, and the
+plan's per-task Interfaces blocks don't collide. The batch review still
+verifies every file named across all the batched briefs shows up in the diff
+— a batch that silently drops one task's file is not complete. Tightly
+coupled or judgment-heavy tasks are never batched.
 
 ## Model Selection
 
@@ -518,6 +539,11 @@ Done!
 - Skip `property-based-testing` for a function with a checkable invariant (round-trip, idempotence, algebraic law) — hand-picked examples under-sample the input space no matter how many are added one at a time
 - Skip `deterministic-simulation-testing` after a task implementing a concurrent/distributed component — a passing example-based concurrency test proves one interleaving worked, not that the rare multi-fault interleaving that actually breaks it was ever tried
 - Skip `observability-standards` after a task that creates an API endpoint or service component — a deployed endpoint without metrics and a runbook is a production liability
+- Let an implementer or reviewer subagent spawn its own subagents — the
+  isolated-context guarantee this skill depends on breaks the moment a
+  dispatched agent dispatches its own, and duplicate reviews of the same
+  diff have resulted. Every dispatch in this skill comes from the
+  controller only.
 
 **If subagent asks questions:**
 - Answer clearly and completely

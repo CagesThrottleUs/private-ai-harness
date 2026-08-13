@@ -18,6 +18,9 @@ Subagent (general-purpose):
     not a merge review — a broad whole-branch review happens separately after
     all tasks are complete.
 
+    Do not dispatch subagents of your own for this review. Review the diff
+    directly.
+
     ## What Was Requested
 
     Read the task brief: [BRIEF_FILE]

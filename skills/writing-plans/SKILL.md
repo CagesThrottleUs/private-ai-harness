@@ -114,6 +114,8 @@ Independence buys nothing if the independent test is vacuous.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Spec:** [exact path to the spec this plan implements, e.g. `.ai/specs/2026-08-13-feature-design.md` — or "N/A" with reason for a spec-less trivial change. SDD reads this file at setup, so a plan conflict is resolved against the design's actual text, not guessed at.]
+
 **Goal:** [One sentence describing what this builds]
 
 **Architecture:** [2-3 sentences about approach]

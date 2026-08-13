@@ -10,6 +10,9 @@ Subagent (general-purpose):
   prompt: |
     You are implementing Task N: [task name]
 
+    Do not dispatch subagents of your own for this task. Implement it
+    directly.
+
     ## Task Description
 
     Read your task brief first: [BRIEF_FILE]
