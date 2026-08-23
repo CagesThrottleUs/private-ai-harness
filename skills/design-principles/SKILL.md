@@ -357,6 +357,27 @@ How code reads and evolves. Structural principles govern architecture. Craft gov
 
 ---
 
+## Maintainability & Simplification
+
+A reviewer's lens as much as an author's. Working code that leaves the codebase messier is not done. Prefer removing complexity over redistributing it.
+
+**Delete, Don't Rearrange (Code Judo)** — When restructuring, prefer the move that removes whole branches, layers, or helpers over one that redistributes the same complexity elsewhere. The best reframing makes the change feel inevitable in hindsight — fewer concepts, fewer conditionals. A refactor that only moves complexity around has not paid for itself.
+_Test:_ After the change, are there fewer concepts a reader must hold at once? If not, it wasn't a simplification.
+
+**Reuse the Canonical Helper** — Before writing a helper, check whether the codebase already owns this concept. A bespoke near-duplicate of an existing canonical utility is a DRY violation on first write — the Rule of Three does not apply when the authoritative version already exists.
+_Test:_ Does a canonical utility/service already do this? If yes, reuse or extend it — don't fork it.
+
+**No Special-Case Bolt-Ons** — A new ad-hoc conditional dropped into an unrelated, already-busy flow is a design smell, not a localized fix. Push the logic behind its own abstraction, strategy, or module rather than tangling an existing path. Each such branch makes the surrounding code harder to reason about even when it works.
+_Test:_ Is this branch here because it belongs here, or because here was convenient? If convenient, move it behind a dedicated seam.
+
+**Explicit Boundary over Silent Fallback** — A new cast, `any`/`unknown`, optional param, or silent fallback that papers over an unclear invariant hides the real contract. Make the boundary explicit — a typed model or validated input — so the control flow gets simpler, not so the ambiguity gets buried.
+_Test:_ Does this cast/fallback handle a real shape, or avoid naming an invariant? If the latter, make the boundary explicit.
+
+**Serial and Non-Atomic Are Smells** — Independent work serialized for no reason should run in parallel; related updates that can leave state half-applied should be made atomic. Don't micro-optimize — but don't ship avoidable orchestration complexity that makes the flow more brittle.
+_Test:_ Do these steps depend on each other? If not, why sequential? Can this multi-step update half-apply? If so, make it atomic.
+
+---
+
 ## Planning Checklist
 
 Run **before finalizing file structure and task decomposition** in `writing-plans`:
@@ -413,6 +434,13 @@ Run **after implementation, before marking complete** in `executing-plans` and `
 - [ ] **Error paths:** Every failure mode returns typed error or named exception. No silent failures?
 - [ ] **Pure functions:** Core logic side-effect free? I/O at edges?
 - [ ] **Names:** Every identifier communicates purpose without a comment?
+
+**Simplification & maintainability**
+- [ ] **Code judo:** A reframing that deletes whole branches/layers, not just relocates complexity? If visible, take it — don't rubber-stamp working-but-messy.
+- [ ] **Canonical reuse:** New helper duplicating an existing canonical utility? Reuse/extend it — a first-write duplicate is a DRY violation.
+- [ ] **No bolt-ons:** New ad-hoc branch tangled into an unrelated busy flow? Push it behind its own abstraction.
+- [ ] **Explicit boundary:** New cast/`any`/`unknown`/optional/silent-fallback papering over an unclear invariant? Make the boundary explicit.
+- [ ] **Serial/atomic:** Independent work serialized for no reason (parallelize)? A multi-step update that can half-apply (make atomic)?
 
 **Patterns**
 - [ ] **Smell scan:** Giant switch-on-type, God class, telescoping constructor, notification spaghetti? Apply smell → pattern table.

@@ -29,6 +29,7 @@ Before implementing:
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
+- Prefer deleting complexity over relocating it — the best simplification removes whole branches, layers, or helpers, not one that spreads the same complexity across more files.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 

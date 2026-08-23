@@ -96,6 +96,7 @@ Before committing each move, apply the lens:
 - Is this the minimum change that removes the smell? (no over-engineering)
 - Did I change any behavior, even accidentally? (run tests, check diff)
 - Is the new name more accurate than the old one? (not just different)
+- Does this move delete complexity — a branch, a layer, a helper — or only relocate it? Prefer the move that removes concepts; a refactor that just shuffles complexity around hasn't earned the commit. (design-principles: Delete, Don't Rearrange)
 - Would a future reader understand why this shape is better?
 
 Stop when the named smell from Step 1 is gone. Do not continue to the next smell in the same session — open a new lane.

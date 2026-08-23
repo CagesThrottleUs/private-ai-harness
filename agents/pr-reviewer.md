@@ -142,6 +142,11 @@ For every new/modified function or class:
 - **Feature Envy / coupling** — does a new/modified method call ≥3 methods/fields on another object vs ≤1 of its own? → move method or pass the needed value directly.
 - **God class** — did this diff push a class over ~300-400 LOC or ~15 public methods with low internal cohesion (methods don't share fields)? → flag for decomposition.
 - **Naming** — does any new identifier require a comment to explain what it does, or mismatch what the code actually does? → rename.
+- **Code judo** — for the most complex changed area, is there a reframing that deletes whole branches/layers rather than redistributing them? A visible-but-untaken dramatic simplification is a finding — don't pass "it works" over a messier codebase.
+- **Canonical reuse** — does this diff add a bespoke helper for something a canonical utility in the repo already does? → reuse it. A first-write duplicate of an existing helper is a DRY violation regardless of occurrence count.
+- **Spaghetti bolt-on** — does this diff insert a new ad-hoc conditional/special-case into an unrelated, already-busy flow (distinct from a type-discriminant switch — that's OCP above)? → push it behind its own abstraction instead of tangling the path.
+- **Type boundary** — does this diff add a cast, `any`/`unknown`, new optional, or silent fallback that papers over an unclear invariant? → make the boundary explicit (typed model / validated input) instead.
+- **Serial / non-atomic** — does this diff serialize independent work for no reason (→ parallelize) or add a multi-step update that can leave state half-applied (→ make atomic)?
 
 **Adversarial pass** — for each new/modified function, also check:
 - Empty/zero/negative/nil/max-size/unicode inputs, and concurrent duplicate calls

@@ -73,6 +73,11 @@ Check:
 - **God class** — class over ~300-400 LOC or ~15 public methods with low internal cohesion (methods don't share fields)? → flag for decomposition.
 - **Shotgun surgery** — does one logical change require touching >3 files/classes? → centralize behind one seam.
 - **Naming** — identifier requiring a comment to explain intent, or mismatched to actual behavior? → rename.
+- **Code judo** — a complex area where a reframing would delete whole branches/layers rather than rearrange them? → flag the missed simplification; working-but-messy is not done.
+- **Canonical reuse** — a bespoke helper duplicating an existing canonical utility? → consolidate on the canonical one (DRY violation regardless of occurrence count).
+- **Spaghetti bolt-on** — ad-hoc special-case branches scattered into unrelated flows? → push each behind a dedicated abstraction.
+- **Type boundary** — casts/`any`/`unknown`/optional/silent fallbacks papering over unclear invariants? → make the boundaries explicit.
+- **Serial / non-atomic** — independent work needlessly serialized (→ parallelize), or multi-step updates that can leave state half-applied (→ make atomic)?
 
 #### Dimension 2: Wiki / Doc Alignment
 
