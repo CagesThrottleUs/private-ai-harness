@@ -38,18 +38,12 @@ The default is: do not override.
 ## The loop — run every round, not just the first
 
 ```
-0. MEASURE  — before BATCH, re-run both checks below against the branch's
+0. MEASURE  — before BATCH, re-run the check below against the branch's
               base. Every round, not just before the first submission — a
-              branch crosses these through many individually-small,
+              branch can drift through many individually-small,
               individually-justified rounds that never re-trigger a
               one-time, first-submission-only gate.
-              a. SIZE — requesting-code-review's PR Size Gate command:
-                 `git diff --numstat <base>...HEAD | awk '$1!="-"{a+=$1}
-                 $2!="-"{m+=$2} END{print a+m}'` plus `git rev-list --count
-                 <base>...HEAD`. Crossed 1000 LOC or 30 commits since the
-                 branch opened? Stop. Show the RECEIPT (step 6) now and ask
-                 the human "split now?" before FIX.
-              b. COHESION — "is this still one describable change?"
+              COHESION — "is this still one describable change?"
                  (design-principles' Cohesion test, applied to the whole
                  branch, not one module). Picked up a second or third
                  concern since the last round? Flag it for a split
@@ -71,9 +65,9 @@ The default is: do not override.
 5. PUSH ONCE — only when internal review is clean: a single push, THEN
               re-trigger the external reviewer.
 6. RECEIPT  — after the push, report cumulative commits and LOC delta vs
-              base since the branch opened. Unconditional, every round — not
-              only when step 0a trips — so growth is visible before it forces
-              the question three rounds later instead of at round one.
+              base since the branch opened. Unconditional, every round —
+              so growth is visible before it forces the question three
+              rounds later instead of at round one.
 ```
 
 **Never:** push after each comment · re-trigger the external bot before the

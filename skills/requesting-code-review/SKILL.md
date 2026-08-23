@@ -9,33 +9,9 @@ Route to the right review agent(s) for what you've built. Reviews are mandatory 
 
 **Core principle:** Review early, review often. After each task, not just at PR time.
 
-`pr-reviewer` walks every commit in the range, not just the aggregate diff — if it flags the range as too large to review thoroughly (30+ commits or ~1000+ changed lines), split the PR before re-requesting review rather than pushing for a faster pass.
+`pr-reviewer` walks every commit in the range, not just the aggregate diff — if it flags the range as too large to review thoroughly, split the PR before re-requesting review rather than pushing for a faster pass.
 
 ---
-
-## PR Size Gate (evidence-backed — check BEFORE dispatching any reviewer)
-
-Review effectiveness is dominated by one variable: **change size**. This is the
-best-measured lever in code review, so it gates first.
-
-| Changed LOC (added + modified, excluding generated/vendored/lockfiles) | Action |
-|---|---|
-| ≤ 200 | Ideal — dispatch review |
-| 201–400 | Good — dispatch review |
-| 401–1000 | **Warn** — split if the diff spans independent concerns; otherwise proceed and tell the reviewer where to focus |
-| > 1000 | **Block** — split into reviewable PRs before requesting review |
-
-Evidence (SmartBear 2,500-review study; Google *Modern Code Review*): defect
-detection peaks at **200–400 changed LOC** and ~60 minutes, and collapses from
-~87% under 100 LOC to ~28% over 1,000 LOC. A 2,000-line PR is not "one big
-review" — it is a review that silently misses two-thirds of its defects.
-
-**Measure before requesting:**
-```bash
-git diff --numstat <base>...HEAD | awk '$1!="-"{a+=$1} $2!="-"{m+=$2} END{print a+m" changed LOC"}'
-# Exclude generated/vendored: add  | grep -vE '(lock|\.min\.|dist/|vendor/|generated/)'
-```
-If over 1000, stop and split — one vertical slice per PR (see `epic-decomposition`).
 
 ## Review Latency Norm
 
@@ -51,9 +27,8 @@ unless told otherwise. Two grounded facts set the posture:
 
 - The **2024 DORA report** found AI adoption raises throughput but **lowers
   delivery stability (~7.2% per 25% adoption)** — "more code, more breakage."
-  Small batch size is the named mitigation, so the **PR Size Gate above is
-  stricter, not laxer, for AI diffs** — an AI can emit 1,500 plausible lines in
-  a minute; that is the exact shape the evidence says review misses.
+  Small batch size is the named mitigation — an AI can emit 1,500 plausible
+  lines in a minute; that is the exact shape the evidence says review misses.
 - AI code **reads cleanly and passes the happy path** while hiding specific
   defect classes; ~76% of developers report frequent AI hallucinations.
 
