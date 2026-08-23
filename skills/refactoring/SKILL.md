@@ -36,8 +36,11 @@ Before touching anything, identify the specific structural problem. One refactor
 | **Feature envy** | Method uses another class's data more than its own |
 | **Tight coupling** | Module directly imports another's internals |
 | **Dead code** | Unreachable branch, unused import, orphaned function |
+| **Shallow module** | Interface nearly as complex as the implementation; a pass-through that hides nothing, or many tiny modules to grasp one concept (classitis) |
 
 If you can't name the smell in one phrase, the scope is too large — narrow it.
+
+**Deletion test (for a suspected shallow module):** would deleting it *concentrate* complexity into its caller (it was pass-through indirection — inline it) or merely *move* complexity elsewhere (it was pulling its weight — leave it)? Only "concentrates" is a real deepening opportunity. (see `design-principles`: Prefer Deep Modules to Shallow Ones)
 
 ## Step 2 — Comprehension + blast radius
 
@@ -45,6 +48,7 @@ Run `codebase-comprehension` (inline) on the target area:
 - Map the symbol(s) to restructure + their callers
 - Note `codegraph_impact` — what else references this area
 - Identify which tests cover the area (these are your behavior guard)
+- If the target wasn't handed to you, prefer recently/frequently-changed files (`git log`) — deepening pays off where change concentrates (YAGNI)
 
 If there are NO tests covering the target area → **STOP**. Refactoring untested code is rewriting, not refactoring. Either write characterization tests first (a valid task) or do not proceed.
 

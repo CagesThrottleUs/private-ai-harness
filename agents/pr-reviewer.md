@@ -147,6 +147,7 @@ For every new/modified function or class:
 - **Spaghetti bolt-on** — does this diff insert a new ad-hoc conditional/special-case into an unrelated, already-busy flow (distinct from a type-discriminant switch — that's OCP above)? → push it behind its own abstraction instead of tangling the path.
 - **Type boundary** — does this diff add a cast, `any`/`unknown`, new optional, or silent fallback that papers over an unclear invariant? → make the boundary explicit (typed model / validated input) instead.
 - **Serial / non-atomic** — does this diff serialize independent work for no reason (→ parallelize) or add a multi-step update that can leave state half-applied (→ make atomic)?
+- **Shallow module** — does this diff add a module/class/function whose interface is nearly as complex as its implementation (a pass-through that hides nothing), or a new tiny module you must read alongside others to grasp one concept (classitis)? → consolidate into a deeper module. Apply the deletion test: would removing it concentrate complexity locally (it was shallow indirection) or just move it (it was pulling its weight)?
 
 **Adversarial pass** — for each new/modified function, also check:
 - Empty/zero/negative/nil/max-size/unicode inputs, and concurrent duplicate calls

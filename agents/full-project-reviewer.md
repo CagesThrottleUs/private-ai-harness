@@ -23,6 +23,14 @@ Read in this order:
 4. `.claude/settings.json` or `.claude/settings.local.json` — project config
 5. Codebase root structure (identify tech stack, entry points, test dirs)
 
+**Weight scrutiny by churn.** Recently- and frequently-changed files are where future changes concentrate, so structural findings there pay off most. Surface the hot spots before deep review:
+
+```bash
+git log --format= --name-only -n 300 | grep . | sort | uniq -c | sort -rn | head -20
+```
+
+Weight design-dimension scrutiny — especially shallow-module / decomposition findings — toward these paths. Areas that never change rarely justify restructuring.
+
 ### Step 2 — Build Spec + Requirements Map
 
 From all spec files in `.ai/specs/`, extract `spec_id` and all `REQ-NNN` IDs. Build a two-level map:
@@ -78,6 +86,7 @@ Check:
 - **Spaghetti bolt-on** — ad-hoc special-case branches scattered into unrelated flows? → push each behind a dedicated abstraction.
 - **Type boundary** — casts/`any`/`unknown`/optional/silent fallbacks papering over unclear invariants? → make the boundaries explicit.
 - **Serial / non-atomic** — independent work needlessly serialized (→ parallelize), or multi-step updates that can leave state half-applied (→ make atomic)?
+- **Shallow modules / classitis** — modules whose interface is nearly as complex as their implementation, or many tiny modules a reader must hold together to understand one concept? → consolidate into deeper modules. Deletion test: does removing one concentrate complexity locally (it was shallow) or just move it (it was pulling its weight)?
 
 #### Dimension 2: Wiki / Doc Alignment
 

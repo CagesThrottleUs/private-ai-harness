@@ -119,6 +119,16 @@ You MUST complete each phase before proceeding to the next.
    - Keep tracing up until you find the source
    - Fix at source, not at symptom
 
+6. **Check the Glue, Not Just the Units**
+
+   **WHEN each unit passes its own tests but the behavior is still wrong:**
+
+   Well-tested pure functions can be wired together incorrectly — the bug lives
+   in the composition (ordering, error handling, state threading at the call
+   sites), which is usually the least-tested code. Read the call site, not just
+   the unit. Decomposition that made each piece testable often left the glue
+   holding the actual logic with no test at all.
+
 ### Phase 2: Pattern Analysis
 
 **Find the pattern before fixing:**

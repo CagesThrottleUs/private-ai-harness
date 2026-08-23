@@ -376,6 +376,15 @@ _Test:_ Does this cast/fallback handle a real shape, or avoid naming an invarian
 **Serial and Non-Atomic Are Smells** — Independent work serialized for no reason should run in parallel; related updates that can leave state half-applied should be made atomic. Don't micro-optimize — but don't ship avoidable orchestration complexity that makes the flow more brittle.
 _Test:_ Do these steps depend on each other? If not, why sequential? Can this multi-step update half-apply? If so, make it atomic.
 
+**Prefer Deep Modules to Shallow Ones** — A deep module hides substantial implementation behind a simple interface. A shallow one has an interface nearly as complex as what it hides — it earns nothing for the cost of existing. Many tiny shallow modules (classitis) are worse than one deep module: grasping a single concept forces the reader to bounce between files. Consolidate shallow modules into deep ones; don't fragment a deep one for its own sake. Complements Parnas information-hiding: hiding a secret is *why* a module is deep. (Ousterhout)
+_Deletion test:_ For a module you suspect is shallow, would deleting it *concentrate* complexity into one local place (it was pass-through indirection — inline it) or merely *move* complexity around (it was pulling its weight — keep it)? "Concentrates" is the deepening signal.
+
+**Locality over Decomposition** — Splitting logic into small pure functions makes each unit trivially testable, but if the real behavior — and the bug — lives in how they are composed (the calling glue), the units pass while the defect ships. Keep related logic local and visible together over decomposing purely for testability. Extract a unit when it has its own reason to exist, not just to give a test something easy to call.
+_Test:_ After extraction, is the composition at the call site still covered? If the bug can only appear in the glue and the glue is untested, decomposition made testing worse.
+
+**The Interface Is the Test Surface** — How hard a module is to test through its public interface is a direct signal of interface quality. If a test must reach past the interface — mock internals, poke private state, reconstruct hidden setup — the interface is wrong, not the test. Fix the interface; don't add scaffolding to work around it.
+_Test:_ Can you exercise the behavior through the public interface alone? If not, the interface hides the wrong things.
+
 ---
 
 ## Planning Checklist
@@ -441,6 +450,9 @@ Run **after implementation, before marking complete** in `executing-plans` and `
 - [ ] **No bolt-ons:** New ad-hoc branch tangled into an unrelated busy flow? Push it behind its own abstraction.
 - [ ] **Explicit boundary:** New cast/`any`/`unknown`/optional/silent-fallback papering over an unclear invariant? Make the boundary explicit.
 - [ ] **Serial/atomic:** Independent work serialized for no reason (parallelize)? A multi-step update that can half-apply (make atomic)?
+- [ ] **Deep not shallow:** Module interface nearly as complex as its impl, or many tiny modules to grasp one concept (classitis)? Consolidate into a deeper module (deletion test: deleting it concentrates complexity locally, or just moves it?).
+- [ ] **Locality:** Pure function extracted only for testability while the composing glue stays untested? Keep it local or test the call site.
+- [ ] **Test surface:** Behavior exercisable through the public interface alone — no reaching past it to internals? If not, the interface is wrong, not the test.
 
 **Patterns**
 - [ ] **Smell scan:** Giant switch-on-type, God class, telescoping constructor, notification spaghetti? Apply smell → pattern table.

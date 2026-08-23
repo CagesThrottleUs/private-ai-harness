@@ -132,6 +132,25 @@ def test_dedup(xs):
 ```
 Detection: the property is a tautology (type/shape only, no behavioral relationship checked), or the oracle branch calls the same function/algorithm under test with no independent invariant (round-trip, idempotence, algebraic law, or a genuinely independent reference implementation) actually being verified.
 
+**3j. Extraction Without Locality**
+Pure helpers are extracted and each is individually tested, but the real behavior — and the bug — lives in how they are composed at the call site, which has no test.
+```python
+# parse() and validate() each have unit tests, but the ordering rule
+# (validate MUST run before parse) lives in the caller, untested
+def handle(raw):
+    return parse(validate(raw))   # no test exercises this composition
+```
+Detection: new tests cover extracted helpers, but the function that composes them — where the ordering, error handling, and state threading actually live — has no test exercising the composed path. The suite gains coverage numbers while the defect-prone glue stays untested.
+
+**3k. Interface Is Not the Test Surface**
+The behavior can only be reached by mocking a collaborator the interface should encapsulate, poking private state, or reconstructing hidden setup — a signal the interface is wrong, not that the test needs more scaffolding.
+```typescript
+// FAIL: to test "user is charged" the test must mock an internal gateway
+// the module should own — the interface doesn't expose the outcome
+const spy = jest.spyOn(svc as any, '_stripeClient')
+```
+Detection: the test cannot exercise a public behavior through the public interface alone. Distinct from 3d — 3d flags *asserting on* internals (brittleness); 3k flags being *unable to test through the interface at all* (interface-design defect). Report it as both a test finding and an interface finding.
+
 ### Step 4 — Spec TC Coverage
 
 For every named `TC-NNN` in the spec's `**Test Cases:**` section:
