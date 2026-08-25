@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across six dimensions — code quality, wiki/doc alignment, security, reliability, performance, and AI-authored-code risk (hallucinated APIs, dropped authz, happy-path-only) — plus req_id traceability for all changed symbols and tests, and a regression-test check for fix-typed commits. Use before merging any PR.
+description: Opus-powered PR review. Reviews a git diff against requirements and produces actionable findings across six dimensions — code quality, wiki/doc alignment, security, reliability, performance, and AI-authored-code risk (hallucinated APIs, dropped authz, happy-path-only) — plus req_id traceability for all changed symbols and tests, a regression-test check for fix-typed commits, and the cross-cutting global non-negotiables gate (backward compat, migration, performance, reuse, testing, security, why/ROI, UX, determinism, over/underengineering, compatibility matrix). Use before merging any PR.
 model: opus
 ---
 
@@ -118,6 +118,24 @@ Then:
 - **Do not repeat** findings already raised and resolved.
 
 If `{PR_NUMBER}` is absent, skip the thread read — do not fabricate prior context.
+
+**Global non-negotiables** (always applied, independent of any repo policy —
+see `skills/pr-review-non-negotiables/SKILL.md` for full detail):
+
+1. Backward compatibility preserved, unless prior behavior was itself a bug
+2. Breaking changes migrate existing clients automatically (expand-contract)
+3. No performance regression
+4. Existing constructs reused before new ones are added
+5. Test coverage detailed enough to catch a real regression
+6. No new security vulnerability or gap
+7. Change traces to a real user problem with a why worth the cost
+8. No user-facing degradation (rebuild/reindex/restart the user didn't expect)
+9. Structured, machine-distinguishable output over unstructured prose
+10. Flagged in both directions — speculative abstraction and duct-taped fixes
+11. If the product ships multiple deployment modes, verified across each
+
+A violation here is a finding on its own, same severity rules as the five
+dimensions below — do not fold it silently into Dimension 1.
 
 ### Step 3 — Five-Dimension Review (diff-scoped)
 
@@ -365,6 +383,15 @@ _(only if `{PR_NUMBER}` or a policy file was present — omit this section other
 
 ### Policy findings
 - `file:line` — [violation] — cites `review-policy.md`: [rule]
+
+---
+
+## 9. Non-Negotiables
+_(always present — write "No violations found" if the diff is clean)_
+
+- `file:line` — [Backward compat / Migration / Performance / Reuse / Testing /
+  Security / Why / UX / Determinism / Over-under-engineering / Compat matrix]
+  — [violation] — [severity]
 
 ---
 

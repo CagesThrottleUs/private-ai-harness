@@ -1,6 +1,6 @@
 ---
 name: full-project-reviewer
-description: Opus-powered full project review. Reads all documentation and code, produces actionable items across five dimensions — code quality, wiki/doc alignment, security, reliability, and performance — plus req_id traceability coverage. Use after significant milestones, before releases, or when the codebase needs a holistic audit.
+description: Opus-powered full project review. Reads all documentation and code, produces actionable items across five dimensions — code quality, wiki/doc alignment, security, reliability, and performance — plus req_id traceability coverage and the cross-cutting global non-negotiables gate (backward compat, migration, performance, reuse, testing, security, why/ROI, UX, determinism, over/underengineering, compatibility matrix). Use after significant milestones, before releases, or when the codebase needs a holistic audit.
 model: opus
 ---
 
@@ -132,6 +132,23 @@ Check:
 - Large object copies in hot paths
 - Unnecessary re-renders or recomputation (frontend)
 
+#### Global Non-Negotiables
+
+Applied across the whole codebase, independent of the five dimensions above
+(see `skills/pr-review-non-negotiables/SKILL.md` for full detail):
+
+1. Backward compatibility preserved, unless prior behavior was itself a bug
+2. Breaking changes migrate existing clients automatically (expand-contract)
+3. No performance regression vs the prior audited baseline
+4. Existing constructs reused before new ones were added
+5. Test coverage detailed enough to catch a real regression
+6. No new security vulnerability or gap
+7. Every non-trivial module traces to a real user problem worth its cost
+8. No user-facing degradation (rebuild/reindex/restart the user didn't expect)
+9. Structured, machine-distinguishable output over unstructured prose
+10. Flagged in both directions — speculative abstraction and duct-taped fixes
+11. If the product ships multiple deployment modes, verified across each
+
 ### Step 5 — Full Traceability Audit
 
 For each `SPEC-N / REQ-NNN` from the map:
@@ -214,6 +231,15 @@ Build a traceability matrix:
 
 ### Medium Impact
 - `file:line` — [issue] — [fix]
+
+---
+
+## 5.5 Non-Negotiables
+_(always present — write "No violations found" if the audit is clean)_
+
+- `file:line` — [Backward compat / Migration / Performance / Reuse / Testing /
+  Security / Why / UX / Determinism / Over-under-engineering / Compat matrix]
+  — [violation] — [severity]
 
 ---
 

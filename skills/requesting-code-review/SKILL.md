@@ -82,6 +82,13 @@ static analysis) but do not replace the human gate on high-blast-radius code.
 | `load-test-reviewer` | `/review performance` | When load tests are written. Validates NFR-aligned thresholds, smoke test, realistic traffic, appropriate test types (soak for 99.9% availability), CI integration — 6 dimensions. Not in `/review all`. |
 | **All at once** | `/review all` | Before any merge. Runs all four PR-scoped agents in parallel. |
 
+Every row above also carries `pr-review-non-negotiables` — a global,
+tool-agnostic gate (backward compat, migration, performance, reuse, testing,
+security, why/ROI, UX, determinism, over/underengineering, compatibility
+matrix) layered above whichever agent's own dimensions run. `pr-reviewer` and
+`full-project-reviewer` embed it as their own output section; other agents
+inherit it as a standing check even where it isn't spelled out per-agent.
+
 ---
 
 ## When to Use Which

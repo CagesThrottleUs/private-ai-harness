@@ -67,6 +67,7 @@ plugin UIs may display the `private-ai-harness:` namespace).
 | `high-level-design` | `/high-level-design` | After spec-quality-gate passes — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs. Runs `hld-reviewer` before human approval. |
 | `karpathy` | `/karpathy` | Anti-LLM-pitfall coding guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs |
+| `pr-review-non-negotiables` | (reference only, no `/` invocation) | Global, tool-agnostic PR review checklist (backward compat, migration, performance, reuse, testing, security, why/ROI, UX, determinism, over/underengineering balance, compatibility matrix) — referenced from user-global `CLAUDE.md` so it applies to every reviewer (`pr-reviewer`, `giving-code-review`, `requesting-code-review`, `scout-pr-review`) in every repo, layered above any repo-local `.scout/review-policy.md` |
 | `giving-code-review` | `/giving-code-review` | Acting as reviewer on a PR via `gh` — someone else's, or self-review of your own before requesting external review; walks every commit, applies `pr-reviewer`'s dimensions, runs a trust-but-verify pass on claims, doubles rigor in self-review mode |
 | `receiving-code-review` | `/receiving-code-review` | Acting on review feedback — verify before implementing, and run the Pattern Propagation Check: fix every sibling occurrence of an accepted finding's pattern within the current PR's diff (analogous paths like CLI vs MCP / primary vs fallback, every call site of a changed shared helper, and a determinism self-check on new concurrency), not just the flagged line; then the Proportionality Gate — a real, in-scope finding needing a disproportionate rewrite (formal proof, multi-site truth table) gets a simpler fix or a follow-up ticket, not a maximal one |
 | `closing-review-loops` | `/closing-review-loops` | Closing a review round to zero negotiable rounds — after fixing findings and before re-triggering any external reviewer (Talos/CodeRabbit/human), batch every open finding, fix in one pass, run an internal self-review that hunts the same failure classes plus fix-introduced regressions, push once, then re-trigger; re-checks cumulative branch size/commit count and cohesion every round — not only at first submission — and reports a commits/LOC receipt after each push; strong-default gate with recorded-reason override |
@@ -111,11 +112,11 @@ inheriting the parent Codex model.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `pr-reviewer` | opus | PR diff review — 6 dimensions (incl. AI-authored-code risk) + spec traceability + regression-test check for fix-typed commits |
+| `pr-reviewer` | opus | PR diff review — 6 dimensions (incl. AI-authored-code risk) + spec traceability + regression-test check for fix-typed commits + global non-negotiables gate |
 | `security-reviewer` | opus | Threat modeling, attack surface, auth/authz chains, cryptography |
 | `spec-impl-reviewer` | opus | Verify implementation satisfies each REQ acceptance criterion |
 | `test-quality-reviewer` | opus | Verify tests (including property-based/fuzz tests) are meaningful, not just annotated |
-| `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance |
+| `full-project-reviewer` | opus | Holistic audit: code quality, security, reliability, performance + global non-negotiables gate |
 | `language-expert-reviewer` | opus | Language-veteran review across 9 dimensions centered on behavioral correctness, invariant integrity, and language fit — not feature checklists. Supports C++, Rust, Python, TypeScript, Go, Java. |
 | `sequence-diagram-reviewer` | opus | Sequence diagram quality gate — validates flow coverage (auth flows, error paths, async patterns), error path per external call, arrow type correctness (sync vs async), auth boundary placement, HLD participant alignment. 5 dimensions. Invoked by `sequence-diagram` skill. |
 | `business-context-reviewer` | opus | Business context quality gate — validates problem statement is user-focused (not solution-framed), JTBD statement is complete, success metrics are measurable with baselines, compliance is explicitly addressed, non-goals present, stakeholders mapped, internal consistency. 6 dimensions. Invoked by `business-context-intake` skill. |

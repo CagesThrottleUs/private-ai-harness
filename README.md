@@ -48,6 +48,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `high-level-design` | `/high-level-design` | After spec-quality-gate — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs |
 | `karpathy` | `/karpathy` | Anti-LLM-coding-pitfall guidelines |
 | `pr-creator` | `/pr-creator` | Draft and open PRs with compliant messages |
+| `pr-review-non-negotiables` | reference only | Global tool-agnostic review checklist (backward compat, migration, perf, reuse, testing, security, why/ROI, UX, determinism, over/underengineering, compatibility matrix); referenced from user-global CLAUDE.md so it applies to every reviewer in every repo |
 | `prefer-deterministic-over-ai` | `/prefer-deterministic-over-ai` | Reach for grep/ast before LLM |
 | `giving-code-review` | `/giving-code-review` | Act as reviewer via `gh` on someone else's PR, or self-review your own first — doubled rigor + trust-but-verify in self-review mode |
 | `receiving-code-review` | `/receiving-code-review` | How to act on review feedback — verify before implementing, propagate the fix to every sibling occurrence and analogous path (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, plus a determinism check on new concurrency; then a Proportionality Gate — simpler fix or a follow-up ticket, not a maximal rewrite |
@@ -88,7 +89,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 
 | Agent | Purpose |
 |-------|---------|
-| `pr-reviewer` | PR review across code, security, design, completeness, and fix-commit regression-test presence |
+| `pr-reviewer` | PR review across code, security, design, completeness, fix-commit regression-test presence, and the global non-negotiables gate |
 | `security-reviewer` | Threat modeling, attack surface, auth/authz chains |
 | `spec-impl-reviewer` | Verify implementation satisfies each REQ statement |
 | `test-quality-reviewer` | Verify tests (incl. property-based) are meaningful, not just annotated |

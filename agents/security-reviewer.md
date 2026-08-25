@@ -188,6 +188,13 @@ This is mandatory. Assess how the attack surface grows over time.
 - Is security-sensitive action (login, permission check, data export) logged in a tamper-evident way?
 - Can an attacker cover their tracks by abusing the current logging approach?
 
+**8f. Non-Negotiables cross-check** — apply the global cross-cutting gate
+(`skills/pr-review-non-negotiables/SKILL.md`) with a security lens: does the
+migration path (expand-contract) ever weaken auth/authz during the transition
+window? Does the compatibility-matrix check cover every deployment mode's
+security posture, not just the default? Does reused code carry a
+vulnerability the new code would otherwise have avoided?
+
 ---
 
 ## Output Format

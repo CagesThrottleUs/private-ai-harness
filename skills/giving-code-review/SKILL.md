@@ -54,6 +54,12 @@ negative/unicode inputs, loop bounds, concurrency, numeric edge cases). See
 - **Any other repo, or no spec:** walk the diff yourself against the same
   dimensions — the checklist doesn't depend on this harness being installed.
 
+Also apply `pr-review-non-negotiables` — the cross-cutting gate (backward
+compat, migration, performance, reuse, testing, security, why/ROI, UX,
+determinism, over/underengineering, compatibility matrix) — regardless of
+which reviewer tool is doing the walking (`pr-reviewer`, `scout-pr-review`, or
+by hand). It sits above the five/six dimensions, not inside them.
+
 ---
 
 ## Step 3: Trust-but-verify pass on claims
