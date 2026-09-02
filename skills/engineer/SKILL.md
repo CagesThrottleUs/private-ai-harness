@@ -32,6 +32,8 @@ Read the request. Apply the signal table. When signals conflict or span two lane
 - epic-vs-portfolio: "Is this one initiative, or several competing initiatives to prioritize and sequence?"
 - any-vs-research: "Is the deliverable committed code or a decision document?"
 
+**FV-eligibility flag (set during classify, independent of lane):** set `fv-eligible` when BOTH hold — (a) the change touches a **critical-core** (cryptography, auth/authz decisioning, monetary/accounting arithmetic, consensus/replication/ordering invariants, or the safety of an `unsafe`/FFI block), AND (b) the target language has a verifier (full-deductive: Rust/Verus, Dafny, Ada/SPARK, C/Frama-C, Java/OpenJML; bounded: C++/CBMC·ESBMC). If (a) holds but the language has no verifier (Kotlin/TS/Python/Go/…), do NOT set the flag — route the invariant to `property-based-testing` (and `deterministic-simulation-testing` for concurrent cores) instead. The flag gates the `formal-verification` step below; it is off by default and never fires on ordinary logic.
+
 ## Step 2 — Present to user (MANDATORY — no skill fires before this)
 
 Always output this exact block before invoking anything:
@@ -95,6 +97,7 @@ artifacts: {}
 4. **writing-plans** *(⊘ plan-reviewer)* — tasks with interfaces, global constraints; update manifest `phase: plan`
 5. **using-git-worktrees** — isolated branch before any code
 6. **subagent-driven-development** — the belt: orchestrator-workers + evaluator-optimizer + ledger; update manifest `phase: construct`
+6a. **formal-verification** *(⊘ formal-verification-reviewer)* — **only if `fv-eligible` set at classify.** Escalate the proof-worthy invariants of the critical-core to machine-checked contracts (web-confirmed toolchain); block on undischarged obligations. Not eligible = skipped with reason "no critical-core / no verifier for language"
 7. **verification-before-completion** *(⊘ linter-reviewer)* — lint + type check; update manifest `phase: verify`
 8. **requesting-code-review** *(⊘ receiving-code-review for triaging returned findings)* — per-task `/review pr` during SDD only (task-scoped). The authoritative full-suite `/review all` runs ONCE at step 10 (finishing), not here.
 9. **pr-creator** — assemble PR; consumes the step-10 review verdict (no re-review); update manifest `phase: deliver`
@@ -126,14 +129,14 @@ Footprint: ~all 55 skills · epic manifest + N child manifests · days–weeks.
 1. **business-context-intake** *(⊘ business-context-reviewer)* — JTBD, measurable metrics, compliance, non-goals; FAIL = restart intake
 2. **brainstorming** — full exploration; produces spec draft
 3. **spec-quality-gate** *(⊘ spec-quality-reviewer)*
-4. **high-level-design** *(⊘ hld-reviewer → human must approve)* — C4, STRIDE, failure modes, capacity; human approval is required before next step
+4. **high-level-design** *(⊘ hld-reviewer → human must approve)* — C4, STRIDE, failure modes, capacity; human approval is required before next step. If any critical-core invariant is `fv-eligible` (see classify), name it here as proof-worthy vs test-worthy — the spec-to-proof boundary is an architectural decision, and child stories inherit the `formal-verification` step (task lane 6a) automatically
 5. **epic-decomposition** — break epic → N bounded stories; produce child manifests; identify parallel vs sequential waves
 6. **service-scaffolding** *(⊘ service-scaffolding-reviewer)* — for a NEW service: emit the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, catalog entry, scorecard) so it is born compliant *before* any child story implements into it. Skip if extending an existing service
 7. **For each child story:** invoke this skill as `/engineer "<story description>"` at task lane — recursive orchestrator-workers one level down (SDD inside each story)
 8. **deployment-workflow** *(⊘ deployment-reviewer)* — rollback, expand-contract migration, smoke tests
 9. **observability-standards** *(⊘ observability-reviewer)* — SLOs, runbooks, golden signals
 10. **incident-response** — severity matrix, postmortem template for new service
-11. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch
+11. **production-readiness-review** *(⊘ production-readiness-reviewer → human go/no-go)* — consolidates SLOs, tested rollback, exercised runbooks, capacity, dependencies, on-call into one PRR artifact; **hard gate before first production traffic**, FAIL blocks launch. For an `fv-eligible` core, the PRR records the proof verdict (obligations discharged, tier, bound if bounded) as evidence — a discharged proof strengthens the readiness claim; an undischarged obligation on the core is a launch blocker
 12. **onboarding-guide** — `wiki/ONBOARDING.md` updated for new service
 13. **delivery-metrics** — after launch (and periodically): DORA four keys + reliability and flow efficiency from the manifest phase timestamps
 14. **outcome-review** *(⊘ outcome-review-reviewer)* — after launch (and at each HEART-aligned checkpoint): measure the business-context north-star + input metrics against their targets with cited sources; render persevere/iterate/kill. Closes the "measure what you shipped" loop back to §4 intake and feeds the portfolio
@@ -226,6 +229,7 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   inside it. Attribution is what makes the circuit breaker and the delivery
   ledger honest about where tokens actually go.
 - **Domain overlay:** when the working files/task match a recognized technology domain (Android/Kotlin/Compose/KMP — detected from `.kt`/`.kts`, `build.gradle(.kts)`, `@Composable`, `androidx.*`), activate the matching `<domain>-advisor` overlay (e.g. `android-advisor`) FIRST inside each construct/test/verify step. The overlay decides which installed global domain skill fills each already-existing lane step, and suppresses the ones that would contradict it. Without it, overlapping community skills feed conflicting guidance. See `domain-overlay` for the pattern.
+- **Formal-verification gate (conditional, like domain-overlay):** when the `fv-eligible` flag is set at classify, the `formal-verification` step is standing — it fires at task-lane 6a and inside every `fv-eligible` child story, and its proof verdict feeds the epic PRR. It is off by default and never fires on ordinary logic or a language with no verifier; a critical-core in an unverifiable language (Kotlin/TS/Python) routes its invariant to `property-based-testing`/`deterministic-simulation-testing` instead. A proof is deductive assurance the review gate cannot give; it never replaces the review gate, it backs non-negotiables #1/#3 where it applies. Bounded-model-checking results (C++) state their bound and never claim an unbounded proof.
 - **Skill not named in any lane above:** invoke `using-superpowers` to discover the right one before improvising
 - **Artifact-by-reference:** each phase writes its output to a file and records
   the path in the manifest. Hold only the manifest pointer, the ledger, and the

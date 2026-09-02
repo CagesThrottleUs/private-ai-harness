@@ -43,6 +43,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `load-testing` | `/load-testing` | Before finishing a feature with NFR targets — k6 smoke/load/stress/spike/soak scripts with thresholds tied to spec NFRs, CI performance job |
 | `integration-testing` | `/integration-testing` | During TDD GREEN for components with external I/O — Testcontainers (real DB/queue/cache), transaction rollback isolation, factory pattern, Pact contract tests |
 | `property-based-testing` | `/property-based-testing` | During TDD's white-box pass for invariant-bearing functions (round-trip, idempotence, algebraic law) — generates Hypothesis/fast-check/jqwik/proptest tests instead of hand-picked examples |
+| `formal-verification` | `/formal-verification` | Risk-gated critical-core proof (crypto, auth/authz, money, consensus, `unsafe`) in a language with a verifier — full-deductive (Rust/Verus, Dafny, Ada/SPARK, C/Frama-C, Java/OpenJML) or bounded (C++/CBMC·ESBMC); escalates a property-based invariant to a machine-checked contract, web-confirms the toolchain, falls back to `property-based-testing` when no verifier exists; runs `formal-verification-reviewer` |
 | `observability-standards` | `/observability-standards` | After first API endpoint — OTel structured logging, golden signal metrics, SLO doc, alert rules, per-alert runbooks |
 | `github-workflows` | `/github-workflows` | GH Actions and PR workflow patterns |
 | `high-level-design` | `/high-level-design` | After spec-quality-gate — C4 diagrams, tech selection, STRIDE threat model, failure modes, capacity planning, ADRs |
@@ -93,6 +94,7 @@ Markdown definitions, so reviewer prompts do not drift between hosts.
 | `security-reviewer` | Threat modeling, attack surface, auth/authz chains |
 | `spec-impl-reviewer` | Verify implementation satisfies each REQ statement |
 | `test-quality-reviewer` | Verify tests (incl. property-based) are meaningful, not just annotated |
+| `formal-verification-reviewer` | Verify a proof discharges against the live toolchain, no obligation is silently skipped, bounded results don't overclaim, and the specification proven is the correct one |
 | `full-project-reviewer` | Holistic audit across quality, security, reliability, performance |
 | `language-expert-reviewer` | Language-veteran review: type system, UB, ownership, idioms, concurrency, error handling, stdlib, performance, standard compliance, safety — C++/Rust/Python/TS/Go/Java |
 | `business-context-reviewer` | Business context quality gate — problem statement user-focused, JTBD complete, metrics measurable with baselines, compliance explicit, non-goals present, stakeholders mapped |

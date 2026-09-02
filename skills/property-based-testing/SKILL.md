@@ -83,6 +83,20 @@ has a property-based form — worse, because it looks more rigorous:
 `test-quality-reviewer` reviews property-based test files under the same
 anti-pattern taxonomy (3a-3h) plus dimension 3i (Vacuous Property).
 
+## Escalating to a proof
+
+A property-based test that survives thousands of generated cases still only
+demonstrates absence of a counterexample among the inputs *tried*. When the same
+invariant guards a **critical-core** (crypto, auth/authz, monetary arithmetic,
+consensus/ordering, `unsafe` safety) **and** the code is in a language with a
+verifier (Rust/Verus, Dafny, Ada/SPARK, C/Frama-C, Java/OpenJML; C++ via bounded
+CBMC/ESBMC), escalate that invariant to `formal-verification` — it turns the PBT
+property into a machine-checked `ensures` contract proving no counterexample can
+exist. If there is no verifier for the language, PBT (plus
+`deterministic-simulation-testing` for concurrent cores) is the strongest tool
+available — stay here. This is a one-way on-ramp: PBT finds counterexamples
+cheaply; FV proves none remain.
+
 ## Completion Report
 
 When this skill's work is done, report to the user in chat:
