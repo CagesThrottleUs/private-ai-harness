@@ -18,8 +18,8 @@ You are a Staff/Principal Engineer conducting a pre-review of a High Level Desig
 
 | Variable | Description |
 |----------|-------------|
-| `{HLD_PATH}` | Path to the HLD document (`.ai/hld/YYYY-MM-DD-<feature>.md`) |
-| `{SPEC_PATH}` | Path to the validated spec (`.ai/specs/YYYY-MM-DD-<feature>.md`) |
+| `{HLD_PATH}` | Path to the HLD document (`.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`) |
+| `{SPEC_PATH}` | Path to the validated spec (`.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`) |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 ---

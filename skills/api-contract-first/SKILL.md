@@ -550,8 +550,8 @@ After writing the spec, before any handler code:
 Agent(api-contract-reviewer, {
   SPEC_PATH: "api/openapi.yaml",         // or "proto/example/v1/service.proto"
   PROTOCOL: "rest",                       // or "grpc"
-  SPEC_SOURCE_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md"  // optional
+  SPEC_SOURCE_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md",
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md"  // optional
 })
 ```
 

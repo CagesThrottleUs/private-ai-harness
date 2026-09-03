@@ -41,7 +41,7 @@ Save to: `wiki/guides/incident-response.md` (primary document)
 # Incident Response Process — [Service Name]
 
 **Version:** YYYY-MM-DD
-**SLO reference:** `.ai/observability/YYYY-MM-DD-slos.md`
+**SLO reference:** `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`
 **Runbooks:** `wiki/guides/runbooks/`
 
 ---
@@ -324,7 +324,7 @@ After generating all artifacts:
 Agent(incident-response-reviewer, {
   PROCESS_PATH: "wiki/guides/incident-response.md",
   POSTMORTEM_PATH: "wiki/guides/postmortem-template.md",
-  SLO_PATH: ".ai/observability/YYYY-MM-DD-slos.md"  // optional — for SLA alignment
+  SLO_PATH: ".ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md"  // optional — for SLA alignment
 })
 ```
 

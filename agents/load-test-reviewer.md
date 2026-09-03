@@ -208,7 +208,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-load-test-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-load-test-review.md`
 
 ---
 
@@ -236,4 +236,4 @@ If the artifact is clean, say so. Do not add phantom warnings to seem thorough.
 - A threshold that is 10× more permissive than the spec NFR is not a threshold — it's a placeholder that will never fail. Flag it as Critical.
 - "No soak test" is Important for availability NFRs (99.9%+), not just Advisory. Memory leaks take hours to manifest; a 30-minute test will miss them.
 - Auth token in the default function (not setup) is Critical when VU count is > 10. It generates O(VU × iterations) auth load, which pollutes the measurement and may DDoS your own auth endpoint.
-- If `{SPEC_PATH}` is absent, check if there's an `.ai/observability/` SLO document. If neither exists, note it: "No NFR source found — thresholds cannot be validated against spec. Add thresholds before committing to production."
+- If `{SPEC_PATH}` is absent, check if there's an `.ai/*/observability/` SLO document. If neither exists, note it: "No NFR source found — thresholds cannot be validated against spec. Add thresholds before committing to production."

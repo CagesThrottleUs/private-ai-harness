@@ -60,7 +60,7 @@ robust testing are the documented mitigations.
 
 ## Data sources (already written by the harness)
 
-- **Work-item manifests** `.ai/work/<id>/manifest.md` — `phase:` transitions.
+- **Work-item manifests** `.ai/<id>/manifest.md` — `phase:` transitions.
 - **Engineer cost-ledger** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl`
   (or `$CODEX_HOME/...`) — one row per phase checkpoint with a timestamp. The
   first→last timestamp gives **cycle/flow time** directly. **Flow efficiency
@@ -134,7 +134,7 @@ reviewer:
 
 ```
 Agent(delivery-metrics-reviewer, {
-  REPORT_PATH: ".ai/reports/YYYY-MM-DD-delivery-metrics.md",
+  REPORT_PATH: ".ai/YYYY-MM-DD-<feature-slug>/reports/reports-delivery-metrics.md",
   LEDGER_PATH: "~/.claude/private-ai-harness/delivery-ledger.jsonl"  // omit if none
 })
 ```

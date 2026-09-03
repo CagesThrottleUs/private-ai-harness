@@ -21,7 +21,7 @@ The caller must provide:
 | `{DESCRIPTION}` | What this PR does (1-3 sentences) |
 | `{BASE_SHA}` | Base commit (e.g., `origin/main`, `abc1234`) |
 | `{HEAD_SHA}` | Head commit (e.g., `HEAD`, `def5678`) |
-| `{REQUIREMENTS}` | **MANDATORY.** Spec file path (`.ai/specs/X.md`) or explicit `REQ-NNN` IDs. Empty = review blocked. |
+| `{REQUIREMENTS}` | **MANDATORY.** Spec file path (`.ai/<feature-slug>/specs/specs-<feature-slug>.md`) or explicit `REQ-NNN` IDs. Empty = review blocked. |
 | `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package PLAN_FILE BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 | `{PR_NUMBER}` | Optional. GitHub PR number or URL. If present, read the existing review threads via `gh` to flag adverse prior advice and amplify sound unresolved suggestions. Pure `gh` — no code-index dependency. |
@@ -36,8 +36,8 @@ The caller must provide:
 Check whether `{REQUIREMENTS}` contains a valid spec reference:
 
 A valid spec reference is one of:
-- A path to a spec file: matches `.ai/specs/` or ends in `.md` containing `spec_id:` + `REQ-` blocks
-- A `SPEC-N` identifier (e.g., `SPEC-1`, `SPEC-12`) — must resolve to a file in `.ai/specs/`
+- A path to a spec file: matches `.ai/*/specs/` or ends in `.md` containing `spec_id:` + `REQ-` blocks
+- A `SPEC-N` identifier (e.g., `SPEC-1`, `SPEC-12`) — must resolve to a file in `.ai/*/specs/`
 - One or more explicit `REQ-NNN` IDs accompanied by a `SPEC-N` (e.g., `SPEC-1 / REQ-001`)
 
 **If `{REQUIREMENTS}` is empty, "none", "N/A", or contains no spec path and no REQ-NNN IDs:**
@@ -48,7 +48,7 @@ A valid spec reference is one of:
 This PR cannot be reviewed without a requirements specification.
 
 Every PR must reference either:
-  1. A spec file path (e.g., `.ai/specs/feature-name.md`)
+  1. A spec file path (e.g., `.ai/YYYY-MM-DD-feature-name/specs/specs-feature-name.md`)
   2. Explicit REQ-NNN IDs from an approved spec
 
 Why: Without requirements, there is no standard to review against.

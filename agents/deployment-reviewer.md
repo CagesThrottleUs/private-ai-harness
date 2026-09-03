@@ -27,9 +27,9 @@ You are a senior SRE reviewing deployment artifacts before a PR is labeled deplo
 
 | Variable | Description |
 |----------|-------------|
-| `{ROLLBACK_PATH}` | Path to rollback procedure (`.ai/deployment/YYYY-MM-DD-rollback.md`) |
-| `{SMOKE_TEST_PATH}` | Path to smoke test spec (`.ai/deployment/YYYY-MM-DD-smoke-tests.md`) |
-| `{RUNBOOK_PATH}` | Path to deployment runbook (`.ai/deployment/YYYY-MM-DD-deploy-runbook.md`) |
+| `{ROLLBACK_PATH}` | Path to rollback procedure (`.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md`) |
+| `{SMOKE_TEST_PATH}` | Path to smoke test spec (`.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md`) |
+| `{RUNBOOK_PATH}` | Path to deployment runbook (`.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-deploy-runbook.md`) |
 | `{MIGRATION_CHECKLIST_PATH}` | Path to migration checklist — omit if no DB changes |
 | `{SPEC_PATH}` | Path to spec — for NFR and acceptance criteria cross-check |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
@@ -238,7 +238,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-deployment-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-deployment-review.md`
 
 ---
 

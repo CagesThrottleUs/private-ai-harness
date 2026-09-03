@@ -32,7 +32,7 @@ outcome and must be treated as `not measured`, never as "target met."
 
 | Variable | Description |
 |----------|-------------|
-| `{OUTCOME_PATH}` | Path to the outcome artifact (`.ai/outcome/YYYY-MM-DD-<feature>.md`) |
+| `{OUTCOME_PATH}` | Path to the outcome artifact (`.ai/YYYY-MM-DD-<feature-slug>/outcome/outcome-<feature-slug>.md`) |
 | `{CONTEXT_PATH}` | Path to the business-context doc for metric cross-check |
 | `{REPORT_FILE}` | Optional. Write full findings there; return only the verdict summary. |
 

@@ -18,7 +18,7 @@ You are a senior systems engineer reviewing sequence diagrams before they are co
 
 | Variable | Description |
 |----------|-------------|
-| `{DIAGRAM_PATH}` | Path to sequence diagram file (`.ai/lld/YYYY-MM-DD-<feature>-sequences.md`) |
+| `{DIAGRAM_PATH}` | Path to sequence diagram file (`.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md`) |
 | `{HLD_PATH}` | Path to HLD — for Container diagram participant cross-check |
 | `{SPEC_PATH}` | Path to spec — for REQ-NNN flow coverage check |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
@@ -160,7 +160,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-sequence-diagram-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-sequence-diagram-review.md`
 
 ---
 

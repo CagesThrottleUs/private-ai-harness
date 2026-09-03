@@ -1,7 +1,7 @@
 ---
 name: business-context-intake
 description: >
-  Use before brainstorming — for any feature, enhancement, or new capability requiring engineering work. Conducts a structured interview to capture business context: user problem, JTBD statement, measurable success metrics, compliance constraints, out-of-scope exclusions, and stakeholder map. Produces .ai/business-context/YYYY-MM-DD-<feature>.md. Runs business-context-reviewer agent before committing. Brainstorming MUST NOT activate without a completed business-context document.
+  Use before brainstorming — for any feature, enhancement, or new capability requiring engineering work. Conducts a structured interview to capture business context: user problem, JTBD statement, measurable success metrics, compliance constraints, out-of-scope exclusions, and stakeholder map. Produces .ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md. Runs business-context-reviewer agent before committing. Brainstorming MUST NOT activate without a completed business-context document.
 ---
 
 # Business Context Intake
@@ -22,7 +22,7 @@ Engineering without a defined success metric is engineering toward an unknown de
 ## The Iron Law
 
 <HARD-GATE>
-`brainstorming` MUST NOT activate without a completed business-context document at `.ai/business-context/YYYY-MM-DD-<feature>.md`. Check for the file first. If absent, complete this skill before invoking brainstorming.
+`brainstorming` MUST NOT activate without a completed business-context document at `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`. Check for the file first. If absent, complete this skill before invoking brainstorming.
 </HARD-GATE>
 
 ---
@@ -90,7 +90,7 @@ Ask questions one at a time. Each question builds on the last. Do not proceed to
 
 ## Document Template
 
-Save to: `.ai/business-context/YYYY-MM-DD-<feature>.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`
 
 ````markdown
 # Business Context — [Feature Name]
@@ -251,8 +251,8 @@ A: [Answer]
 
 On every new session for this feature:
 1. Read this document first
-2. Check `.ai/specs/` for any spec already written
-3. Brief any new agent: "We are building [feature name]. Business context: `.ai/business-context/YYYY-MM-DD-[feature].md`"
+2. Check `.ai/YYYY-MM-DD-<feature-slug>/specs/` for any spec already written
+3. Brief any new agent: "We are building [feature name]. Business context: `.ai/YYYY-MM-DD-[feature-slug]/business-context/business-context-[feature-slug].md`"
 ````
 
 ---
@@ -273,7 +273,7 @@ After completing the document, before committing:
 
 ```
 Agent(business-context-reviewer, {
-  CONTEXT_PATH: ".ai/business-context/YYYY-MM-DD-<feature>.md"
+  CONTEXT_PATH: ".ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md"
 })
 ```
 
@@ -295,7 +295,7 @@ docs(context): add business context for [feature name]
 
 After human approves the document:
 
-> "Business context committed to `.ai/business-context/YYYY-MM-DD-<feature>.md`.
+> "Business context committed to `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`.
 >
 > I now have: [problem], [user persona], [success metric], [compliance status], [key non-goals].
 >

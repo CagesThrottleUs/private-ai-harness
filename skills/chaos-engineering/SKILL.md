@@ -250,8 +250,8 @@ When dispatching the reviewer agent:
 ```
 Agent(chaos-reviewer, {
   TEST_FILES: "tests/chaos/**/*.js",
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

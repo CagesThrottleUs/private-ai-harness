@@ -29,7 +29,7 @@ You are a senior API engineer reviewing an API contract before any handler code 
 |----------|-------------|
 | `{SPEC_PATH}` | Path to spec file (`api/openapi.yaml` or `proto/**/*.proto`) |
 | `{PROTOCOL}` | `rest` or `grpc` |
-| `{SPEC_SOURCE_PATH}` | Path to source spec (`.ai/specs/YYYY-MM-DD-<feature>.md`) — for REQ cross-check |
+| `{SPEC_SOURCE_PATH}` | Path to source spec (`.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`) — for REQ cross-check |
 | `{HLD_PATH}` | Optional. Path to HLD — for API surface cross-check against §5.1 |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
@@ -268,7 +268,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-api-contract-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-api-contract-review.md`
 
 ---
 

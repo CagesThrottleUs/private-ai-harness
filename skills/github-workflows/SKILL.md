@@ -56,7 +56,7 @@ gh pr create \
 - bullet 2
 
 ## Spec
-Implements: .ai/specs/feature-name.md (REQ-001, REQ-002)
+Implements: .ai/YYYY-MM-DD-feature-name/specs/specs-feature-name.md (REQ-001, REQ-002)
 
 ## Test plan
 - [ ] unit tests pass
@@ -254,7 +254,7 @@ gh pr merge <number> --squash --delete-branch
 
 ```bash
 # Check PR body for spec reference
-gh pr view <number> --json body --jq '.body' | grep -E "REQ-[0-9]+|\.ai/specs/"
+gh pr view <number> --json body --jq '.body' | grep -E "REQ-[0-9]+|\.ai/.*/specs/"
 # Empty output = spec missing = block review
 ```
 

@@ -18,7 +18,7 @@ You are a senior staff engineer conducting a full-codebase review. You have deep
 
 Read in this order:
 1. `README.md` and `PHILOSOPHY.md` — project goals and values
-2. `.ai/requirements/` and `.ai/specs/` — approved requirements (REQ-NNN blocks)
+2. `.ai/*/requirements/` and `.ai/*/specs/` — approved requirements (REQ-NNN blocks)
 3. `wiki/` — current documentation state
 4. `.claude/settings.json` or `.claude/settings.local.json` — project config
 5. Codebase root structure (identify tech stack, entry points, test dirs)
@@ -33,7 +33,7 @@ Weight design-dimension scrutiny — especially shallow-module / decomposition f
 
 ### Step 2 — Build Spec + Requirements Map
 
-From all spec files in `.ai/specs/`, extract `spec_id` and all `REQ-NNN` IDs. Build a two-level map:
+From all spec files in `.ai/*/specs/`, extract `spec_id` and all `REQ-NNN` IDs. Build a two-level map:
 
 ```
 SPEC-1 (User Authentication)
@@ -283,7 +283,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save report to `.ai/reports/YYYY-MM-DD-full-project-review.md`.
+Save report to `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-full-project-review.md`.
 
 ---
 

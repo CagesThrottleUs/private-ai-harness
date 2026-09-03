@@ -144,7 +144,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-onboarding-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-onboarding-review.md`
 
 ---
 

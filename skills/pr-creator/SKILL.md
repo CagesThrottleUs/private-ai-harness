@@ -104,16 +104,16 @@ If any FAIL: list exactly what failed and what to fix. Do not proceed.
 
 Both are **mandatory**. No PR without both.
 
-**Spec:** The `.ai/specs/` file (with `spec_id: SPEC-N`) that governs this work.
-**Plan:** The `.ai/plans/` file that broke down the implementation.
+**Spec:** The `.ai/<feature-slug>/specs/` file (with `spec_id: SPEC-N`) that governs this work.
+**Plan:** The `.ai/<feature-slug>/plans/` file that broke down the implementation.
 
 Ask the user:
 ```
 Which spec does this PR implement?
-→ Path: .ai/specs/<name>.md
+→ Path: .ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md
 
 Which plan did you follow?
-→ Path: .ai/plans/<name>.md (or .ai/plans/<date>-<name>.md)
+→ Path: .ai/YYYY-MM-DD-<feature-slug>/plans/plans-<feature-slug>.md
 ```
 
 If neither exists: STOP. Do not create the PR.
@@ -122,8 +122,8 @@ If neither exists: STOP. Do not create the PR.
 ❌ PR BLOCKED — NO SPEC / NO PLAN
 
 Every PR must reference:
-  1. A spec file (.ai/specs/) with a valid spec_id: SPEC-N
-  2. A plan file (.ai/plans/) that governed the implementation
+  1. A spec file (.ai/<feature-slug>/specs/) with a valid spec_id: SPEC-N
+  2. A plan file (.ai/<feature-slug>/plans/) that governed the implementation
 
 Reason: A PR without a spec is unverifiable.
          A PR without a plan has no baseline to compare against.
@@ -182,8 +182,8 @@ Body = commit body. Must pass commit-msg.sh. **Explains WHY, never what files ch
 <WHY: 2-4 sentences. What was wrong/missing? Why this approach over alternatives?
 What breaks without this change? Never list files. Never say "I added X to Y.">
 
-Spec: .ai/specs/<name>.md (SPEC-N)
-Plan: .ai/plans/<name>.md
+Spec: .ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md (SPEC-N)
+Plan: .ai/YYYY-MM-DD-<feature-slug>/plans/plans-<feature-slug>.md
 Requirements: REQ-001, REQ-002, REQ-003
 North Star: <spec's north_star value — the business metric this change advances, or "N/A — <reason>">
 
@@ -255,12 +255,12 @@ If any public construct in the diff is missing `@spec_id` or `@req_id`: flag as 
 ## Step 5 — Consume Review Verdict (no re-dispatch)
 
 The authoritative review runs once, at `finishing-a-development-branch`
-Step 1.5, which writes `.ai/reports/YYYY-MM-DD-<branch>-review-summary.md`.
+Step 1.5, which writes `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<branch>-review-summary.md`.
 pr-creator consumes that verdict — it does NOT run review agents again.
 
 ```bash
 BRANCH=$(git branch --show-current)
-VERDICT=$(ls -t .ai/reports/*-"$BRANCH"-review-summary.md 2>/dev/null | head -1)
+VERDICT=$(ls -t .ai/*/reports/*-"$BRANCH"-review-summary.md 2>/dev/null | head -1)
 ```
 
 - If `$VERDICT` exists and was written for the current HEAD → read it. Do NOT

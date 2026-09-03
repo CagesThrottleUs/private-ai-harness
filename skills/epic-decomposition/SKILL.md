@@ -18,9 +18,9 @@ An epic is a system. Decomposition turns it into N bounded stories, each indepen
 The HLD C4 Container diagram IS the decomposition map. Without it, stories are invented rather than derived. Do not decompose without an approved HLD.
 
 **Inputs required:**
-- Approved HLD at `.ai/hld/YYYY-MM-DD-<epic>.md` (human-approved)
-- Approved spec at `.ai/specs/YYYY-MM-DD-<epic>.md`
-- Epic manifest at `.ai/work/YYYY-MM-DD-<epic>/manifest.md`
+- Approved HLD at `.ai/YYYY-MM-DD-<epic>/hld/hld-<epic>.md` (human-approved)
+- Approved spec at `.ai/YYYY-MM-DD-<epic>/specs/specs-<epic>.md`
+- Epic manifest at `.ai/YYYY-MM-DD-<epic>/manifest.md`
 
 ## Process
 
@@ -66,7 +66,7 @@ A (data model) ──blocks──► B (API)     ──blocks──► D (UI)
 
 ### Step 3 — Create child manifests
 
-For each story, create `.ai/work/YYYY-MM-DD-<epic>/children/YYYY-MM-DD-<story-slug>/manifest.md`:
+For each story, create `.ai/YYYY-MM-DD-<epic>/children/YYYY-MM-DD-<story-slug>/manifest.md`:
 
 ```markdown
 # Story: [name]

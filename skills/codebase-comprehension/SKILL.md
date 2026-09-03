@@ -18,8 +18,8 @@ Understand before you change. Maps the relevant area structurally — what exist
 | Lane | Depth | Artifact |
 |---|---|---|
 | quick-fix | 1–3 codegraph calls, inline | none |
-| task | Full area map | `.ai/work/<id>/comprehension.md` |
-| epic | Subsystem-wide map | `.ai/work/<id>/comprehension.md` |
+| task | Full area map | `.ai/<id>/comprehension.md` |
+| epic | Subsystem-wide map | `.ai/<id>/comprehension.md` |
 | research | Inline, area being evaluated | none |
 
 ## Process
@@ -92,7 +92,7 @@ Correct any misunderstanding before the next phase starts. A wrong map produces 
 
 ### 5 — Write artifact (task/epic only)
 
-Write the confirmed comprehension to `.ai/work/<id>/comprehension.md`. Downstream phases (brainstorming, writing-plans) read this file instead of re-doing structural analysis.
+Write the confirmed comprehension to `.ai/<id>/comprehension.md`. Downstream phases (brainstorming, writing-plans) read this file instead of re-doing structural analysis.
 
 ## What this is NOT
 

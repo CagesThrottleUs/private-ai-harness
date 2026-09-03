@@ -31,19 +31,19 @@ Example confirm message:
    - Check npm/PyPI/crates.io/etc. for battle-tested libraries before writing utility code.
    - Prefer adopting or porting a proven approach over net-new code when it meets the requirement.
 
-0.5. **business-context-intake** — Activates before brainstorming for any new feature or enhancement. Produces `.ai/business-context/YYYY-MM-DD-<feature>.md` with user problem, JTBD statement, measurable success metrics, compliance constraints, non-goals, and stakeholder map. Runs `business-context-reviewer` agent. Brainstorming MUST NOT activate without this document. **Skip** for bug fixes, config changes, and refactoring with no user-facing impact.
+0.5. **business-context-intake** — Activates before brainstorming for any new feature or enhancement. Produces `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md` with user problem, JTBD statement, measurable success metrics, compliance constraints, non-goals, and stakeholder map. Runs `business-context-reviewer` agent. Brainstorming MUST NOT activate without this document. **Skip** for bug fixes, config changes, and refactoring with no user-facing impact.
 
-1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves spec to `.ai/specs/` using REQ-NNN requirement format with test case mappings.
+1. **brainstorming** - Activates before writing code. Refines rough ideas through questions, explores alternatives, presents design in sections for validation. Saves spec to `.ai/YYYY-MM-DD-<feature-slug>/specs/` using REQ-NNN requirement format with test case mappings.
 
 2. **spec-quality-gate** - Activates after spec is written. Lints spec for vague language, missing REQ-NNN structure, unmeasurable criteria, undeclared dependencies. FAIL = fix spec, re-run. PASS = proceed.
 
-3. **high-level-design** - Activates after spec gate passes for any feature requiring architectural decisions (new services, data models, external integrations, security boundaries). Produces committed HLD document (C4 diagrams, technology selection, threat model via STRIDE, failure mode analysis, capacity planning) and ADRs in `wiki/architecture/`. Runs `hld-reviewer` agent before presenting to human. Human must approve HLD before `writing-plans` activates. **Skip** for bug fixes, config changes, and isolated non-architectural changes.
+3. **high-level-design** - Activates after spec gate passes for any feature requiring architectural decisions (new services, data models, external integrations, security boundaries). Produces committed HLD document (C4 diagrams, technology selection, threat model via STRIDE, failure mode analysis, capacity planning) in `.ai/YYYY-MM-DD-<feature-slug>/hld/` and ADRs in `wiki/architecture/`. Runs `hld-reviewer` agent before presenting to human. Human must approve HLD before `writing-plans` activates. **Skip** for bug fixes, config changes, and isolated non-architectural changes.
 
 4. **using-git-worktrees** - Activates after HLD is approved (or after spec gate for non-architectural changes). Creates isolated workspace on new branch, runs project setup, verifies clean test baseline. Immediately triggers `ci-pipeline-setup` if no CI config exists.
 
 4.5. **ci-pipeline-setup** - Activates immediately after worktree creation if no CI configuration exists. Detects platform (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps, Bitbucket), generates platform-agnostic pipeline spec and platform-specific config, runs `ci-reviewer` agent. Pipeline commits to branch before first feature commit — CI guards from day one.
 
-5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs, an Interfaces block (Consumes/Produces exact signatures), and a Task Right-Sizing boundary. Plan header includes a `## Global Constraints` section with project-wide binding requirements from the spec. Each task should trace to a container in the HLD's C4 diagram.
+5. **writing-plans** - Activates with approved spec and HLD. Breaks work into bite-sized tasks (2-5 minutes each). Saves plan to `.ai/YYYY-MM-DD-<feature-slug>/plans/`. Every task has exact file paths, complete code, verification steps tied to REQ-NNN IDs, an Interfaces block (Consumes/Produces exact signatures), and a Task Right-Sizing boundary. Plan header includes a `## Global Constraints` section with project-wide binding requirements from the spec. Each task should trace to a container in the HLD's C4 diagram.
 
 6. **subagent-driven-development** or **executing-plans** - Activates with plan. Dispatches fresh subagent per task with single-pass task review (spec compliance + code quality combined via `task-reviewer-prompt.md`), using file-based handoffs (`task-brief` + `review-package` scripts) to prevent context bloat. Progress tracked in a durable ledger that survives session compaction. Or executes inline with human checkpoints. After any task that creates an API endpoint or service component, triggers `observability-standards`.
 
@@ -62,6 +62,19 @@ Example confirm message:
 `wiki/` = living product docs — always 1:1 with the product, updated in the same commit as behavior changes.  
 `.ai/` = ephemeral work artifacts (`%TEMP%` for AI) — audit trail, not source of truth.
 
+**Task-folder convention:** every feature/task gets one shared root
+`.ai/YYYY-MM-DD-<feature-slug>/`, with artifact-type subfolders inside it
+(`specs/`, `plans/`, `hld/`, `lld/`, `business-context/`, `ci/`,
+`observability/`, `deployment/`, `performance/`, `prr/`, `outcome/`,
+`sdd/`, `reports/`, `requirements/`, `catalog/`). Filenames inside a
+subfolder drop the date (it lives in the folder name) and follow
+`<artifact-type>-<feature-slug>[-suffix].md`. `comprehension.md` is the one
+exception — it sits directly at the task root, not in its own subfolder,
+since it's a single Step-1 artifact referenced everywhere as one file.
+`portfolio-management` is cross-epic, not single-task, so it stays a
+standalone `.ai/portfolio/` outside any one task folder — a deliberate
+deviation from the "everything moves into a task folder" rule.
+
 | Artifact | Location | Notes |
 |----------|----------|-------|
 | Team onboarding | `wiki/ONBOARDING.md` | Generated by `/team-onboarding`; lives here, not repo root |
@@ -69,22 +82,24 @@ Example confirm message:
 | Architecture decisions (ADRs) | `wiki/architecture/` | Immutable once merged |
 | Developer guides / runbooks | `wiki/guides/` | How-tos, operational procedures |
 | Changelog / release notes / news | `wiki/changelog/` | One file per release or sprint |
-| Business context | `.ai/business-context/YYYY-MM-DD-feature.md` | User problem, JTBD, success metrics, compliance; gate before brainstorming |
-| Feature design specs | `.ai/specs/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
-| High level design | `.ai/hld/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
-| Database ERD | `.ai/lld/YYYY-MM-DD-<feature>-schema.md` | Mermaid erDiagram with entities, FKs, index strategy |
-| Sequence diagrams | `.ai/lld/YYYY-MM-DD-<feature>-sequences.md` | Critical flows with error paths, auth boundary, sync/async |
-| CI/CD pipeline spec | `.ai/ci/YYYY-MM-DD-pipeline-spec.md` | Platform-agnostic pipeline design; committed alongside CI config |
-| SLO definition | `.ai/observability/YYYY-MM-DD-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
+| Comprehension | `.ai/YYYY-MM-DD-<feature-slug>/comprehension.md` | Step-1 codebase map; single file at task root |
+| Business context | `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md` | User problem, JTBD, success metrics, compliance; gate before brainstorming |
+| Feature design specs | `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` | Ephemeral; audit trail after ship |
+| High level design | `.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md` | Ephemeral; audit trail after ship |
+| Database ERD | `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md` | Mermaid erDiagram with entities, FKs, index strategy |
+| Sequence diagrams | `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md` | Critical flows with error paths, auth boundary, sync/async |
+| CI/CD pipeline spec | `.ai/YYYY-MM-DD-<feature-slug>/ci/ci-pipeline-spec-<feature-slug>.md` | Platform-agnostic pipeline design; committed alongside CI config |
+| SLO definition | `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md` | SLI/SLO/error budget; tied to spec NFRs |
 | API contract (REST) | `api/openapi.yaml` | OpenAPI 3.1 spec — written before handler code |
 | API contract (gRPC) | `proto/<pkg>/v1/<service>.proto` | Protobuf service definition — written before service implementation |
-| Performance baseline | `.ai/performance/YYYY-MM-DD-baseline.md` | k6 results vs NFR targets; committed after load test run |
-| Deployment artifacts | `.ai/deployment/YYYY-MM-DD-*.md` | Rollback procedure, smoke tests, deploy runbook, migration checklist |
-| Implementation plans | `.ai/plans/YYYY-MM-DD-feature.md` | Ephemeral; audit trail after ship |
-| Quality gate reports | `.ai/reports/` | Ephemeral; one per run |
-| Requirement traceability | `.ai/requirements/` | REQ-NNN → TC mapping |
-| SDD scratch (task briefs, review diffs, progress ledger) | `.ai/sdd/` | Self-ignoring (`*` in `.gitignore`); ephemeral run state for subagent-driven-development |
-| Brainstorm server session files (mockup HTML, state, logs) | `.ai/brainstorm/` | Self-ignoring (`*` in `.gitignore`); ephemeral server runtime, created by `start-server.sh --project-dir` |
+| Performance baseline | `.ai/YYYY-MM-DD-<feature-slug>/performance/performance-<feature-slug>-baseline.md` | k6 results vs NFR targets; committed after load test run |
+| Deployment artifacts | `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-*.md` | Rollback procedure, smoke tests, deploy runbook, migration checklist |
+| Implementation plans | `.ai/YYYY-MM-DD-<feature-slug>/plans/plans-<feature-slug>.md` | Ephemeral; audit trail after ship |
+| Quality gate reports | `.ai/YYYY-MM-DD-<feature-slug>/reports/` | Ephemeral; one per run |
+| Requirement traceability | `.ai/YYYY-MM-DD-<feature-slug>/requirements/` | REQ-NNN → TC mapping |
+| SDD scratch (task briefs, review diffs, progress ledger) | `.ai/YYYY-MM-DD-<feature-slug>/sdd/` | Self-ignoring (`*` in `.gitignore`); ephemeral run state for subagent-driven-development |
+| Brainstorm server session files (mockup HTML, state, logs) | `.ai/brainstorm/` | Self-ignoring (`*` in `.gitignore`); ephemeral server runtime, created by `start-server.sh --project-dir`; not feature-scoped since it's a shared server workspace |
+| Portfolio Kanban manifest | `.ai/portfolio/` | Cross-epic, spans many features — deliberately NOT nested under one task folder |
 
 ## Wiki Sync Rule
 

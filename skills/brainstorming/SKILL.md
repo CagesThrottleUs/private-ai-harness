@@ -42,7 +42,7 @@ Every project goes through this process. A todo list, a single-function utility,
 Before asking any design questions, check if a business context document exists:
 
 ```bash
-ls .ai/business-context/*.md 2>/dev/null
+ls .ai/*/business-context/*.md 2>/dev/null
 ```
 
 If absent AND this is a feature/enhancement (not a bug fix or config change): stop and invoke `business-context-intake` skill. Do NOT proceed with brainstorming without a completed business context document. The LLM cannot know the user's business context — a human must provide it.
@@ -54,12 +54,12 @@ If present: read it. Every design question must be anchored to the problem, pers
 
 You MUST create a task for each of these items and complete them in order:
 
-1. **Explore project context** — check files, docs, recent commits; read `.ai/business-context/` if exists
+1. **Explore project context** — check files, docs, recent commits; read the task's `.ai/<feature-slug>/business-context/` if exists
 2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `.ai/specs/YYYY-MM-DD-<topic>-design.md` using requirement format (see below); commit
+6. **Write design doc** — save to `.ai/YYYY-MM-DD-<topic-slug>/specs/specs-<topic-slug>-design.md` using requirement format (see below); commit
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **Run spec-quality-gate** — invoke `spec-quality-gate` skill, which dispatches `spec-quality-reviewer` agent with fresh context; fix all FAIL items before proceeding
 9. **User reviews written spec** — ask user to review the spec file before proceeding
@@ -179,10 +179,10 @@ For open-ended questions ("describe your problem"), continue using prose — the
 
 **Documentation:**
 
-- Write the validated design (spec) to `.ai/specs/YYYY-MM-DD-<topic>-design.md`
+- Write the validated design (spec) to `.ai/YYYY-MM-DD-<topic-slug>/specs/specs-<topic-slug>-design.md`
   - (User preferences for spec location override this default)
 - Use the Requirement Format below — every statement is a REQ-NNN with measurable acceptance criteria
-- Pick `spec_id` by checking `grep -h '^spec_id:' .ai/specs/*.md 2>/dev/null` for the highest existing `SPEC-N` and incrementing; use `SPEC-1` if none exist
+- Pick `spec_id` by checking `grep -h '^spec_id:' .ai/*/specs/*.md 2>/dev/null` for the highest existing `SPEC-N` and incrementing; use `SPEC-1` if none exist
 - Set `north_star` by copying the one north-star metric (and target) verbatim from the business-context doc read in the Pre-Condition gate. If this is a bug fix / config change with no business-context doc, set it to `N/A — <reason>`. This value threads forward into the plan's Global Constraints and the PR body — do not leave it blank.
 - Commit the design document to git
 
@@ -195,7 +195,7 @@ Every spec must follow this structure. This is not optional.
 spec_id: SPEC-N
 title: [Feature Name]
 status: draft
-north_star: [the ONE business-context north-star metric this spec advances — verbatim from .ai/business-context/YYYY-MM-DD-<feature>.md, including its target; or "N/A — <bug fix / config / no business-context>"]
+north_star: [the ONE business-context north-star metric this spec advances — verbatim from .ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md, including its target; or "N/A — <bug fix / config / no business-context>"]
 ---
 
 # [Feature Name] — Specification
@@ -212,7 +212,7 @@ north_star: [the ONE business-context north-star metric this spec advances — v
 
 *This is the "inputs a team influences" layer of the North Star framework (Amplitude/Sean Ellis): the north-star is a lagging outcome; a feature earns its place by moving a named input metric that drives it. A delivery metric (latency, DORA, SLO) is NOT a business north-star — do not put one here.*
 
-**Business north-star:** [metric + target, verbatim from `.ai/business-context/` — matches the `north_star:` frontmatter value; or "N/A" with reason]
+**Business north-star:** [metric + target, verbatim from `.ai/YYYY-MM-DD-<feature-slug>/business-context/` — matches the `north_star:` frontmatter value; or "N/A" with reason]
 
 **Input metric this feature moves:** [the specific driver of the north-star this work advances, e.g. "activation rate (signup → first successful action)". If N/A, say why — e.g. "bug fix restoring existing behavior, no metric movement expected".]
 

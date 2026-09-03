@@ -15,9 +15,9 @@ NO PLAN WITHOUT A PASSING QUALITY GATE FIRST
 
 ## Inputs Required
 
-- **Spec path:** `.ai/specs/YYYY-MM-DD-<feature>.md` — the file brainstorming just wrote
+- **Spec path:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` — the file brainstorming just wrote
 
-If no spec path is known, check `.ai/specs/` for the most recent file. If ambiguous, ask the human.
+If no spec path is known, check `.ai/*/specs/` for the most recent file. If ambiguous, ask the human.
 
 ## Convergence Rule
 
@@ -43,7 +43,7 @@ When dispatching the reviewer agent:
 Run before dispatching the agent, every cycle:
 
 ```bash
-bash skills/spec-quality-gate/scripts/pre-lint.sh .ai/specs/YYYY-MM-DD-<feature>.md
+bash skills/spec-quality-gate/scripts/pre-lint.sh .ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md
 ```
 
 This is a deterministic pass over the exact Section 1 (format) checks the agent runs first, plus the Section 4 placeholder scan. If it exits non-zero, the agent will fail on the identical grounds — fix the reported findings and re-run the script until it exits 0 before spending any Opus tokens. Do not dispatch the agent while this script is failing.
@@ -52,7 +52,7 @@ This is a deterministic pass over the exact Section 1 (format) checks the agent 
 
 ```
 Agent(spec-quality-reviewer, {
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

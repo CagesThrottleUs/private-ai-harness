@@ -396,7 +396,7 @@ After writing integration tests, before committing:
 ```
 Agent(integration-test-reviewer, {
   TEST_FILES: "tests/integration/**",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

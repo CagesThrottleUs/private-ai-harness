@@ -34,8 +34,8 @@ Use `AskUserQuestion` when the scope is ambiguous (feature could be small or lar
 
 ## Inputs Required
 
-- **Spec:** `.ai/specs/YYYY-MM-DD-<feature>.md` — must have passed `spec-quality-gate`
-- **Business context:** `.ai/specs/business-context.md` — read if exists
+- **Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` — must have passed `spec-quality-gate`
+- **Business context:** `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md` — read if exists
 
 Read both. Extract: NFRs (latency/throughput/availability), security requirements, compliance constraints, component dependencies from REQ-NNN statements.
 
@@ -57,7 +57,7 @@ Do NOT activate without a spec that has passed spec-quality-gate. If no spec exi
 8. **Capacity planning** — 3 scenarios from NFRs: pessimistic / expected / optimistic
 9. **Identify ADR candidates** — every significant "why X over Y" decision
 10. **Write ADR files** — one per decision, committed to `wiki/architecture/`
-11. **Write HLD document** — all sections assembled, committed to `.ai/hld/`
+11. **Write HLD document** — all sections assembled, committed to `.ai/YYYY-MM-DD-<feature-slug>/hld/`
 12. **Run `hld-reviewer` agent** — fix all Critical and Important findings before presenting
 13. **Human review gate** — present for approval. Do NOT invoke `writing-plans` until approved.
 14. **Resolve open questions** — all must be decided or explicitly deferred before `writing-plans`
@@ -80,13 +80,13 @@ Ask only what meaningfully changes the design. Stop when you can draw the boxes:
 
 ## HLD Document Format
 
-Save to: `.ai/hld/YYYY-MM-DD-<feature>.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`
 
 ````markdown
 # [Feature Name] — High Level Design
 
 **Date:** YYYY-MM-DD
-**Spec:** `.ai/specs/YYYY-MM-DD-<feature>.md`
+**Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`
 **Status:** Draft | Under Review | Approved
 **Reviewers:** [names]
 **Approved by:** [name] on [date]
@@ -412,8 +412,8 @@ After writing the HLD and ADRs, before presenting to human:
 
 ```
 Agent(hld-reviewer, {
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 
@@ -425,7 +425,7 @@ Fix all **Critical** and **Important** findings before presenting. Advisory find
 
 After `hld-reviewer` passes, present to human:
 
-> "HLD committed to `.ai/hld/YYYY-MM-DD-<feature>.md`. ADRs committed to `wiki/architecture/`. `hld-reviewer` passed with [N advisory findings — listed below].
+> "HLD committed to `.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`. ADRs committed to `wiki/architecture/`. `hld-reviewer` passed with [N advisory findings — listed below].
 >
 > Key decisions made: [list 3–5 most consequential ADRs].
 >
@@ -451,7 +451,7 @@ After explicit human approval:
 
 The HLD becomes the authoritative reference for implementation task design. If a `writing-plans` task cannot be traced to a component in the Container diagram, either add the component to the HLD or remove the task from the plan.
 
-**Data model note:** §5.2 (Data Model) describes entities and relationships conceptually. For any feature with database changes, invoke `database-erd` skill to produce the formal Mermaid erDiagram with all entities, FK annotations, cardinality, index strategy, and design decisions. Saved to `.ai/lld/` alongside sequence diagrams.
+**Data model note:** §5.2 (Data Model) describes entities and relationships conceptually. For any feature with database changes, invoke `database-erd` skill to produce the formal Mermaid erDiagram with all entities, FK annotations, cardinality, index strategy, and design decisions. Saved to `.ai/YYYY-MM-DD-<feature-slug>/lld/` alongside sequence diagrams.
 
 **API surface note:** §5.1 defines the API surface conceptually. Before any handler task is defined in `writing-plans`, invoke `api-contract-first` skill to produce the formal OpenAPI 3.1 or `.proto` contract. The handler task references the spec — not the HLD — as its implementation contract.
 

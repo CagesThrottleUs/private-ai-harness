@@ -28,10 +28,10 @@ You are a Senior SRE reviewing an observability setup before a service is deploy
 
 | Variable | Description |
 |----------|-------------|
-| `{SLO_PATH}` | Path to SLO document (`.ai/observability/YYYY-MM-DD-slos.md`) |
+| `{SLO_PATH}` | Path to SLO document (`.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`) |
 | `{ALERTS_PATH}` | Path to alert rules (`wiki/guides/alerts.md`) |
 | `{RUNBOOK_DIR}` | Path to runbook directory (`wiki/guides/runbooks/`) |
-| `{SPEC_PATH}` | Path to spec (`.ai/specs/YYYY-MM-DD-<feature>.md`) — for NFR cross-check |
+| `{SPEC_PATH}` | Path to spec (`.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`) — for NFR cross-check |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 If `{SLO_PATH}` is absent: `BLOCKED — SLO document not found.`
@@ -237,7 +237,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-observability-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-observability-review.md`
 
 ---
 

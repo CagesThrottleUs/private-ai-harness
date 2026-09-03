@@ -18,7 +18,7 @@ You verify that tests **actually catch bugs**, not just that they exist and carr
 
 | Variable | Description |
 |----------|-------------|
-| `{SPEC_PATH}` | Path to spec file (`.ai/specs/X.md`) |
+| `{SPEC_PATH}` | Path to spec file (`.ai/<feature-slug>/specs/specs-<feature-slug>.md`) |
 | `{BASE_SHA}` | Base commit |
 | `{HEAD_SHA}` | Head commit |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |

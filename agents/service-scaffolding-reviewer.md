@@ -27,7 +27,7 @@ completeness check against a fixed component list, not an architecture judgment.
 | Variable | Description |
 |----------|-------------|
 | `{SCAFFOLD_DIR}` | Path to the generated service scaffold (repo/dir root) |
-| `{CATALOG_PATH}` | Path to the catalog entry (`catalog-info.yaml` or `.ai/catalog/services.yaml`) |
+| `{CATALOG_PATH}` | Path to the catalog entry (`catalog-info.yaml` or `.ai/catalog/services.yaml` — standalone, cross-service registry, not task-scoped) |
 | `{SCORECARD_PATH}` | Path to the service scorecard |
 | `{REPORT_FILE}` | Optional. Write full findings there; return only the verdict summary. |
 

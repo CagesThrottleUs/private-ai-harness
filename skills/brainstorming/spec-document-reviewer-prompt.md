@@ -4,7 +4,7 @@ Use this template when dispatching a spec document reviewer subagent.
 
 **Purpose:** Verify the spec is complete, requirements are traceable and testable, and it is ready for implementation planning.
 
-**Dispatch after:** Spec document is written to `.ai/specs/` AND spec-quality-gate has passed.
+**Dispatch after:** Spec document is written to `.ai/<feature-slug>/specs/` AND spec-quality-gate has passed.
 
 ```
 Task tool (general-purpose):

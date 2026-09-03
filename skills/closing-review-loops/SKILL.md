@@ -14,7 +14,7 @@ the external reviewer.
 PRs (MSR 2026) merge instantly or else churn in iterative review ("approval
 churning", author ghosts the reviewer). A pre-submission self-review cuts review
 time ~28%. The bottleneck is the *review loop*, not the writing. See
-`.ai/reports/2026-07-30-pr-turnaround-review-gaps.md`.
+`.ai/2026-07-30-pr-turnaround/reports/reports-pr-turnaround-review-gaps.md`.
 
 `receiving-code-review` tells you how to fix each finding. This skill is the loop
 *around* those fixes — how to close a round so no free round is spent.

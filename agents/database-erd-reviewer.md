@@ -16,7 +16,7 @@ You are a database engineer reviewing an ERD before schema migration files are w
 
 | Variable | Description |
 |----------|-------------|
-| `{ERD_PATH}` | Path to ERD file (`.ai/lld/YYYY-MM-DD-<feature>-schema.md`) |
+| `{ERD_PATH}` | Path to ERD file (`.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md`) |
 | `{SPEC_PATH}` | Path to spec (optional — for entity coverage cross-check) |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
@@ -126,7 +126,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-database-erd-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-database-erd-review.md`
 
 ---
 

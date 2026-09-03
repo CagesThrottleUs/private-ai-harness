@@ -1,7 +1,7 @@
 ---
 name: outcome-review
 description: >
-  Use after a feature ships (and at defined checkpoints thereafter) to close the measurement loop — did the north-star and input metrics promised at business-context-intake actually move? Reads .ai/business-context/ success metrics and the PR-FAQ claims, records the realized value vs target for each metric with a cited data source, and renders a verdict: moved / did-not-move / inconclusive-need-more-time. Feeds a persevere / iterate / kill signal back to the portfolio. Runs outcome-review-reviewer to reject any metric that is not backed by a real measured source. This is the leg that makes "measure what you shipped" as pervasive as "write it down" and "review it."
+  Use after a feature ships (and at defined checkpoints thereafter) to close the measurement loop — did the north-star and input metrics promised at business-context-intake actually move? Reads the task's .ai/<feature-slug>/business-context/ success metrics and the PR-FAQ claims, records the realized value vs target for each metric with a cited data source, and renders a verdict: moved / did-not-move / inconclusive-need-more-time. Feeds a persevere / iterate / kill signal back to the portfolio. Runs outcome-review-reviewer to reject any metric that is not backed by a real measured source. This is the leg that makes "measure what you shipped" as pervasive as "write it down" and "review it."
 ---
 
 # Outcome Review
@@ -46,7 +46,7 @@ we promised actually show up?*
 **Skip:**
 - Bug fixes, refactors, config changes, and internal-only work — these have no
   business-context north-star metric to measure against. (If there is no
-  `.ai/business-context/` doc, there is nothing to review; skip.)
+  `.ai/<feature-slug>/business-context/` doc, there is nothing to review; skip.)
 
 **Infer + confirm:**
 > "This feature has a north-star metric (`checkout completion → 85%`) with a
@@ -71,7 +71,7 @@ document if any realized value lacks a source.
 
 ### Step 1 — Load the promises
 
-Read `.ai/business-context/YYYY-MM-DD-<feature>.md`:
+Read `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`:
 - §4 north-star metric: baseline, target, measurement method, timeline.
 - §4 input metrics (2–4): each baseline/target/method/timeline.
 - §8 PR-FAQ: the customer-outcome claims and the *riskiest assumptions* from the
@@ -128,14 +128,14 @@ Roll up to one launch decision (Lean Startup):
 
 ## Output Format
 
-Save to: `.ai/outcome/YYYY-MM-DD-<feature>.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/outcome/outcome-<feature-slug>.md`
 
 ````markdown
 # Outcome Review — [Feature Name]
 
 **Date:** YYYY-MM-DD
 **Shipped:** YYYY-MM-DD (day N post-launch)
-**Business context:** .ai/business-context/YYYY-MM-DD-<feature>.md
+**Business context:** .ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md
 **Launch decision:** persevere | iterate | kill/roll-back | inconclusive-too-early
 
 ---
@@ -186,8 +186,8 @@ After writing the document, before committing:
 
 ```
 Agent(outcome-review-reviewer, {
-  OUTCOME_PATH: ".ai/outcome/YYYY-MM-DD-<feature>.md",
-  CONTEXT_PATH: ".ai/business-context/YYYY-MM-DD-<feature>.md"
+  OUTCOME_PATH: ".ai/YYYY-MM-DD-<feature-slug>/outcome/outcome-<feature-slug>.md",
+  CONTEXT_PATH: ".ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md"
 })
 ```
 

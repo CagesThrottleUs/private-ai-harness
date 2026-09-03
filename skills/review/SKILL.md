@@ -113,7 +113,7 @@ HEAD=$(git rev-parse HEAD)
 Spec required for: pr, spec, tests, security, all. If not provided:
 ```
 Spec is required for this review type.
-Provide: .ai/specs/<name>.md or SPEC-N
+Provide: .ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md or SPEC-N
 ```
 
 ### Step 2 — Route and Dispatch
@@ -154,22 +154,22 @@ For artifact reviews, auto-detect paths per footnotes below.
 ¹ Before dispatching, check for matching `Anthropic-Cybersecurity-Skills` (e.g. `testing-idor-*`, `analyzing-jwt-*`); invoke first.
 ² Ask: LANGUAGE (required), STANDARD (optional, default latest stable), SCOPE (`diff` default or `full`).
 ³ Auto-detect: `.github/workflows/ci.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, `.circleci/config.yml`, `azure-pipelines.yml`, `bitbucket-pipelines.yml`. Ask if ambiguous.
-⁴ Check `.ai/ci/` for `*pipeline-spec.md`; omit if absent.
-⁵ Check `.ai/hld/` for most recent `*hld*.md`. Ask if ambiguous.
-⁶ Check `.ai/observability/` for most recent `*slos*.md`.
+⁴ Check `.ai/*/ci/` for `*pipeline-spec*.md`; omit if absent.
+⁵ Check `.ai/*/hld/` for most recent `*hld*.md`. Ask if ambiguous.
+⁶ Check `.ai/*/observability/` for most recent `*slos*.md`.
 ⁷ `wiki/guides/alerts.md`
 ⁸ `wiki/guides/runbooks/`
-⁹ Check `.ai/deployment/` for `*rollback*.md`, `*smoke*.md`, `*runbook*.md`, `*migration*.md`. Omit MIGRATION_CHECKLIST_PATH if no DB changes.
+⁹ Check `.ai/*/deployment/` for `*rollback*.md`, `*smoke*.md`, `*runbook*.md`, `*migration*.md`. Omit MIGRATION_CHECKLIST_PATH if no DB changes.
 ¹⁰ Auto-detect: `tests/integration/**`, `test/integration/**`, `**/*_integration_test*`.
 ¹¹ Check `api/openapi.yaml`, `api/*.yaml`, `proto/**/*.proto`.
 ¹² Auto-detect: `.yaml`/`.json` → `rest`, `.proto` → `grpc`.
 ¹³ Auto-detect: `tests/e2e/**/*.spec.ts`, `e2e/**/*.spec.*`.
 ¹⁴ `wiki/guides/feature-flag-registry.md`
-¹⁵ Check `.ai/lld/` for `*schema*.md`.
+¹⁵ Check `.ai/*/lld/` for `*schema*.md`.
 ¹⁶ `tests/visual/`
 ¹⁷ `tests/chaos/`
 ¹⁸ `wiki/guides/incident-response.md`
-¹⁹ Check `.ai/lld/` for `*sequences*.md`.
+¹⁹ Check `.ai/*/lld/` for `*sequences*.md`.
 ²⁰ Check `tests/performance/` for `*.js`, `*.py` (Locust), `*.scala` (Gatling).
 
 ### Step 3 — `/review all` (conditional parallel dispatch)
@@ -223,7 +223,7 @@ Wait for all dispatched agents, then produce the aggregated report (Step 4).
 1. [SOURCE] <item>
 ```
 
-Save to `.ai/reports/YYYY-MM-DD-<branch>-review-summary.md`.
+Save to `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<branch>-review-summary.md`.
 
 ---
 

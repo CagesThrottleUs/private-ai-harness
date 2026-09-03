@@ -39,8 +39,8 @@ Produce the deployment artifacts before the PR is opened — not as a post-merge
 ## Inputs Required
 
 - **Branch diff** — `git diff <base>...HEAD --name-only` to detect DB migrations and changed endpoints
-- **Spec** — `.ai/specs/` for the feature (NFRs inform smoke test thresholds)
-- **Observability setup** — `.ai/observability/YYYY-MM-DD-slos.md` for SLO targets used in verification
+- **Spec** — `.ai/<feature-slug>/specs/` for the feature (NFRs inform smoke test thresholds)
+- **Observability setup** — `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md` for SLO targets used in verification
 - **Last git tag** — for release notes scope: `git describe --tags --abbrev=0`
 
 ---
@@ -195,7 +195,7 @@ Apply the **Expand-Contract pattern** (Prisma Data Guide) per migration. Breakin
 
 ## Rollback Procedure Document
 
-Save to: `.ai/deployment/YYYY-MM-DD-rollback.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md`
 
 ````markdown
 # Rollback Procedure — [Feature Name]
@@ -291,13 +291,13 @@ Estimated time remaining: [N] minutes to full resolution
 
 ## Post-Deploy Smoke Test Spec
 
-Save to: `.ai/deployment/YYYY-MM-DD-smoke-tests.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md`
 
 ````markdown
 # Post-Deploy Smoke Tests — [Feature Name]
 
 **Run immediately after deploy.** Target: all pass within 5 minutes.
-**On failure:** initiate rollback per `.ai/deployment/YYYY-MM-DD-rollback.md`
+**On failure:** initiate rollback per `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md`
 
 ---
 
@@ -392,7 +392,7 @@ Organize by type into **Keep a Changelog** format. Save to: `wiki/changelog/YYYY
 
 ## Deployment Runbook
 
-Save to: `.ai/deployment/YYYY-MM-DD-deploy-runbook.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-deploy-runbook.md`
 
 ````markdown
 # Deployment Runbook — [Feature Name]
@@ -410,7 +410,7 @@ Save to: `.ai/deployment/YYYY-MM-DD-deploy-runbook.md`
 - [ ] All CI checks green on branch
 - [ ] `deployment-reviewer` passed (no Critical findings)
 - [ ] Staging deployed and smoke tests passing
-- [ ] Rollback procedure reviewed and tested: `.ai/deployment/YYYY-MM-DD-rollback.md`
+- [ ] Rollback procedure reviewed and tested: `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md`
 - [ ] On-call briefed on what is shipping
 - [ ] Observability dashboard open: [dashboard link]
 - [ ] Feature flag configured (if applicable)
@@ -426,7 +426,7 @@ Save to: `.ai/deployment/YYYY-MM-DD-deploy-runbook.md`
 
 Run smoke tests: [command]
 
-- [ ] All Phase 1 smoke tests pass (see `.ai/deployment/YYYY-MM-DD-smoke-tests.md`)
+- [ ] All Phase 1 smoke tests pass (see `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md`)
 - [ ] Error rate stable in dashboard
 - [ ] No spike in p99 latency
 
@@ -443,7 +443,7 @@ Run smoke tests: [command]
 
 ## If Issues Found
 
-See rollback procedure: `.ai/deployment/YYYY-MM-DD-rollback.md`
+See rollback procedure: `.ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md`
 ````
 
 ---
@@ -464,11 +464,11 @@ After writing all artifacts, before committing:
 
 ```
 Agent(deployment-reviewer, {
-  ROLLBACK_PATH: ".ai/deployment/YYYY-MM-DD-rollback.md",
-  SMOKE_TEST_PATH: ".ai/deployment/YYYY-MM-DD-smoke-tests.md",
-  RUNBOOK_PATH: ".ai/deployment/YYYY-MM-DD-deploy-runbook.md",
-  MIGRATION_CHECKLIST_PATH: ".ai/deployment/YYYY-MM-DD-migration.md",  // omit if no DB changes
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  ROLLBACK_PATH: ".ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md",
+  SMOKE_TEST_PATH: ".ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md",
+  RUNBOOK_PATH: ".ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-deploy-runbook.md",
+  MIGRATION_CHECKLIST_PATH: ".ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-migration.md",  // omit if no DB changes
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

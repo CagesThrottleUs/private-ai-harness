@@ -29,7 +29,7 @@ You are a senior DevOps/platform engineer reviewing a CI/CD pipeline configurati
 
 | Variable | Description |
 |----------|-------------|
-| `{PIPELINE_SPEC_PATH}` | Path to platform-agnostic spec (`.ai/ci/YYYY-MM-DD-pipeline-spec.md`) |
+| `{PIPELINE_SPEC_PATH}` | Path to platform-agnostic spec (`.ai/YYYY-MM-DD-<feature-slug>/ci/ci-pipeline-spec-<feature-slug>.md`) |
 | `{CI_CONFIG_PATH}` | Path to platform config (`.github/workflows/ci.yml`, `.gitlab-ci.yml`, `Jenkinsfile`, etc.) |
 | `{PROJECT_ROOT}` | Repository root (for manifest file detection) |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
@@ -302,7 +302,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save report to: `.ai/reports/YYYY-MM-DD-ci-review.md`
+Save report to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-ci-review.md`
 
 ---
 

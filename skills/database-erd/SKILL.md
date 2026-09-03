@@ -1,7 +1,7 @@
 ---
 name: database-erd
 description: >
-  Use during high-level-design or writing-plans for any feature that creates or modifies database tables. Reads migration files, ORM models, or schema definitions to generate a Mermaid erDiagram with all entities, attributes (type, PK/FK, unique constraints), relationships (crow's foot notation), and index strategy documentation. Saved to .ai/lld/YYYY-MM-DD-<feature>-schema.md alongside sequence diagrams. Runs database-erd-reviewer before committing. Schema design decisions are architectural decisions — the ERD is the LLD artifact that implementation traces back to.
+  Use during high-level-design or writing-plans for any feature that creates or modifies database tables. Reads migration files, ORM models, or schema definitions to generate a Mermaid erDiagram with all entities, attributes (type, PK/FK, unique constraints), relationships (crow's foot notation), and index strategy documentation. Saved to .ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md alongside sequence diagrams. Runs database-erd-reviewer before committing. Schema design decisions are architectural decisions — the ERD is the LLD artifact that implementation traces back to.
 ---
 
 # Database ERD
@@ -97,20 +97,20 @@ erDiagram
 5. **Add index strategy** — below the diagram, list which fields need indexes and why
 6. **Add design rationale** — for non-obvious choices (e.g., "total in cents, not float — avoids floating-point precision errors")
 7. **Run `database-erd-reviewer`** — fix Critical and Important findings
-8. **Commit** — `.ai/lld/YYYY-MM-DD-<feature>-schema.md`
+8. **Commit** — `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md`
 
 ---
 
 ## Output Format
 
-Save to: `.ai/lld/YYYY-MM-DD-<feature>-schema.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md`
 
 ````markdown
 # Database Schema — [Feature Name]
 
 **Date:** YYYY-MM-DD
-**Spec:** `.ai/specs/YYYY-MM-DD-<feature>.md`
-**HLD:** `.ai/hld/YYYY-MM-DD-<feature>.md`
+**Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`
+**HLD:** `.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`
 **Migration files:** [list migration file names]
 
 ---
@@ -165,8 +165,8 @@ When dispatching the reviewer agent:
 
 ```
 Agent(database-erd-reviewer, {
-  ERD_PATH: ".ai/lld/YYYY-MM-DD-<feature>-schema.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  ERD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-schema.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

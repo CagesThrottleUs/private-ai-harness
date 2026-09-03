@@ -135,7 +135,7 @@ Return: Summary of what you found and what you fixed.
 
 Short parallel bursts (fix N test files, return) need no coordinator — dispatch, collect, integrate. But when 3+ agents run **long-lived** on the same repo, you need one coordination-only role holding a shared board. This is a portable file-ledger — no external coordination service required, works anywhere.
 
-**Board file:** `.ai/sdd/board.md` (same scratch dir subagent-driven-development uses; self-ignored by git).
+**Board file:** `.ai/<feature-slug>/sdd/board.md` (same scratch dir subagent-driven-development uses; self-ignored by git).
 
 **Each worker writes a heartbeat block** (never broadcasts to peers):
 

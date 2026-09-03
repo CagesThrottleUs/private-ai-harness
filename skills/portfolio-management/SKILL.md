@@ -35,7 +35,7 @@ wsjf: <computed>            # cost_of_delay / job_size
   job_size: <1-13>          # relative duration/effort
 depends_on: [<epic-slug>, ...]   # cross-epic edges (must be DAG)
 owner: <name>
-epic_manifest: .ai/work/<id>/manifest.md   # once it enters Implementing
+epic_manifest: .ai/<id>/manifest.md   # once it enters Implementing
 ```
 
 ## Portfolio Kanban — the states

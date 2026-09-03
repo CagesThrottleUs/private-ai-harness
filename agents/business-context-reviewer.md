@@ -26,7 +26,7 @@ You are a senior product manager reviewing a business context document before en
 
 | Variable | Description |
 |----------|-------------|
-| `{CONTEXT_PATH}` | Path to business context doc (`.ai/business-context/YYYY-MM-DD-<feature>.md`) |
+| `{CONTEXT_PATH}` | Path to business context doc (`.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`) |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 If `{CONTEXT_PATH}` missing: `BLOCKED — business context document not found.`
@@ -207,7 +207,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save to: `.ai/reports/YYYY-MM-DD-business-context-review.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-business-context-review.md`
 
 ---
 

@@ -36,11 +36,11 @@ This skill reads **existing harness artifacts** — it does not invent content:
 
 | Section | Reads from |
 |---------|-----------|
-| System overview | `.ai/business-context/` + HLD §1 (Context) |
+| System overview | `.ai/*/business-context/` + HLD §1 (Context) |
 | Architecture tour | HLD §3 (C4 Container diagram) + §5 (Actual Design) |
 | Key ADRs | `wiki/architecture/ADR-*.md` — summary of all Accepted ADRs |
 | API reference | `api/openapi.yaml` — endpoint listing |
-| Ops/monitoring | `.ai/observability/YYYY-MM-DD-slos.md` + `wiki/guides/alerts.md` + `wiki/guides/runbooks/` |
+| Ops/monitoring | `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md` + `wiki/guides/alerts.md` + `wiki/guides/runbooks/` |
 | First contribution | Harness workflow (this plugin's workflow skill) |
 
 ---
@@ -83,7 +83,7 @@ C4Context
 - Language/runtime: [from manifest files]
 - Primary database: [from HLD tech selection]
 - External dependencies: [from HLD Container diagram]
-- Production SLO: [from .ai/observability/ SLO doc]
+- Production SLO: [from .ai/*/observability/ SLO doc]
 
 ---
 
@@ -135,7 +135,7 @@ C4Container
 
 **How a typical request flows:**
 
-[Describe the critical path — from user action to response — in 5-7 steps. Reference the sequence diagram in `.ai/lld/` if it exists.]
+[Describe the critical path — from user action to response — in 5-7 steps. Reference the sequence diagram in `.ai/*/lld/` if it exists.]
 
 **Key design decisions:**
 - [One sentence summary of most important ADR, e.g., "We chose PostgreSQL over MongoDB because [reason from ADR-001]"]
@@ -200,7 +200,7 @@ tests → requesting-code-review → pr-creator
 **Step by step:**
 
 1. **Pick a task** — check the issue tracker. Look for `good-first-issue` or `onboarding` labels.
-2. **Read the spec** — every feature has a spec in `.ai/specs/`. Read it before writing code.
+2. **Read the spec** — every feature has a spec in `.ai/*/specs/`. Read it before writing code.
 3. **Create a branch** — `git checkout -b feat/your-feature-name`
 4. **Write tests first** — this project enforces TDD. Write the failing test before the implementation.
 5. **Run the linter** — before committing: `[linter command for this project's language]`. Zero output required.
@@ -223,7 +223,7 @@ tests → requesting-code-review → pr-creator
 
 | Endpoint | Availability SLO | Latency SLO (p99) |
 |----------|-----------------|------------------|
-[From .ai/observability/YYYY-MM-DD-slos.md]
+[From .ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md]
 
 **Dashboards:**
 - [Link to primary dashboard if documented in wiki/guides/]
@@ -245,12 +245,12 @@ tests → requesting-code-review → pr-creator
 
 | What | Where | Notes |
 |------|-------|-------|
-| Feature specs | `.ai/specs/` | One file per feature |
-| Implementation plans | `.ai/plans/` | Bite-sized tasks |
-| HLD (architecture doc) | `.ai/hld/` | C4 diagrams, ADRs, threat model |
-| Sequence diagrams | `.ai/lld/` | Critical flow diagrams |
-| SLO definitions | `.ai/observability/` | Availability/latency targets |
-| Deployment runbooks | `.ai/deployment/` | Rollback, smoke tests |
+| Feature specs | `.ai/<feature-slug>/specs/` | One file per feature |
+| Implementation plans | `.ai/<feature-slug>/plans/` | Bite-sized tasks |
+| HLD (architecture doc) | `.ai/<feature-slug>/hld/` | C4 diagrams, ADRs, threat model |
+| Sequence diagrams | `.ai/<feature-slug>/lld/` | Critical flow diagrams |
+| SLO definitions | `.ai/<feature-slug>/observability/` | Availability/latency targets |
+| Deployment runbooks | `.ai/<feature-slug>/deployment/` | Rollback, smoke tests |
 | Architecture decisions | `wiki/architecture/` | ADR files |
 | API reference | `api/openapi.yaml` | OpenAPI 3.1 spec |
 | Operational runbooks | `wiki/guides/runbooks/` | One per alert |
@@ -281,8 +281,8 @@ After generating the guide:
 ```
 Agent(onboarding-reviewer, {
   ONBOARDING_PATH: "wiki/ONBOARDING.md",
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

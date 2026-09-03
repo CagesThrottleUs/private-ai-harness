@@ -1,7 +1,7 @@
 ---
 name: sequence-diagram
 description: >
-  Use during high-level-design or writing-plans for any operation that crosses 3+ components or service boundaries. Reads the HLD Container diagram and spec REQ-NNN to identify critical flows, generates Mermaid sequenceDiagram blocks for each (happy path, error paths, auth boundary, async vs sync), and saves to .ai/lld/YYYY-MM-DD-<feature>-sequences.md. Runs sequence-diagram-reviewer before committing. Without sequence diagrams, multi-service bugs are found during debugging, not design.
+  Use during high-level-design or writing-plans for any operation that crosses 3+ components or service boundaries. Reads the HLD Container diagram and spec REQ-NNN to identify critical flows, generates Mermaid sequenceDiagram blocks for each (happy path, error paths, auth boundary, async vs sync), and saves to .ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md. Runs sequence-diagram-reviewer before committing. Without sequence diagrams, multi-service bugs are found during debugging, not design.
 ---
 
 # Sequence Diagrams
@@ -147,14 +147,14 @@ sequenceDiagram
 
 ## Output Format
 
-Save to: `.ai/lld/YYYY-MM-DD-<feature>-sequences.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md`
 
 ````markdown
 # Sequence Diagrams — [Feature Name]
 
 **Date:** YYYY-MM-DD
-**HLD:** `.ai/hld/YYYY-MM-DD-<feature>.md`
-**Spec:** `.ai/specs/YYYY-MM-DD-<feature>.md`
+**HLD:** `.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`
+**Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`
 
 ---
 
@@ -234,9 +234,9 @@ When dispatching the reviewer agent:
 
 ```
 Agent(sequence-diagram-reviewer, {
-  DIAGRAM_PATH: ".ai/lld/YYYY-MM-DD-<feature>-sequences.md",
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  DIAGRAM_PATH: ".ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md",
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

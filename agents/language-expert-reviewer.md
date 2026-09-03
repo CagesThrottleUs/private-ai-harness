@@ -305,7 +305,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save report to `.ai/reports/YYYY-MM-DD-lang-expert-{LANGUAGE}-review.md`.
+Save report to `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-lang-expert-{LANGUAGE}-review.md`.
 
 ---
 

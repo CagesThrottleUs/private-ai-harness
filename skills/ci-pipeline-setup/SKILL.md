@@ -118,7 +118,7 @@ Every pipeline is a DAG. Stages run in this order regardless of platform. **Fail
 
 ## Pipeline Spec Document Format
 
-Save to: `.ai/ci/YYYY-MM-DD-pipeline-spec.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/ci/ci-pipeline-spec-<feature-slug>.md`
 
 ````markdown
 # CI/CD Pipeline Specification
@@ -469,7 +469,7 @@ After generating configs, before committing:
 
 ```
 Agent(ci-reviewer, {
-  PIPELINE_SPEC_PATH: ".ai/ci/YYYY-MM-DD-pipeline-spec.md",
+  PIPELINE_SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/ci/ci-pipeline-spec-<feature-slug>.md",
   CI_CONFIG_PATH: "[platform-specific file path]",
   PROJECT_ROOT: "."
 })

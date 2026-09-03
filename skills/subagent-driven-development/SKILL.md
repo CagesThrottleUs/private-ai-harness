@@ -404,14 +404,14 @@ a ledger file, not only in todos.
 
 - Each plan owns a workspace: at skill start, run this skill's
   `scripts/sdd-workspace PLAN_FILE` — it prints the plan's git-ignored
-  directory (`<repo-root>/.ai/sdd/<plan-basename>/`), home to every
+  directory (`<repo-root>/.ai/<feature-slug>/sdd/`), home to every
   artifact for THIS plan: ledger, briefs, reports, review packages.
   Another plan's directory is never yours to read or write.
 - Check for this plan's ledger at `<workspace>/progress.md`. If its first
   line names your plan file, tasks with a `Task <N>: complete` line are DONE
   — do not re-dispatch them; resume at the first task without one. A ledger
   whose first line names a different plan file — or a stray ledger at the
-  old flat path `.ai/sdd/progress.md` — is another plan's progress: leave it
+  old flat path `.ai/sdd/progress.md` (pre-task-folder convention) — is another plan's progress: leave it
   in place and start your own, fresh.
 - Create the ledger with its identity as the first line:
   `# SDD ledger — plan: <plan file path>`.
@@ -449,7 +449,7 @@ a ledger file, not only in todos.
 ```
 You: I'm using Subagent-Driven Development to execute this plan.
 
-[Read plan file once: .ai/plans/feature-plan.md]
+[Read plan file once: .ai/YYYY-MM-DD-feature-plan/plans/plans-feature-plan.md]
 [Create todos for all tasks]
 
 Task 1: Hook installation script

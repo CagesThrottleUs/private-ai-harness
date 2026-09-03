@@ -83,7 +83,7 @@ Design phase skipped by default — nothing to model in a one-symbol fix. Pull i
 
 Footprint: ~12 skills · work-item manifest · hours.
 
-**First:** create `.ai/work/YYYY-MM-DD-<slug>/manifest.md`:
+**First:** create `.ai/YYYY-MM-DD-<slug>/manifest.md`:
 ```
 tier: task
 phase: comprehend
@@ -92,7 +92,7 @@ artifacts: {}
 ```
 
 1. **codebase-comprehension** — map the relevant area; write `comprehension.md`; user confirms understanding before proceeding
-2. **brainstorming** — refine intent, scope, edge cases; produces spec draft in `.ai/specs/`
+2. **brainstorming** — refine intent, scope, edge cases; produces spec draft in `.ai/<slug>/specs/`
 3. **spec-quality-gate** *(⊘ spec-quality-reviewer)* — FAIL = fix spec + re-run; PASS = advance; update manifest `phase: design, gate_status: pass`
 4. **writing-plans** *(⊘ plan-reviewer)* — tasks with interfaces, global constraints; update manifest `phase: plan`
 5. **using-git-worktrees** — isolated branch before any code
@@ -124,7 +124,7 @@ Hold the WIP limit regardless of how cheaply AI can start epics; the 2024 DORA r
 
 Footprint: ~all 55 skills · epic manifest + N child manifests · days–weeks.
 
-**First:** create epic manifest at `.ai/work/YYYY-MM-DD-<slug>/manifest.md`. Every gate below is hard-blocking — do not advance past a FAIL without human resolution.
+**First:** create epic manifest at `.ai/YYYY-MM-DD-<slug>/manifest.md`. Every gate below is hard-blocking — do not advance past a FAIL without human resolution.
 
 1. **business-context-intake** *(⊘ business-context-reviewer)* — JTBD, measurable metrics, compliance, non-goals; FAIL = restart intake
 2. **brainstorming** — full exploration; produces spec draft
@@ -205,7 +205,7 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   finishes — success, BLOCKED, or FAIL — run `scripts/cost-checkpoint end
   <step-slug> --row phase --lane <lane> --phase <phase> --skill <skill>`.
   For task/epic lanes, `--phase` is the manifest's current `phase:` value at
-  that moment, read from `.ai/work/<id>/manifest.md` — the source of truth.
+  that moment, read from `.ai/<id>/manifest.md` — the source of truth.
   For lanes with no manifest (quick-fix, research, refactoring), use the
   lane name as `--phase`. This appends one row to a global, cross-repo
   ledger — tokens only, no dollar figure, since pricing drifts and token
@@ -236,7 +236,7 @@ Named subagents ignore the chat model (their frontmatter `model:` is pinned).
   current phase in context. Re-read a prior artifact only when a step needs it —
   do not keep full bodies resident.
 - **Manifest is the source of truth:** read phase/gate/artifact state from
-  `.ai/work/<id>/manifest.md`, not from memory. This survives compaction.
+  `.ai/<id>/manifest.md`, not from memory. This survives compaction.
 - **Verdict-only returns:** gates and reviewers return `PASS|FAIL` plus a
   REPORT_FILE path — never paste their findings into the orchestrator.
 - **After each phase:** tell the user "phase complete — safe to /compact; the

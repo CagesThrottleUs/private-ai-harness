@@ -37,7 +37,7 @@ The checks below are the floor. The north star is the ceiling.
 
 | Variable | Description |
 |----------|-------------|
-| `{SPEC_PATH}` | Path to the spec file (`.ai/specs/YYYY-MM-DD-<feature>.md`) |
+| `{SPEC_PATH}` | Path to the spec file (`.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`) |
 | `{REPORT_FILE}` | Optional. Path to write full findings. If present, write findings there and return only the verdict summary to context. |
 
 If `{SPEC_PATH}` is empty or the file does not exist: stop immediately with `BLOCKED — spec file not found at {SPEC_PATH}.`
@@ -315,7 +315,7 @@ the artifact alone — they span documents, live in unchanged code, or require
 runtime evidence. Report alongside the main verdict; the dispatcher resolves them.]
 ```
 
-Save report to: `.ai/reports/YYYY-MM-DD-<feature>-spec-quality.md`
+Save report to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<feature>-spec-quality.md`
 
 ---
 

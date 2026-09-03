@@ -18,7 +18,7 @@ You verify that code **does what the spec says**, not just that it is annotated.
 
 | Variable | Description |
 |----------|-------------|
-| `{SPEC_PATH}` | Path to spec file (`.ai/specs/X.md`) |
+| `{SPEC_PATH}` | Path to spec file (`.ai/<feature-slug>/specs/specs-<feature-slug>.md`) |
 | `{BASE_SHA}` | Base commit |
 | `{HEAD_SHA}` | Head commit |
 | `{DIFF_FILE}` | Optional. Path to a pre-generated diff file (from `scripts/review-package PLAN_FILE BASE HEAD`). If present, read it instead of running git diff — it contains the commit list, stat summary, and full diff with context in one Read call. |

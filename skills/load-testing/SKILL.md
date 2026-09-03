@@ -46,8 +46,8 @@ Default: **k6**. All templates below are k6. Locust/Gatling templates available 
 
 ## Inputs Required
 
-- **Spec NFRs** — read from `.ai/specs/YYYY-MM-DD-<feature>.md` NFR table
-- **SLO targets** — read from `.ai/observability/YYYY-MM-DD-slos.md`
+- **Spec NFRs** — read from `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` NFR table
+- **SLO targets** — read from `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`
 - **Staging URL** — `$BASE_URL` environment variable
 
 ---
@@ -76,7 +76,7 @@ import { check, sleep } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
 
 // ---- NFR-ALIGNED THRESHOLDS ----
-// These values MUST match the spec NFR table and .ai/observability/slos.md
+// These values MUST match the spec NFR table and .ai/<feature-slug>/observability/observability-<feature-slug>-slos.md
 // Changing a threshold here requires updating the spec NFR and SLO document too
 export const options = {
   // Smoke: validates script works, runs on every PR
@@ -338,7 +338,7 @@ Load tests run **after staging deploy** — not on every PR (smoke test runs on 
 
 ## Performance Baseline Report
 
-Save results to: `.ai/performance/YYYY-MM-DD-baseline.md`
+Save results to: `.ai/YYYY-MM-DD-<feature-slug>/performance/performance-<feature-slug>-baseline.md`
 
 ````markdown
 # Performance Baseline — [Feature Name]
@@ -392,8 +392,8 @@ After writing scripts, before committing:
 ```
 Agent(load-test-reviewer, {
   SCRIPT_PATH: "tests/performance/load-test.js",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
-  SLO_PATH: ".ai/observability/YYYY-MM-DD-slos.md"  // optional
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md",
+  SLO_PATH: ".ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md"  // optional
 })
 ```
 

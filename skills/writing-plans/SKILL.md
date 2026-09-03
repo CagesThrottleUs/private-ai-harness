@@ -15,8 +15,8 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** If working in an isolated worktree, it should have been created via the `superpowers:using-git-worktrees` skill at execution time.
 
-**Save plans to:** `.ai/plans/YYYY-MM-DD-<feature-name>.md`
-**Spec reference:** Link to `.ai/specs/YYYY-MM-DD-<feature-name>.md` in plan header.
+**Save plans to:** `.ai/YYYY-MM-DD-<feature-name>/plans/plans-<feature-name>.md`
+**Spec reference:** Link to `.ai/YYYY-MM-DD-<feature-name>/specs/specs-<feature-name>.md` in plan header.
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -114,7 +114,7 @@ Independence buys nothing if the independent test is vacuous.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Spec:** [exact path to the spec this plan implements, e.g. `.ai/specs/2026-08-13-feature-design.md` — or "N/A" with reason for a spec-less trivial change. SDD reads this file at setup, so a plan conflict is resolved against the design's actual text, not guessed at.]
+**Spec:** [exact path to the spec this plan implements, e.g. `.ai/2026-08-13-feature-design/specs/specs-feature-design.md` — or "N/A" with reason for a spec-less trivial change. SDD reads this file at setup, so a plan conflict is resolved against the design's actual text, not guessed at.]
 
 **Goal:** [One sentence describing what this builds]
 
@@ -221,7 +221,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Sequence Diagram Gate
 
-**Before defining tasks for any flow crossing 3+ components:** confirm that `.ai/lld/YYYY-MM-DD-<feature>-sequences.md` exists. If absent and the flow has auth, async, or retry behavior → invoke `sequence-diagram` skill.
+**Before defining tasks for any flow crossing 3+ components:** confirm that `.ai/YYYY-MM-DD-<feature-slug>/lld/lld-<feature-slug>-sequences.md` exists. If absent and the flow has auth, async, or retry behavior → invoke `sequence-diagram` skill.
 
 Sequence diagrams answer "what does the implementer do when the external service times out?" — a question that cannot be answered from the Container diagram alone.
 
@@ -248,9 +248,9 @@ After the self-review, dispatch `plan-reviewer` agent before offering execution:
 
 ```
 Agent(plan-reviewer, {
-  PLAN_PATH: ".ai/plans/YYYY-MM-DD-<feature>.md",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
-  HLD_PATH: ".ai/hld/YYYY-MM-DD-<feature>.md"  // omit if non-architectural
+  PLAN_PATH: ".ai/YYYY-MM-DD-<feature-slug>/plans/plans-<feature-slug>.md",
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md",
+  HLD_PATH: ".ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md"  // omit if non-architectural
 })
 ```
 
@@ -262,7 +262,7 @@ The plan-reviewer runs with fresh context — no brainstorming or spec history. 
 
 After plan-reviewer passes, offer execution choice:
 
-**"Plan complete and saved to `.ai/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `.ai/<feature-slug>/plans/plans-<feature-slug>.md`. Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 

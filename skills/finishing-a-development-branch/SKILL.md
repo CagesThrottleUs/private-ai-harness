@@ -102,7 +102,7 @@ If zero E2E tests AND feature has user-facing behavior → invoke `e2e-testing` 
 **Deployment artifacts** — required for any feature changing user-facing behavior:
 
 ```bash
-ls .ai/deployment/YYYY-MM-DD-rollback.md .ai/deployment/YYYY-MM-DD-smoke-tests.md .ai/deployment/YYYY-MM-DD-deploy-runbook.md 2>/dev/null
+ls .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-deploy-runbook.md 2>/dev/null
 ```
 
 **If deployment artifacts are absent AND this branch changes user-facing behavior, endpoints, or DB schema:**
@@ -126,7 +126,7 @@ Run `/review all` before presenting merge/PR options. All four agents run in par
 
 This dispatches: pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer.
 
-The aggregated summary is written to `.ai/reports/YYYY-MM-DD-<branch>-review-summary.md`.
+The aggregated summary is written to `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<branch>-review-summary.md`.
 This is the authoritative branch verdict. `pr-creator` consumes it — do not run
 the suite again downstream.
 
@@ -134,7 +134,7 @@ the suite again downstream.
 
 | If diff contains | Agent | Key inputs |
 |-----------------|-------|------------|
-| `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
+| `.github/workflows/`, `.gitlab-ci.yml`, `Jenkinsfile`, `.ai/*/ci/` | `ci-reviewer` | `CI_CONFIG_PATH`, `PROJECT_ROOT` |
 | `tests/performance/` | `load-test-reviewer` | `SCRIPT_PATH`, `SPEC_PATH`, `SLO_PATH` |
 | `tests/visual/` | `visual-regression-reviewer` | `TEST_FILES`, `SNAPSHOT_DIR` |
 | `tests/chaos/` | `chaos-reviewer` | `TEST_FILES`, `HLD_PATH` |
@@ -144,14 +144,14 @@ the suite again downstream.
 | `wiki/architecture/*versioning*`, `wiki/guides/api-versioning*` | `api-versioning-reviewer` | `ADR_PATH`, `POLICY_PATH`, `OPENAPI_PATH` |
 | `api/`, `.proto`, `openapi.` | `api-contract-reviewer` | `SPEC_PATH`, `PROTOCOL`, `SPEC_SOURCE_PATH` |
 | `tests/integration/` | `integration-test-reviewer` | `TEST_FILES`, `SPEC_PATH` |
-| `.ai/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
-| `.ai/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
-| `.ai/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
+| `.ai/*/deployment/` | `deployment-reviewer` | `ROLLBACK_PATH`, `SMOKE_TEST_PATH`, `RUNBOOK_PATH` |
+| `.ai/*/observability/`, `wiki/guides/alerts`, `wiki/guides/runbooks/` | `observability-reviewer` | `SLO_PATH`, `ALERTS_PATH`, `RUNBOOK_DIR` |
+| `.ai/*/hld/` | `hld-reviewer` | `HLD_PATH`, `SPEC_PATH` |
 | `tests/e2e/` | `e2e-reviewer` + `accessibility-reviewer` | `TEST_FILES`, `SPEC_PATH`, `BUSINESS_CONTEXT_PATH` |
 | `wiki/guides/feature-flag-registry.md` | `feature-flag-reviewer` | `REGISTRY_PATH`, `CODE_PATH` |
 | `infra/` | `iac-reviewer` | `IAC_DIR`, `TOOL` |
-| `.ai/lld/*-schema.md` | `database-erd-reviewer` | `ERD_PATH`, `SPEC_PATH` |
-| `.ai/lld/*-sequences.md` | `sequence-diagram-reviewer` | `DIAGRAM_PATH`, `HLD_PATH`, `SPEC_PATH` |
+| `.ai/*/lld/*-schema.md` | `database-erd-reviewer` | `ERD_PATH`, `SPEC_PATH` |
+| `.ai/*/lld/*-sequences.md` | `sequence-diagram-reviewer` | `DIAGRAM_PATH`, `HLD_PATH`, `SPEC_PATH` |
 
 Run: `git diff <base-branch>...HEAD --name-only` to detect which artifact types changed. Dispatch matching reviewers in parallel. All Critical findings from all agents block merge.
 
@@ -297,7 +297,7 @@ skills/delivery-metrics/scripts/delivery-record deploy --work-item <manifest-id>
 
 This is the deploy half of the delivery ledger `delivery-metrics` reads; the
 incident half is filled by `incident-response`. Skip only when there is no
-work-item manifest (bare quick-fix with no `.ai/work/<id>/`).
+work-item manifest (bare quick-fix with no `.ai/<id>/`).
 
 **Don't cleanup worktree.**
 

@@ -37,7 +37,7 @@ evidence, but a human makes the go/no-go call. Never auto-advance a PRR.
 
 ## The PRR checklist artifact
 
-Produce `.ai/prr/YYYY-MM-DD-<service>-prr.md` with all seven dimensions. Each
+Produce `.ai/YYYY-MM-DD-<service>/prr/prr-<service>.md` with all seven dimensions. Each
 line is **PASS / FAIL / N-A with evidence** — a link to the artifact or command
 output, never a bare "yes."
 

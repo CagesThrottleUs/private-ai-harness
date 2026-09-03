@@ -26,9 +26,9 @@ A plan that requires the implementer to ask questions is a plan that will produc
 
 | Variable | Description |
 |----------|-------------|
-| `{PLAN_PATH}` | Path to the plan (`.ai/plans/YYYY-MM-DD-<feature>.md`) |
-| `{SPEC_PATH}` | Path to the validated spec (`.ai/specs/YYYY-MM-DD-<feature>.md`) |
-| `{HLD_PATH}` | Optional. Path to HLD (`.ai/hld/YYYY-MM-DD-<feature>.md`) if architectural feature |
+| `{PLAN_PATH}` | Path to the plan (`.ai/YYYY-MM-DD-<feature-slug>/plans/plans-<feature-slug>.md`) |
+| `{SPEC_PATH}` | Path to the validated spec (`.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`) |
+| `{HLD_PATH}` | Optional. Path to HLD (`.ai/YYYY-MM-DD-<feature-slug>/hld/hld-<feature-slug>.md`) if architectural feature |
 
 If `{PLAN_PATH}` or `{SPEC_PATH}` is missing: `BLOCKED — required file not found.`
 
@@ -226,7 +226,7 @@ The plan header must contain:
 **BLOCKED** — any Critical finding. Fix all Critical findings and re-run plan-reviewer before execution.
 ```
 
-Save report to: `.ai/reports/YYYY-MM-DD-<feature>-plan-review.md`
+Save report to: `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<feature>-plan-review.md`
 
 ---
 

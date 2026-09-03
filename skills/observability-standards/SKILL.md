@@ -36,7 +36,7 @@ Instrument a system for production before it reaches production. Observability r
 
 - **Project root** — detect language from manifest files
 - **Endpoints created** — list of new endpoints/handlers from the current task
-- **NFRs** — latency and availability targets from `.ai/specs/` (used to set SLO targets)
+- **NFRs** — latency and availability targets from `.ai/<feature-slug>/specs/` (used to set SLO targets)
 
 ---
 
@@ -45,7 +45,7 @@ Instrument a system for production before it reaches production. Observability r
 1. **Detect language** — read manifest files (`pyproject.toml`, `package.json`, `go.mod`, `Cargo.toml`, `pom.xml`)
 2. **Generate structured logging config** — language-specific, OpenTelemetry-compliant, all mandatory fields
 3. **Instrument golden signals** — add metrics to each new endpoint (histogram, counter, gauge)
-4. **Write SLO document** — pulled from NFRs in spec; saved to `.ai/observability/YYYY-MM-DD-slos.md`
+4. **Write SLO document** — pulled from NFRs in spec; saved to `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`
 5. **Write alert rules** — symptom-based; saved to `wiki/guides/alerts.md`
 6. **Write runbook per alert** — saved to `wiki/guides/runbooks/alert-<name>.md`
 7. **Write observability standards doc** — project-specific field names and conventions; `wiki/guides/observability.md`
@@ -209,7 +209,7 @@ OTel Histogram → Prometheus generates `_bucket`, `_sum`, `_count`.
 
 ## SLO Definition Document
 
-Save to: `.ai/observability/YYYY-MM-DD-slos.md`
+Save to: `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`
 
 ````markdown
 # Service Level Objectives — [Service Name]
@@ -217,7 +217,7 @@ Save to: `.ai/observability/YYYY-MM-DD-slos.md`
 **Date:** YYYY-MM-DD
 **Author:** [name]
 **Service:** [service name]
-**Spec:** `.ai/specs/YYYY-MM-DD-<feature>.md`
+**Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md`
 **Revisit:** YYYY-MM-DD (quarterly)
 
 ---
@@ -488,7 +488,7 @@ Save to: `wiki/guides/observability.md` — single source of truth for this proj
 
 ## SLOs
 
-- Document: `.ai/observability/YYYY-MM-DD-slos.md`
+- Document: `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md`
 - Window: 28 days rolling
 - Review cadence: quarterly
 
@@ -522,10 +522,10 @@ After generating all artifacts, before committing:
 
 ```
 Agent(observability-reviewer, {
-  SLO_PATH: ".ai/observability/YYYY-MM-DD-slos.md",
+  SLO_PATH: ".ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md",
   ALERTS_PATH: "wiki/guides/alerts.md",
   RUNBOOK_DIR: "wiki/guides/runbooks/",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

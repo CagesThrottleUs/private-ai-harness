@@ -32,7 +32,7 @@ a guess. A runbook nobody exercised is a hypothesis.
 
 | Variable | Description |
 |----------|-------------|
-| `{PRR_PATH}` | Path to the PRR artifact (`.ai/prr/YYYY-MM-DD-<service>-prr.md`) |
+| `{PRR_PATH}` | Path to the PRR artifact (`.ai/YYYY-MM-DD-<service>/prr/prr-<service>.md`) |
 | `{SLO_PATH}` | Optional. Path to the SLO/observability doc for cross-check |
 | `{ROLLBACK_PATH}` | Optional. Path to the rollback procedure/evidence |
 | `{SPEC_PATH}` | Optional. Spec for NFR/capacity cross-check |

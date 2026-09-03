@@ -556,8 +556,8 @@ When dispatching the reviewer agents (this skill dispatches both `e2e-reviewer` 
 ```
 Agent(accessibility-reviewer, {
   TEST_FILES: "tests/e2e/**/*.spec.ts",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md",
-  BUSINESS_CONTEXT_PATH: ".ai/business-context/YYYY-MM-DD-<feature>.md"  // for EU check
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md",
+  BUSINESS_CONTEXT_PATH: ".ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md"  // for EU check
 })
 ```
 
@@ -572,7 +572,7 @@ After writing E2E tests, before committing:
 ```
 Agent(e2e-reviewer, {
   TEST_FILES: "tests/e2e/**/*.spec.ts",
-  SPEC_PATH: ".ai/specs/YYYY-MM-DD-<feature>.md"
+  SPEC_PATH: ".ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md"
 })
 ```
 

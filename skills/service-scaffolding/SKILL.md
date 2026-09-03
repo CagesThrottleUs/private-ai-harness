@@ -70,7 +70,9 @@ this skill points, even where a step is still manual today.
 
 ## The service catalog
 
-Register every service in `.ai/catalog/services.yaml` (or `catalog-info.yaml`
+Register every service in `.ai/catalog/services.yaml` (cross-service registry,
+deliberately NOT nested under one task folder — same rationale as
+`.ai/portfolio/`: it spans every service, not one feature) (or `catalog-info.yaml`
 per service, Backstage-compatible). One entry per service:
 
 ```yaml
@@ -88,7 +90,8 @@ it is — the lookup the portfolio and incident lanes need.
 
 ## Scorecards (maturity checks)
 
-Attach `.ai/catalog/scorecards/<service>.md` — a maturity checklist the service
+Attach `.ai/catalog/scorecards/<service>.md` (same standalone catalog, not
+task-scoped) — a maturity checklist the service
 is graded against, so "born observable and accountable" is verifiable, not
 aspirational:
 
