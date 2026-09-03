@@ -42,7 +42,7 @@ For each task:
 4. Before committing: run the `design-principles` **Review Checklist** — catch violations before they land
 5. Before committing: apply `karpathy` lens — no speculative code, surgical changes only, every changed line traces to the spec
 6. Before committing: apply `code-documentation` to every public construct written — full docstring, `@spec_id`, `@req_id`
-7. Run linter gate: detect language from manifest, run format check + lint + type check. Zero issues required. Dispatch `linter-reviewer` agent to validate.
+7. Run linter gate: detect language from manifest, run format check + lint + type check. Zero issues required.
 8. If task creates a component with external dependencies (DB, queue, cache, external HTTP): invoke `integration-testing` skill — write Testcontainers-based integration tests alongside unit tests
 8. If task created a new API endpoint or service component: invoke `observability-standards` — instrument logging, metrics, SLOs, alerts, runbooks before this endpoint is deployed
 9. Mark as completed
