@@ -17,8 +17,11 @@ session after reinstalling the local plugin.
 | `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
 | `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly and Codex adapters are generated from it |
-| `scripts/install-tools.sh` | One-shot shared + detected-host environment setup |
-| `scripts/install-codex.sh` | Codex plugin, custom-agent, and global-guidance installer |
+| `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
+| `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
+| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, AGENTS.md guidance |
+| `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
+| `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps opencode's `event` hook → `hook-beep.sh` event names |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
@@ -253,7 +256,7 @@ A delivery metric is a **guardrail**, not the needle. "Deployment frequency is e
 
 ## External skills loaded at install time
 
-These are installed via `scripts/install-tools.sh` and available alongside this plugin.
+These are installed via `scripts/install-claude.sh` and available alongside this plugin.
 
 | Source | What it adds |
 |--------|-------------|
@@ -262,7 +265,7 @@ These are installed via `scripts/install-tools.sh` and available alongside this 
 | `Leonxlnx/taste-skill` | Visual taste heuristics |
 | Android skill pack (step 16) | Kotlin/Compose/KMP: `chrisbanes/skills`, `skydoves/android-testing-skills`, `skydoves/compose-performance-skills`, `rcosteira79/android-skills`, `new-silvermoon/awesome-android-agent-skills`, `aldefy/compose-skill`, `hamen/compose_skill`, `Meet-Miyani/compose-skill`, `Drjacky/claude-android-ninja`, `ceorkm/mobile-app-ui-design`, `jimliu/baoyu-skills` — overlapping by design; the `android-advisor` overlay resolves precedence per sub-task |
 
-> `mukul975/Anthropic-Cybersecurity-Skills` (754 skills) is commented out in `scripts/install-tools.sh` — uncomment to enable.
+> `mukul975/Anthropic-Cybersecurity-Skills` (754 skills) is commented out in `scripts/install-claude.sh` — uncomment to enable.
 
 ---
 

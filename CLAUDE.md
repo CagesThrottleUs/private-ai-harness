@@ -13,8 +13,10 @@ code. No tests. No build step.
 ```
 skills/<name>/SKILL.md      skill definitions (frontmatter + prompt body)
 agents/<name>.md            subagent definitions
-scripts/install-tools.sh    one-shot environment setup
-scripts/install-codex.sh    Codex plugin + custom-agent installer
+scripts/install-claude.sh    one-shot environment setup (Claude Code)
+scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
+scripts/install-opencode.sh opencode installer (host-agnostic tools only)
+scripts/codex-notify.sh     Codex notify hook adapter → hook-beep.sh
 scripts/install-codex-agents.py  Markdown-to-Codex-agent adapter
 scripts/commit-msg.sh       conventional commits enforcement hook
 .claude-plugin/plugin.json  Claude Code plugin manifest

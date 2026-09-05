@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+# Install private-ai-harness tooling for opencode (opencode.ai) from this checkout.
+# Run from any directory: bash scripts/install-opencode.sh
+#
+# opencode's skill format is identical to Claude Code's SKILL.md — skills
+# written for Claude Code work in opencode unmodified — and it reads a global
+# ~/.config/opencode/AGENTS.md the same way Claude reads ~/.claude/CLAUDE.md.
+# It has no plugin marketplace (npm packages or local files in
+# ~/.config/opencode/plugin/ instead), and reviewer agents use its own
+# agent/subagent schema (mode/model/permission), not Claude's frontmatter, so
+# agents/*.md is left as reference-only rather than auto-copied.
+#
+# What this script ports from install-claude.sh:
+#   - host-agnostic CLI tools (rtk, ffmpeg)
+#   - Context7 MCP, registered via `opencode mcp add`
+#   - this repo's skills/ directory, symlinked into opencode's global skill
+#     dir so every private-ai-harness skill loads natively (no adapter)
+#   - a sound-notify plugin (scripts/opencode-notify-plugin.js), dropped into
+#     opencode's auto-loaded plugin/ dir, reusing hook-beep.sh + assets/sounds
+#   - the commit-msg git hook
+#   - global guidance appended to opencode's AGENTS.md
+#
+# Not ported (no opencode equivalent): Claude/Codex plugin marketplace,
+# custom reviewer agents, LSP plugins, Android skill pack, cost-visibility
+# plugins.
+
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+RESET='\033[0m'
+
+ok()   { echo -e "${GREEN}✔${RESET} $*"; }
+info() { echo -e "${CYAN}→${RESET} $*"; }
+warn() { echo -e "${YELLOW}⚠${RESET} $*"; }
+fail() { echo -e "${RED}✖${RESET} $*"; }
+
+check_cmd() { command -v "$1" &>/dev/null; }
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OPENCODE_HOME="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
+GLOBAL_AGENTS="$OPENCODE_HOME/AGENTS.md"
+GLOBAL_SKILLS="$OPENCODE_HOME/skills"
+GLOBAL_PLUGIN_DIR="$OPENCODE_HOME/plugin"
+
+echo ""
+echo "═══════════════════════════════════════════"
+echo "  Private AI Harness — opencode installer"
+echo "═══════════════════════════════════════════"
+echo ""
+
+HAVE_OPENCODE=1
+if ! check_cmd opencode; then
+  HAVE_OPENCODE=0
+  warn "opencode CLI not found — continuing with file-based steps only"
+  warn "install opencode first: https://opencode.ai"
+fi
+
+# ── 1. RTK ────────────────────────────────────────────────────────────────────
+echo "1. RTK (Rust Tool Killer)"
+if check_cmd rtk; then
+  ok "rtk already installed ($(rtk --version 2>/dev/null || echo 'version unknown'))"
+else
+  info "Installing rtk..."
+  brew install rtk && ok "rtk installed" || warn "rtk install failed"
+fi
+info "Running: rtk init -g"
+rtk init -g && ok "rtk global init done" || warn "rtk init -g failed — check output above"
+echo ""
+
+# ── 2. Context7 MCP ──────────────────────────────────────────────────────────
+echo "2. Context7 (MCP server)"
+if [[ "$HAVE_OPENCODE" -eq 1 ]]; then
+  info "Running: opencode mcp add context7 npx -y @upstash/context7-mcp@latest"
+  opencode mcp add context7 npx -y @upstash/context7-mcp@latest \
+    && ok "context7 MCP server registered" \
+    || warn "context7 registration failed — may already be registered; verify with 'opencode mcp list'"
+else
+  warn "opencode CLI not found — add manually once installed:"
+  warn "  opencode mcp add context7 npx -y @upstash/context7-mcp@latest"
+fi
+echo ""
+
+# ── 3. FFmpeg ─────────────────────────────────────────────────────────────────
+echo "3. FFmpeg"
+if check_cmd ffmpeg; then
+  ok "ffmpeg already installed ($(ffmpeg -version 2>/dev/null | head -1))"
+else
+  info "Installing ffmpeg..."
+  brew install ffmpeg && ok "ffmpeg installed" || warn "ffmpeg install failed"
+fi
+echo ""
+
+# ── 4. Skills — symlink into opencode's global skill dir ────────────────────
+echo "4. private-ai-harness skills (native, no adapter needed)"
+mkdir -p "$GLOBAL_SKILLS"
+count=0
+for skill_dir in "$REPO_ROOT"/skills/*/; do
+  name="$(basename "$skill_dir")"
+  [[ -f "$skill_dir/SKILL.md" ]] || { warn "$name has no SKILL.md — skipping"; continue; }
+  ln -sfn "$skill_dir" "$GLOBAL_SKILLS/$name"
+  count=$((count + 1))
+done
+ok "$count skills symlinked → $GLOBAL_SKILLS"
+echo ""
+
+# ── 5. Sound-notify plugin ───────────────────────────────────────────────────
+echo "5. Sound-notify plugin"
+mkdir -p "$GLOBAL_PLUGIN_DIR"
+cp "$REPO_ROOT/scripts/opencode-notify-plugin.js" "$GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
+chmod +x "$REPO_ROOT/scripts/hook-beep.sh"
+ok "sound-notify plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
+info "Note: this plugin file imports scripts/hook-beep.sh from this checkout by relative"
+info "path resolved at plugin load time — do not move or delete this repo checkout."
+echo ""
+
+# ── 6. commit-msg git hook ───────────────────────────────────────────────────
+echo "6. commit-msg hook"
+HOOK_SOURCE="$REPO_ROOT/scripts/commit-msg.sh"
+HOOK_TARGET="$REPO_ROOT/.git/hooks/commit-msg"
+if [[ ! -f "$HOOK_SOURCE" ]]; then
+  warn "scripts/commit-msg.sh not found — skipping hook install"
+elif [[ ! -d "$REPO_ROOT/.git" ]]; then
+  warn "$REPO_ROOT is not a git repo — skipping hook install"
+else
+  chmod +x "$HOOK_SOURCE"
+  ln -sf "$HOOK_SOURCE" "$HOOK_TARGET"
+  ok "commit-msg hook installed → $HOOK_TARGET"
+fi
+
+CWD_GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -n "$CWD_GIT_ROOT" && "$CWD_GIT_ROOT" != "$REPO_ROOT" ]]; then
+  CWD_HOOK="$CWD_GIT_ROOT/.git/hooks/commit-msg"
+  ln -sf "$HOOK_SOURCE" "$CWD_HOOK" \
+    && ok "commit-msg hook installed → $CWD_HOOK" \
+    || warn "hook install failed for $CWD_GIT_ROOT"
+fi
+echo ""
+
+# ── 7. Global guidance — opencode AGENTS.md ──────────────────────────────────
+echo "7. Global guidance (opencode AGENTS.md)"
+mkdir -p "$OPENCODE_HOME"
+if check_cmd python3; then
+  python3 - "$GLOBAL_AGENTS" "$REPO_ROOT" <<'PYEOF'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+repo_root = sys.argv[2]
+start = "<!-- private-ai-harness:start -->"
+end = "<!-- private-ai-harness:end -->"
+block = f"""{start}
+## Private AI Harness
+
+Skills are installed natively (symlinked into ~/.config/opencode/skills/) and
+auto-invoke like any other opencode skill — no manual reference needed.
+
+Reviewer agents (`{repo_root}/agents/*.md`) are NOT auto-installed: opencode's
+agent schema (mode/model/permission) differs from Claude's reviewer
+frontmatter. When a skill asks for a named reviewer, read the matching
+`agents/<name>.md` file and use its prompt body directly as the task brief.
+{end}"""
+
+current = path.read_text(encoding="utf-8") if path.exists() else ""
+if start in current and end in current:
+    before, remainder = current.split(start, 1)
+    _, after = remainder.split(end, 1)
+    updated = before.rstrip() + "\n\n" + block + after
+else:
+    updated = current.rstrip() + ("\n\n" if current.strip() else "") + block + "\n"
+path.write_text(updated, encoding="utf-8")
+PYEOF
+  ok "global guidance synchronized in $GLOBAL_AGENTS"
+else
+  warn "python3 not found — skipping global guidance sync"
+fi
+echo ""
+
+echo "═══════════════════════════════════════════"
+echo -e "${YELLOW}NOT PORTED (no opencode equivalent):${RESET}"
+echo "  - Claude/Codex plugin marketplace"
+echo "  - Custom reviewer agents (agents/*.md) — read manually per above"
+echo "  - LSP plugins, Android skill pack, cost-visibility plugins"
+echo "═══════════════════════════════════════════"
+echo ""
+ok "Done. Start a new opencode session — skills load from ~/.config/opencode/skills/."

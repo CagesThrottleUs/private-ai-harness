@@ -195,10 +195,34 @@ bash scripts/install-codex.sh
 
 Pass `--no-global-guidance` to install only the plugin and custom agents. The
 installer uses `$CODEX_HOME` when set, otherwise `~/.codex`, and keeps the
-existing Claude agent files as the single source of truth.
+existing Claude agent files as the single source of truth. It also wires
+`scripts/codex-notify.sh` into `config.toml`'s `notify` key so Codex plays the
+same sounds as Claude Code (`scripts/hook-beep.sh` / `assets/sounds/`) — Codex
+has only one notify hook (turn-complete), not Claude's per-event hooks, so all
+event types collapse onto `Stop`/`Notification`.
 
 After installation, start a new Codex session and open `/plugins`. Use `/agent`
 to inspect reviewer agents.
+
+### opencode-only install
+
+```bash
+bash scripts/install-opencode.sh
+```
+
+opencode's skill format is identical to Claude Code's (SKILL.md works
+unmodified), so this symlinks the repo's `skills/` directory straight into
+`~/.config/opencode/skills/` — every private-ai-harness skill auto-invokes
+natively, no adapter needed. It also registers Context7 via `opencode mcp
+add`, installs `rtk`/`ffmpeg`, drops a sound-notify plugin
+(`scripts/opencode-notify-plugin.js`) into opencode's auto-loaded
+`plugin/` directory (reusing `hook-beep.sh` + `assets/sounds/`), installs the
+`commit-msg` git hook, and appends global guidance to opencode's `AGENTS.md`.
+Reviewer agents (`agents/*.md`) are NOT auto-installed — opencode's own
+agent schema (mode/model/permission) differs from Claude's reviewer
+frontmatter, so those stay reference-only. Claude/Codex's plugin
+marketplace, LSP servers, Android skill pack, and cost-visibility plugins
+have no opencode equivalent and are skipped with a warning.
 
 ### Claude Code manual steps
 
