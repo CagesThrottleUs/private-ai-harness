@@ -97,6 +97,18 @@ else
   warn "global Codex guidance skipped"
 fi
 
+info "Wiring audio feedback (notify hook)"
+CODEX_CONFIG="$CODEX_HOME/config.toml"
+NOTIFY_SCRIPT="$REPO_ROOT/scripts/codex-notify.sh"
+chmod +x "$NOTIFY_SCRIPT"
+mkdir -p "$CODEX_HOME"
+if [[ -f "$CODEX_CONFIG" ]] && grep -q '^notify *=' "$CODEX_CONFIG"; then
+  warn "notify already set in $CODEX_CONFIG — leaving it untouched (edit manually to use $NOTIFY_SCRIPT)"
+else
+  printf '\nnotify = ["%s"]\n' "$NOTIFY_SCRIPT" >> "$CODEX_CONFIG"
+  ok "notify hook added → $CODEX_CONFIG"
+fi
+
 echo ""
 echo "Start a new Codex session, then open /plugins to verify the plugin."
 echo "Use /agent to inspect harness reviewer agents."
