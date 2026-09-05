@@ -164,7 +164,7 @@ Check them periodically with `gh` and sync if they've changed:
 ### Install every detected host
 
 ```bash
-bash scripts/install-tools.sh
+bash scripts/install-claude.sh
 ```
 
 This script installs (in order):
@@ -173,7 +173,7 @@ This script installs (in order):
 2. **CodeGraph** — AST knowledge graph MCP server (`npm i -g @colbymchenry/codegraph`)
 3. **Context7** — live library docs MCP (`npx ctx7 setup`)
 4. **claude-mem** — persistent memory MCP (`npx claude-mem install`)
-5. **Skills** — `impeccable`, `emilkowalski/skill`, `taste-skill` (`mukul975/Anthropic-Cybersecurity-Skills` is commented out — uncomment in `install-tools.sh` to enable)
+5. **Skills** — `impeccable`, `emilkowalski/skill`, `taste-skill` (`mukul975/Anthropic-Cybersecurity-Skills` is commented out — uncomment in `install-claude.sh` to enable)
 6. **Claude plugins** — `code-review`, `code-simplifier`, `skill-creator`, `claude-md-management`, `security-guidance`
 7. **LSP plugins** — `clangd-lsp`, `gopls-lsp`, `jdtls-lsp`, `kotlin-lsp`, `rust-analyzer-lsp`, `typescript-lsp`
 8. **Understand-Anything** — multimodal analysis plugin (`Lum1104/Understand-Anything`)
