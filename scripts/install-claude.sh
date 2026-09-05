@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Install tools required by the AI harness.
-# Run from any directory: bash scripts/install-tools.sh
+# Run from any directory: bash scripts/install-claude.sh
 #
 # Steps 1-17 run automatically. Step 9 self-installs this repo as a Claude plugin.
 # Step 10 installs the Codex plugin and custom-agent adapters when Codex exists.
