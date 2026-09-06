@@ -15,9 +15,10 @@ skills/<name>/SKILL.md      skill definitions (frontmatter + prompt body)
 agents/<name>.md            subagent definitions
 scripts/install-claude.sh    one-shot environment setup (Claude Code)
 scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
-scripts/install-opencode.sh opencode installer (host-agnostic tools only)
+scripts/install-opencode.sh opencode installer (skills, Context7, sound plugin, agents, hooks)
 scripts/codex-notify.sh     Codex notify hook adapter → hook-beep.sh
 scripts/install-codex-agents.py  Markdown-to-Codex-agent adapter
+scripts/install-opencode-agents.py Markdown-to-opencode-subagent adapter
 scripts/commit-msg.sh       conventional commits enforcement hook
 .claude-plugin/plugin.json  Claude Code plugin manifest
 .claude-plugin/marketplace.json  Claude/local marketplace manifest
@@ -63,9 +64,11 @@ model: opus   # or sonnet, haiku
 ```
 
 These Markdown files are the source of truth. Do not hand-maintain duplicate
-Codex prompts. `scripts/install-codex-agents.py` generates Codex TOML agents,
-mapping Opus/Sonnet/Haiku to high/medium/low reasoning while inheriting the
-active Codex model.
+Codex or opencode prompts. `scripts/install-codex-agents.py` generates Codex
+TOML agents, mapping Opus/Sonnet/Haiku to high/medium/low reasoning while
+inheriting the active Codex model. `scripts/install-opencode-agents.py`
+generates opencode subagents (`mode: subagent`, no `model`), so opencode
+agents inherit the invoking primary agent's model and permissions.
 
 ---
 

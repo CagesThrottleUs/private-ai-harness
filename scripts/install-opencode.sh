@@ -6,9 +6,10 @@
 # written for Claude Code work in opencode unmodified — and it reads a global
 # ~/.config/opencode/AGENTS.md the same way Claude reads ~/.claude/CLAUDE.md.
 # It has no plugin marketplace (npm packages or local files in
-# ~/.config/opencode/plugin/ instead), and reviewer agents use its own
-# agent/subagent schema (mode/model/permission), not Claude's frontmatter, so
-# agents/*.md is left as reference-only rather than auto-copied.
+# ~/.config/opencode/plugin/ instead). Reviewer agents use opencode's own
+# subagent schema (mode/model/permission), so scripts/install-opencode-agents.py
+# adapts agents/*.md into ~/.config/opencode/agents/ subagents that inherit the
+# invoking primary agent's model and permissions.
 #
 # What this script ports from install-claude.sh:
 #   - host-agnostic CLI tools (rtk, ffmpeg)
@@ -17,12 +18,12 @@
 #     dir so every private-ai-harness skill loads natively (no adapter)
 #   - a sound-notify plugin (scripts/opencode-notify-plugin.js), dropped into
 #     opencode's auto-loaded plugin/ dir, reusing hook-beep.sh + assets/sounds
+#   - reviewer agents (agents/*.md) adapted into opencode subagents
 #   - the commit-msg git hook
 #   - global guidance appended to opencode's AGENTS.md
 #
 # Not ported (no opencode equivalent): Claude/Codex plugin marketplace,
-# custom reviewer agents, LSP plugins, Android skill pack, cost-visibility
-# plugins.
+# LSP plugins, Android skill pack, cost-visibility plugins.
 
 set -euo pipefail
 
@@ -159,10 +160,12 @@ block = f"""{start}
 Skills are installed natively (symlinked into ~/.config/opencode/skills/) and
 auto-invoke like any other opencode skill — no manual reference needed.
 
-Reviewer agents (`{repo_root}/agents/*.md`) are NOT auto-installed: opencode's
-agent schema (mode/model/permission) differs from Claude's reviewer
-frontmatter. When a skill asks for a named reviewer, read the matching
-`agents/<name>.md` file and use its prompt body directly as the task brief.
+Reviewer agents from `{repo_root}/agents/*.md` are adapted into opencode
+subagents in ~/.config/opencode/agents/, named `private-ai-harness-<name>`.
+They inherit the invoking primary agent's model and permissions. When a skill
+asks for a named reviewer, dispatch the matching `private-ai-harness-<name>`
+subagent via the Task tool or @mention — do not read the file and re-derive
+the brief.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""
@@ -180,11 +183,25 @@ else
 fi
 echo ""
 
+# ── 8. Reviewer agents — opencode subagents ─────────────────────────────────
+echo "8. Reviewer agents (opencode subagents)"
+if check_cmd python3; then
+  if python3 "$REPO_ROOT/scripts/install-opencode-agents.py" --check >/dev/null; then
+    python3 "$REPO_ROOT/scripts/install-opencode-agents.py" \
+      --dest-dir "$OPENCODE_HOME/agents"
+  else
+    warn "agent validation failed — skipping reviewer agent adapters"
+  fi
+else
+  warn "python3 not found — skipping reviewer agent adapters"
+fi
+echo ""
+
 echo "═══════════════════════════════════════════"
 echo -e "${YELLOW}NOT PORTED (no opencode equivalent):${RESET}"
 echo "  - Claude/Codex plugin marketplace"
-echo "  - Custom reviewer agents (agents/*.md) — read manually per above"
 echo "  - LSP plugins, Android skill pack, cost-visibility plugins"
 echo "═══════════════════════════════════════════"
 echo ""
-ok "Done. Start a new opencode session — skills load from ~/.config/opencode/skills/."
+ok "Done. Start a new opencode session — skills load from ~/.config/opencode/skills/,"
+ok "reviewer agents from ~/.config/opencode/agents/ (@private-ai-harness-<name>)."

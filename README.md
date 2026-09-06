@@ -13,8 +13,8 @@ Not a product. Optimized for one workflow.
 | Directory | Contents |
 |-----------|----------|
 | `skills/` | Shared skills loaded into Claude Code and Codex |
-| `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents |
-| `scripts/` | Shared installer, Codex installer/adapter, and `commit-msg.sh` hook |
+| `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents and opencode subagents |
+| `scripts/` | Shared installer, Codex installer/adapter, opencode installer/adapter, and `commit-msg.sh` hook |
 | `.claude-plugin/` | Claude Code manifest and local marketplace |
 | `.codex-plugin/` | Native Codex plugin manifest |
 
@@ -86,7 +86,9 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 
 Claude Code exposes agents as `private-ai-harness:<name>`. The Codex installer
 generates equivalent `private-ai-harness-<name>` custom agents from the same
-Markdown definitions, so reviewer prompts do not drift between hosts.
+Markdown definitions, and the opencode installer generates
+`private-ai-harness-<name>` subagents the same way — so reviewer prompts do
+not drift between hosts.
 
 | Agent | Purpose |
 |-------|---------|
@@ -218,11 +220,13 @@ add`, installs `rtk`/`ffmpeg`, drops a sound-notify plugin
 (`scripts/opencode-notify-plugin.js`) into opencode's auto-loaded
 `plugin/` directory (reusing `hook-beep.sh` + `assets/sounds/`), installs the
 `commit-msg` git hook, and appends global guidance to opencode's `AGENTS.md`.
-Reviewer agents (`agents/*.md`) are NOT auto-installed — opencode's own
-agent schema (mode/model/permission) differs from Claude's reviewer
-frontmatter, so those stay reference-only. Claude/Codex's plugin
-marketplace, LSP servers, Android skill pack, and cost-visibility plugins
-have no opencode equivalent and are skipped with a warning.
+Reviewer agents (`agents/*.md`) are adapted by
+`scripts/install-opencode-agents.py` into opencode subagents in
+`~/.config/opencode/agents/`, named `private-ai-harness-<name>`; they inherit
+the invoking primary agent's model and permissions (`mode: subagent`, no
+`model` key) and are dispatched via the Task tool or @mention. Claude/Codex's
+plugin marketplace, LSP servers, Android skill pack, and cost-visibility
+plugins have no opencode equivalent and are skipped with a warning.
 
 ### Claude Code manual steps
 

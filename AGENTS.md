@@ -16,13 +16,14 @@ session after reinstalling the local plugin.
 |-----------|------|
 | `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
-| `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly and Codex adapters are generated from it |
+| `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex + opencode adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
-| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, AGENTS.md guidance |
+| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
 | `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
+| `scripts/install-opencode-agents.py` | Deterministic Markdown-to-opencode-subagent adapter (renders `agents/*.md` → `private-ai-harness-<name>.md` in opencode's global agents dir, `mode: subagent`, no `model` → inherits the invoking agent's model) |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
 | `hooks/*.json` | Claude Code hook manifests wiring events to `scripts/hook-beep.sh` (Claude Code only, not loaded by Codex) |
@@ -112,7 +113,9 @@ Claude Code dispatches with the `Agent` tool and
 `subagent_type: "private-ai-harness:<name>"`. Codex dispatches the generated
 custom agent `private-ai-harness-<name>`. `scripts/install-codex-agents.py`
 maps `opus` to high reasoning, `sonnet` to medium, and `haiku` to low while
-inheriting the parent Codex model.
+inheriting the parent Codex model. opencode dispatches the generated subagent
+`private-ai-harness-<name>` (via Task tool or @mention) with no `model` key,
+so it inherits the invoking primary agent's model and permissions.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
