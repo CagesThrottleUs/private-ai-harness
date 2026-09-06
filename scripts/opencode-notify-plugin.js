@@ -6,13 +6,16 @@
 // hook-beep.sh already understands (PreToolUse, PostToolUse, Notification,
 // Stop, PreCompact, PermissionRequest), so all three hosts share one sound
 // library under assets/sounds/.
+//
+// This file gets copied (not symlinked) into ~/.config/opencode/plugin/, so
+// it cannot find hook-beep.sh next to itself at runtime the way codex-notify.sh
+// can (that one stays in place inside the repo checkout). install-opencode.sh
+// substitutes __HOOK_BEEP_PATH__ below with the absolute path to this repo's
+// scripts/hook-beep.sh at install time.
 
 import { spawn } from "node:child_process"
-import { fileURLToPath } from "node:url"
-import { dirname, join } from "node:path"
 
-const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url))
-const HOOK_BEEP = join(SCRIPT_DIR, "hook-beep.sh")
+const HOOK_BEEP = "__HOOK_BEEP_PATH__"
 
 const EVENT_MAP = {
   "session.idle": "Stop",
@@ -25,6 +28,7 @@ const EVENT_MAP = {
 
 function beep(eventName) {
   const child = spawn(HOOK_BEEP, [], { stdio: ["pipe", "ignore", "ignore"], detached: true })
+  child.on("error", (err) => console.error(`[private-ai-harness-notify] ${HOOK_BEEP}: ${err.message}`))
   child.stdin.end(JSON.stringify({ hook_event_name: eventName }))
   child.unref()
 }

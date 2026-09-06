@@ -109,11 +109,13 @@ echo ""
 # ── 5. Sound-notify plugin ───────────────────────────────────────────────────
 echo "5. Sound-notify plugin"
 mkdir -p "$GLOBAL_PLUGIN_DIR"
-cp "$REPO_ROOT/scripts/opencode-notify-plugin.js" "$GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
 chmod +x "$REPO_ROOT/scripts/hook-beep.sh"
+sed "s#__HOOK_BEEP_PATH__#$REPO_ROOT/scripts/hook-beep.sh#" \
+  "$REPO_ROOT/scripts/opencode-notify-plugin.js" \
+  > "$GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
 ok "sound-notify plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
-info "Note: this plugin file imports scripts/hook-beep.sh from this checkout by relative"
-info "path resolved at plugin load time — do not move or delete this repo checkout."
+info "Note: the installed copy has an absolute path to this checkout's hook-beep.sh"
+info "baked in — do not move or delete this repo checkout, or re-run this installer after moving it."
 echo ""
 
 # ── 6. commit-msg git hook ───────────────────────────────────────────────────
