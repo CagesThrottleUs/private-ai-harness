@@ -1,11 +1,19 @@
 // opencode plugin — audio feedback via hook-beep.sh
 //
 // Dropped into ~/.config/opencode/plugin/, opencode auto-loads any .js/.ts
-// file in that directory (no opencode.json entry needed). Subscribes to the
-// "event" hook and maps opencode's event.type onto the same event names
-// hook-beep.sh already understands (PreToolUse, PostToolUse, Notification,
-// Stop, PreCompact, PermissionRequest), so all three hosts share one sound
-// library under assets/sounds/.
+// file in that directory (no opencode.json entry needed). Maps opencode's
+// surfaces onto the same event names hook-beep.sh already understands
+// (PreToolUse, PostToolUse, Notification, Stop, PreCompact,
+// PermissionRequest), so all three hosts share one sound library under
+// assets/sounds/.
+//
+// Two distinct surfaces, per opencode's plugin docs + source:
+//   - tool.execute.before / tool.execute.after are BLOCKING HOOKS, not bus
+//     events ("do not confuse hooks with events"); they fire only when the
+//     plugin returns them as hook keys, so they are registered here as hooks.
+//   - session.* and permission.* events arrive on the bus, delivered to the
+//     "event" hook. permission.updated does not exist; the real events are
+//     permission.asked / permission.replied.
 //
 // This file gets copied (not symlinked) into ~/.config/opencode/plugin/, so
 // it cannot find hook-beep.sh next to itself at runtime the way codex-notify.sh
@@ -17,13 +25,11 @@ import { spawn } from "node:child_process"
 
 const HOOK_BEEP = "__HOOK_BEEP_PATH__"
 
-const EVENT_MAP = {
+const BUS_EVENT_MAP = {
   "session.idle": "Stop",
   "session.error": "Notification",
-  "permission.updated": "PermissionRequest",
-  "tool.execute.before": "PreToolUse",
-  "tool.execute.after": "PostToolUse",
   "session.compacted": "PreCompact",
+  "permission.asked": "PermissionRequest",
 }
 
 function beep(eventName) {
@@ -34,8 +40,14 @@ function beep(eventName) {
 }
 
 export const PrivateAiHarnessNotify = async () => ({
+  "tool.execute.before": (_input) => {
+    beep("PreToolUse")
+  },
+  "tool.execute.after": (_input) => {
+    beep("PostToolUse")
+  },
   event: async ({ event }) => {
-    const mapped = EVENT_MAP[event?.type]
+    const mapped = BUS_EVENT_MAP[event?.type]
     if (mapped) beep(mapped)
   },
 })

@@ -21,7 +21,7 @@ session after reinstalling the local plugin.
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
 | `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, AGENTS.md guidance |
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
-| `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps opencode's `event` hook → `hook-beep.sh` event names |
+| `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
