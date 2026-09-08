@@ -74,6 +74,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — zero-cost `pre-lint.sh` format check (incl. required `north_star` field) runs before the Opus reviewer |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
+| `teacher` | `/teacher` | Independent track (not an `/engineer` step) that checks and deepens your own understanding — evidence-maps actual vs. ideal solution (cited, no hand-waving), Socratic-questions the drift without ever stating the fix, assigns near/far transfer exercises, grades on return, logs for spaced re-quizzing |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
 | `using-git-worktrees` | `/using-git-worktrees` | Parallel branches without stash churn |
 | `using-superpowers` | `/using-superpowers` | Leverage MCP tools effectively |

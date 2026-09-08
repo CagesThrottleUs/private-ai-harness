@@ -73,7 +73,9 @@ exception — it sits directly at the task root, not in its own subfolder,
 since it's a single Step-1 artifact referenced everywhere as one file.
 `portfolio-management` is cross-epic, not single-task, so it stays a
 standalone `.ai/portfolio/` outside any one task folder — a deliberate
-deviation from the "everything moves into a task folder" rule.
+deviation from the "everything moves into a task folder" rule. `teacher`
+is a comprehension check on top of work, not a deliverable of it — its
+dossiers stay in a standalone `.ai/teacher/` for the same reason.
 
 | Artifact | Location | Notes |
 |----------|----------|-------|
@@ -100,6 +102,7 @@ deviation from the "everything moves into a task folder" rule.
 | SDD scratch (task briefs, review diffs, progress ledger) | `.ai/YYYY-MM-DD-<feature-slug>/sdd/` | Self-ignoring (`*` in `.gitignore`); ephemeral run state for subagent-driven-development |
 | Brainstorm server session files (mockup HTML, state, logs) | `.ai/brainstorm/` | Self-ignoring (`*` in `.gitignore`); ephemeral server runtime, created by `start-server.sh --project-dir`; not feature-scoped since it's a shared server workspace |
 | Portfolio Kanban manifest | `.ai/portfolio/` | Cross-epic, spans many features — deliberately NOT nested under one task folder |
+| Teacher session artifacts | `.ai/teacher/<date>-<topic>/` | Socratic dossier/session log/grading report from the independent `teacher` track — not a deliverable of the feature it examines, so it never nests under that feature's task folder |
 
 ## Wiki Sync Rule
 
