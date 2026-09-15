@@ -1,8 +1,8 @@
 # private-ai-harness
 
-Personal Claude Code + Codex harness. One shared skill tree, full stack:
-Karpathy guidelines, commit discipline, parallel agent patterns, TDD
-workflows, systematic debugging, code review, and caveman mode.
+Personal Claude Code + Codex + GitHub Copilot harness. One shared skill tree,
+full stack: Karpathy guidelines, commit discipline, parallel agent patterns,
+TDD workflows, systematic debugging, code review, and caveman mode.
 
 Not a product. Optimized for one workflow.
 
@@ -12,9 +12,9 @@ Not a product. Optimized for one workflow.
 
 | Directory | Contents |
 |-----------|----------|
-| `skills/` | Shared skills loaded into Claude Code and Codex |
-| `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents and opencode subagents |
-| `scripts/` | Shared installer, Codex installer/adapter, opencode installer/adapter, and `commit-msg.sh` hook |
+| `skills/` | Shared skills loaded into Claude Code and Codex; the `skills/*/SKILL.md` layout is also GitHub's native Agent Skills convention, so Copilot discovers it unmodified |
+| `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents, opencode subagents, and Copilot agent skills |
+| `scripts/` | Shared installer, Codex installer/adapter, opencode installer/adapter, Copilot installer/adapter, and `commit-msg.sh` hook |
 | `.claude-plugin/` | Claude Code manifest and local marketplace |
 | `.codex-plugin/` | Native Codex plugin manifest |
 
@@ -87,9 +87,10 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 
 Claude Code exposes agents as `private-ai-harness:<name>`. The Codex installer
 generates equivalent `private-ai-harness-<name>` custom agents from the same
-Markdown definitions, and the opencode installer generates
-`private-ai-harness-<name>` subagents the same way — so reviewer prompts do
-not drift between hosts.
+Markdown definitions, the opencode installer generates
+`private-ai-harness-<name>` subagents the same way, and the Copilot installer
+renders each into a `~/.agents/skills/<name>/SKILL.md` Agent Skill — so
+reviewer prompts do not drift between hosts.
 
 | Agent | Purpose |
 |-------|---------|
@@ -129,10 +130,15 @@ not drift between hosts.
 
 ### Hooks
 
-Claude Code only. Plays a short sound on `PreToolUse`, `PostToolUse`,
+Claude Code plays a short sound on `PreToolUse`, `PostToolUse`,
 `Notification`, `Stop`, `PreCompact`, and `PermissionRequest` — the same
 default beep set shipped by [voicemode](https://github.com/mbailey/voicemode)
-(MIT), ported here so it keeps working if that plugin is uninstalled.
+(MIT), ported here so it keeps working if that plugin is uninstalled. Codex
+maps its single `notify` hook onto the closest event via
+`scripts/codex-notify.sh`. Copilot CLI has its own hooks system
+(`sessionStart`/`agentStop`/`preCompact`/...) configured in
+`~/.copilot/config.json`; `scripts/install-copilot.sh` wires
+`scripts/copilot-notify.sh` into `SessionStart`/`Stop`/`PreCompact` there.
 
 - Script: `scripts/hook-beep.sh`
 - Sounds: `assets/sounds/<Event>/default.mp3`, falls back to `assets/sounds/fallback.mp3`
@@ -150,7 +156,8 @@ default beep set shipped by [voicemode](https://github.com/mbailey/voicemode)
 | [Node.js](https://nodejs.org/) ≥ 18 | `npm`/`npx` for CodeGraph, Context7, claude-mem, skills |
 | [Claude Code](https://claude.ai/code) CLI (`claude`) | plugin install, marketplace registration |
 | [Codex](https://developers.openai.com/codex/) CLI (`codex`) | Codex plugin install and custom-agent dispatch |
-| Python ≥ 3.11 | validates and renders Codex custom-agent TOML files |
+| [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) (`copilot`) | Copilot agent-skill install and global instructions sync |
+| Python ≥ 3.11 | validates and renders Codex custom-agent TOML files and Copilot agent-skill files |
 | [GitHub CLI](https://cli.github.com/) (`gh`) | checking upstream skill repos for updates |
 
 ### Upstream skills to monitor for updates
@@ -188,7 +195,9 @@ This script installs (in order):
 14. **Android team skills** — Kotlin/Compose/KMP pack (chrisbanes, skydoves testing + performance, rcosteira79, new-silvermoon, aldefy, hamen, Meet-Miyani, Drjacky, ceorkm, baoyu); overlapping on purpose — the `android-advisor` overlay resolves which wins per sub-task
 15. **Cost-visibility plugins** — `context-guard` + `statusline` (context budget enforcement, subagent spend tracking) and `claude-context-optimizer` (`/cco*` dashboard, ROI reports, CLAUDE.md bloat audit)
 
-Host-specific steps are skipped when their CLI is not installed.
+Host-specific steps are skipped when their CLI is not installed. GitHub
+Copilot is not chained into this script — run `bash scripts/install-copilot.sh`
+separately (see below).
 
 ### Codex-only install
 
@@ -228,6 +237,40 @@ the invoking primary agent's model and permissions (`mode: subagent`, no
 `model` key) and are dispatched via the Task tool or @mention. Claude/Codex's
 plugin marketplace, LSP servers, Android skill pack, and cost-visibility
 plugins have no opencode equivalent and are skipped with a warning.
+
+### Copilot-only install
+
+```bash
+bash scripts/install-copilot.sh
+```
+
+The harness's `skills/*/SKILL.md` layout is GitHub's native Agent Skills
+discovery convention, so no adapter is needed for skills — the installer
+symlinks each `skills/<name>` folder individually into `~/.copilot/skills/`
+(not the whole tree at once, since that directory is shared with other
+tools' own skill installs — this machine already had ~20 unrelated skill
+folders there). Reviewer agents (`agents/*.md`) have no equivalent in Copilot
+(no subagent dispatch with a per-agent model tier), so
+`scripts/install-copilot-agents.py` renders each into its own
+`~/.agents/skills/<name>/SKILL.md` — same trigger-by-description model as any
+other Copilot skill.
+
+Beyond the harness's own skills, the installer also ports what
+`install-claude.sh` sets up, wherever a real Copilot equivalent exists,
+verified against the actual CLIs rather than assumed:
+
+- **RTK** — `rtk init -g --copilot` (its own documented Copilot integration: writes `~/.copilot/hooks/rtk-rewrite.json` and merges a block into `~/.copilot/copilot-instructions.md`)
+- **Context7** — `copilot mcp add context7 -- npx -y @upstash/context7-mcp` (MCP is host-agnostic)
+- **UI + Android skills** (impeccable, taste-skill, chrisbanes/skills, ceorkm/mobile-app-ui-design, baoyu-skills, hamen/compose_skill, drjacky/claude-android-ninja) — the `skills` CLI (`npx skills add`) has a `github-copilot` agent target built in
+- **skydoves, new-silvermoon, Meet-Miyani, rcosteira79, aldefy skill packs** — no Copilot-aware installer of their own, so cloned directly and their `SKILL.md` folders copied into `~/.copilot/skills/` (bypasses Claude's plugin marketplace, which rcosteira79/aldefy are normally installed through)
+- **Sound notify hooks** — Copilot CLI has its own hooks system (`sessionStart`/`agentStop`/`preCompact`/...) in `~/.copilot/config.json`; the installer wires `scripts/copilot-notify.sh` into it (JSONC-safe merge, timestamped backup), reusing `hook-beep.sh` + `assets/sounds/`
+
+Not portable, and skipped with a reason printed at the end of the run:
+claude-mem (Claude-specific hook/plugin memory, no standalone MCP
+mode), Claude's plugin-marketplace items with no skill-only mirror
+(code-review, code-simplifier, skill-creator, claude-md-management,
+security-guidance, the 6 LSP plugins, Understand-Anything, context-guard,
+claude-context-optimizer), and statusline (Claude Code terminal UI only).
 
 ### Claude Code manual steps
 

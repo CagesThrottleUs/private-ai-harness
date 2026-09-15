@@ -7,23 +7,28 @@ working inside this repo. Keep it current whenever skills, agents, or the instal
 
 ## Repo contract
 
-This repo is a **dual Claude Code and Codex plugin** — no application code, no
-build step, no test suite. Skills are shared and loaded raw by both hosts.
-Claude refreshes them on `/reload-plugins`; Codex loads plugin changes in a new
-session after reinstalling the local plugin.
+This repo is a **Claude Code, Codex, and GitHub Copilot plugin** — no
+application code, no build step, no test suite. Skills are shared and loaded
+raw by all three hosts. Claude refreshes them on `/reload-plugins`; Codex
+loads plugin changes in a new session after reinstalling the local plugin;
+Copilot picks up a re-run of `install-copilot.sh` on its next session (no
+plugin-reload step of its own).
 
 | Directory | Role |
 |-----------|------|
-| `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex |
+| `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex; the same `skills/*/SKILL.md` layout is GitHub's native Agent Skills discovery convention, so Copilot loads it unmodified too |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
-| `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex + opencode adapters are generated from it |
+| `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex, opencode, and Copilot adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
 | `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
+| `scripts/install-copilot.sh` | Copilot installer — per-skill symlinks `skills/<name>` into `~/.copilot/skills/` (shared directory, not a wholesale-tree symlink), adapts `agents/*.md` to Copilot Agent Skills via `install-copilot-agents.py`, syncs global guidance into `~/.copilot/copilot-instructions.md`; also ports whatever `install-claude.sh` sets up that has a verified Copilot equivalent — `rtk init -g --copilot`, Context7 MCP, UI/Android skills via the `skills` CLI's `github-copilot` agent target, skydoves/silvermoon/Meet-Miyani/rcosteira79/aldefy skill packs cloned and copied directly, and sound-notify hooks in `~/.copilot/config.json`; prints what has no Copilot equivalent (claude-mem, Claude's plugin-marketplace items, statusline) and why |
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
+| `scripts/copilot-notify.sh` | Adapter: Copilot CLI's per-event hooks (`sessionStart`/`agentStop`/`preCompact`) → `hook-beep.sh` event names, invoked with the target event name as an argument since Copilot's own hook payloads don't always name the firing event |
 | `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/install-opencode-agents.py` | Deterministic Markdown-to-opencode-subagent adapter (renders `agents/*.md` → `private-ai-harness-<name>.md` in opencode's global agents dir, `mode: subagent`, no `model` → inherits the invoking agent's model) |
+| `scripts/install-copilot-agents.py` | Deterministic Markdown-to-Copilot-Agent-Skill adapter (renders `agents/*.md` → `~/.agents/skills/<name>/SKILL.md`; Copilot has no model-tier dispatch, so the Claude model label is replaced with a neutral "(GitHub Copilot)" tag) |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
 | `hooks/*.json` | Claude Code hook manifests wiring events to `scripts/hook-beep.sh` (Claude Code only, not loaded by Codex) |
@@ -38,7 +43,9 @@ session after reinstalling the local plugin.
 
 Claude Code invokes skills with the `Skill` tool or `/<name>`. Codex loads the
 same skills natively; mention `$<name>` or select them with `/skills` (installed
-plugin UIs may display the `private-ai-harness:` namespace).
+plugin UIs may display the `private-ai-harness:` namespace). Copilot
+auto-loads them from `~/.copilot/skills/` once relevant to the task — describe
+the task, or name the skill directly in the prompt.
 
 | Skill name | Invocation | When to use |
 |------------|------------|-------------|
@@ -116,7 +123,13 @@ custom agent `private-ai-harness-<name>`. `scripts/install-codex-agents.py`
 maps `opus` to high reasoning, `sonnet` to medium, and `haiku` to low while
 inheriting the parent Codex model. opencode dispatches the generated subagent
 `private-ai-harness-<name>` (via Task tool or @mention) with no `model` key,
-so it inherits the invoking primary agent's model and permissions.
+so it inherits the invoking primary agent's model and permissions. Copilot has
+no subagent-dispatch tool with a per-agent model tier, so
+`scripts/install-copilot-agents.py` instead renders each agent as an ordinary
+Agent Skill at `~/.agents/skills/<name>/SKILL.md` — Copilot loads it like any
+other skill, triggered by matching the task against its description, and the
+Claude model-tier label in the body is replaced with a neutral
+"(GitHub Copilot)" tag since there is no reasoning-effort dial to map it to.
 
 | Agent | Model | Purpose |
 |-------|-------|---------|

@@ -1,8 +1,8 @@
 # private-ai-harness — project instructions
 
-This repo is a dual Claude Code and Codex plugin: shared skills, canonical
-agent prompts, host adapters, scripts, and philosophy docs. No application
-code. No tests. No build step.
+This repo is a Claude Code, Codex, and GitHub Copilot plugin: shared skills,
+canonical agent prompts, host adapters, scripts, and philosophy docs. No
+application code. No tests. No build step.
 
 @AGENTS.md
 
@@ -16,9 +16,12 @@ agents/<name>.md            subagent definitions
 scripts/install-claude.sh    one-shot environment setup (Claude Code)
 scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
 scripts/install-opencode.sh opencode installer (skills, Context7, sound plugin, agents, hooks)
+scripts/install-copilot.sh  GitHub Copilot installer (skills symlink, agent-skill adapter, global instructions)
 scripts/codex-notify.sh     Codex notify hook adapter → hook-beep.sh
+scripts/copilot-notify.sh   Copilot CLI hooks adapter → hook-beep.sh
 scripts/install-codex-agents.py  Markdown-to-Codex-agent adapter
 scripts/install-opencode-agents.py Markdown-to-opencode-subagent adapter
+scripts/install-copilot-agents.py  Markdown-to-Copilot-Agent-Skill adapter
 scripts/commit-msg.sh       conventional commits enforcement hook
 .claude-plugin/plugin.json  Claude Code plugin manifest
 .claude-plugin/marketplace.json  Claude/local marketplace manifest
