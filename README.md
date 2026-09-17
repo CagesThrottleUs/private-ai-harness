@@ -136,9 +136,11 @@ default beep set shipped by [voicemode](https://github.com/mbailey/voicemode)
 (MIT), ported here so it keeps working if that plugin is uninstalled. Codex
 maps its single `notify` hook onto the closest event via
 `scripts/codex-notify.sh`. Copilot CLI has its own hooks system
-(`sessionStart`/`agentStop`/`preCompact`/...) configured in
-`~/.copilot/config.json`; `scripts/install-copilot.sh` wires
-`scripts/copilot-notify.sh` into `SessionStart`/`Stop`/`PreCompact` there.
+(`sessionStart`/`agentStop`/...; no `preCompact` event exists) configured via
+personal hook files in `~/.copilot/hooks/*.json` — NOT `config.json`, which
+silently ignores an unrecognized `hooks` key. `scripts/install-copilot.sh`
+writes `~/.copilot/hooks/private-ai-harness.json`, wiring
+`scripts/copilot-notify.sh` into `SessionStart`/`Stop` there.
 
 - Script: `scripts/hook-beep.sh`
 - Sounds: `assets/sounds/<Event>/default.mp3`, falls back to `assets/sounds/fallback.mp3`
@@ -263,7 +265,7 @@ verified against the actual CLIs rather than assumed:
 - **Context7** — `copilot mcp add context7 -- npx -y @upstash/context7-mcp` (MCP is host-agnostic)
 - **UI + Android skills** (impeccable, taste-skill, chrisbanes/skills, ceorkm/mobile-app-ui-design, baoyu-skills, hamen/compose_skill, drjacky/claude-android-ninja) — the `skills` CLI (`npx skills add`) has a `github-copilot` agent target built in
 - **skydoves, new-silvermoon, Meet-Miyani, rcosteira79, aldefy skill packs** — no Copilot-aware installer of their own, so cloned directly and their `SKILL.md` folders copied into `~/.copilot/skills/` (bypasses Claude's plugin marketplace, which rcosteira79/aldefy are normally installed through)
-- **Sound notify hooks** — Copilot CLI has its own hooks system (`sessionStart`/`agentStop`/`preCompact`/...) in `~/.copilot/config.json`; the installer wires `scripts/copilot-notify.sh` into it (JSONC-safe merge, timestamped backup), reusing `hook-beep.sh` + `assets/sounds/`
+- **Sound notify hooks** — Copilot CLI has its own hooks system (`sessionStart`/`agentStop`/...; no `preCompact` event) read from personal hook files in `~/.copilot/hooks/*.json`, not `config.json`; the installer writes `~/.copilot/hooks/private-ai-harness.json` (merge, timestamped backup) wiring `scripts/copilot-notify.sh`, reusing `hook-beep.sh` + `assets/sounds/`
 
 Not portable, and skipped with a reason printed at the end of the run:
 claude-mem (Claude-specific hook/plugin memory, no standalone MCP

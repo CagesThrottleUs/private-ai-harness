@@ -27,6 +27,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COPILOT_HOME="${COPILOT_HOME:-$HOME/.copilot}"
 GLOBAL_INSTRUCTIONS="$COPILOT_HOME/copilot-instructions.md"
 GLOBAL_CONFIG="$COPILOT_HOME/config.json"
+GLOBAL_HOOKS_FILE="$COPILOT_HOME/hooks/private-ai-harness.json"
 GLOBAL_SKILLS_DIR="$COPILOT_HOME/skills"
 AGENT_SKILLS_DIR="$HOME/.agents/skills"
 ANDROID_SKILLS_SRC="$HOME/.copilot-skills-sources"
@@ -176,13 +177,17 @@ echo ""
 
 # ── 6. Audio feedback (hooks) ─────────────────────────────────────────────────
 echo "6. Audio feedback (Copilot CLI hooks)"
-# Copilot CLI has a real hooks system (sessionStart, agentStop, preCompact,
-# preToolUse, postToolUse, ...) configured under the "hooks" key of
-# ~/.copilot/config.json. That file is JSONC (leading // comments) on a
-# freshly-installed CLI, so the merge below preserves any leading comment
-# lines and backs up the original before writing.
+# Personal hooks live in their own files under ~/.copilot/hooks/*.json, NOT
+# under a "hooks" key in config.json (that key is silently ignored — verified
+# against docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks).
+# Each file needs {"version": 1, "hooks": {...}} and entries use "bash"/
+# "timeoutSec", not "command"/"timeout". Copilot CLI has no preCompact event
+# (valid: sessionStart, sessionEnd, userPromptSubmitted, preToolUse,
+# postToolUse, errorOccurred, agentStop), so only sessionStart and agentStop
+# are wired here.
 chmod +x "$REPO_ROOT/scripts/copilot-notify.sh"
-python3 - "$GLOBAL_CONFIG" "$REPO_ROOT" <<'PYEOF'
+mkdir -p "$(dirname "$GLOBAL_HOOKS_FILE")"
+python3 - "$GLOBAL_HOOKS_FILE" "$REPO_ROOT" <<'PYEOF'
 from pathlib import Path
 import json
 import shutil
@@ -192,35 +197,27 @@ import datetime
 path = Path(sys.argv[1])
 repo_root = sys.argv[2]
 
-raw = path.read_text(encoding="utf-8") if path.exists() else "{}\n"
-lines = raw.splitlines(keepends=True)
-i = 0
-while i < len(lines) and lines[i].lstrip().startswith("//"):
-    i += 1
-comment_prefix = "".join(lines[:i])
-json_text = "".join(lines[i:]).strip() or "{}"
-
-data = json.loads(json_text)
+data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+data.setdefault("version", 1)
 hooks = data.setdefault("hooks", {})
 notify_cmd = f"{repo_root}/scripts/copilot-notify.sh"
 
 def ensure_hook(event_key: str, claude_event_name: str) -> None:
     entries = hooks.setdefault(event_key, [])
-    command = f"{notify_cmd} {claude_event_name}"
-    if not any(e.get("command") == command for e in entries):
-        entries.append({"type": "command", "command": command, "timeout": 5})
+    bash_cmd = f"{notify_cmd} {claude_event_name}"
+    if not any(e.get("bash") == bash_cmd for e in entries):
+        entries.append({"type": "command", "bash": bash_cmd, "timeoutSec": 5})
 
 ensure_hook("sessionStart", "SessionStart")
 ensure_hook("agentStop", "Stop")
-ensure_hook("preCompact", "PreCompact")
 
 if path.exists():
     backup = path.with_name(f"{path.name}.bak.{datetime.datetime.now():%Y%m%d%H%M%S}")
     shutil.copy2(path, backup)
 
-path.write_text(comment_prefix + json.dumps(data, indent=2) + "\n", encoding="utf-8")
+path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 PYEOF
-ok "sound hooks wired into $GLOBAL_CONFIG (SessionStart/Stop/PreCompact)"
+ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop)"
 echo ""
 
 # ── 7. Global Copilot instructions ────────────────────────────────────────────
