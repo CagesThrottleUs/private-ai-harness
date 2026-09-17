@@ -183,8 +183,10 @@ echo "6. Audio feedback (Copilot CLI hooks)"
 # Each file needs {"version": 1, "hooks": {...}} and entries use "bash"/
 # "timeoutSec", not "command"/"timeout". Copilot CLI has no preCompact event
 # (valid: sessionStart, sessionEnd, userPromptSubmitted, preToolUse,
-# postToolUse, errorOccurred, agentStop), so only sessionStart and agentStop
-# are wired here.
+# postToolUse, errorOccurred, agentStop). preToolUse/postToolUse are wired
+# too — without them the only audible cue all session is the single Stop
+# beep at the very end, since Copilot fires no other event hook-beep.sh has
+# a dedicated sound for.
 chmod +x "$REPO_ROOT/scripts/copilot-notify.sh"
 mkdir -p "$(dirname "$GLOBAL_HOOKS_FILE")"
 python3 - "$GLOBAL_HOOKS_FILE" "$REPO_ROOT" <<'PYEOF'
@@ -210,6 +212,8 @@ def ensure_hook(event_key: str, claude_event_name: str) -> None:
 
 ensure_hook("sessionStart", "SessionStart")
 ensure_hook("agentStop", "Stop")
+ensure_hook("preToolUse", "PreToolUse")
+ensure_hook("postToolUse", "PostToolUse")
 
 if path.exists():
     backup = path.with_name(f"{path.name}.bak.{datetime.datetime.now():%Y%m%d%H%M%S}")
@@ -217,7 +221,7 @@ if path.exists():
 
 path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 PYEOF
-ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop)"
+ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse)"
 echo ""
 
 # ── 7. Global Copilot instructions ────────────────────────────────────────────
