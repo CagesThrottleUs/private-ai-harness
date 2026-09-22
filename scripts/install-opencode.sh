@@ -40,11 +40,23 @@ fail() { echo -e "${RED}✖${RESET} $*"; }
 
 check_cmd() { command -v "$1" &>/dev/null; }
 
+# clone fresh, or fast-forward an existing checkout
+clone_or_pull() {  # $1=git url  $2=dest
+  if [[ -d "$2/.git" ]]; then
+    git -C "$2" pull --ff-only --quiet && ok "updated $(basename "$2")" || warn "pull failed: $(basename "$2")"
+  else
+    rm -rf "$2"
+    git clone --depth 1 --quiet "$1" "$2" && ok "cloned $(basename "$2")" || warn "clone failed: $(basename "$2")"
+  fi
+}
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OPENCODE_HOME="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 GLOBAL_AGENTS="$OPENCODE_HOME/AGENTS.md"
 GLOBAL_SKILLS="$OPENCODE_HOME/skills"
 GLOBAL_PLUGIN_DIR="$OPENCODE_HOME/plugin"
+GLOBAL_OPENCODE_JSON="$OPENCODE_HOME/opencode.json"
+PONYTAIL_SRC="$OPENCODE_HOME/ponytail-src"
 
 echo ""
 echo "═══════════════════════════════════════════"
@@ -194,6 +206,39 @@ if check_cmd python3; then
   fi
 else
   warn "python3 not found — skipping reviewer agent adapters"
+fi
+echo ""
+
+# ── 9. Ponytail (YAGNI / lazy-dev enforcement plugin) ────────────────────────
+echo "9. Ponytail (YAGNI / lazy-dev skill pack)"
+clone_or_pull "https://github.com/DietrichGebert/ponytail.git" "$PONYTAIL_SRC"
+
+if [[ -d "$PONYTAIL_SRC/skills" ]]; then
+  linked=0
+  for skill_dir in "$PONYTAIL_SRC"/skills/*/; do
+    name="$(basename "$skill_dir")"
+    ln -sfn "${skill_dir%/}" "$GLOBAL_SKILLS/$name"
+    linked=$((linked + 1))
+  done
+  ok "$linked ponytail skills symlinked → $GLOBAL_SKILLS"
+else
+  warn "ponytail skills/ not found in checkout — skipping skill symlinks"
+fi
+
+if check_cmd python3; then
+  python3 - "$GLOBAL_OPENCODE_JSON" <<'PYEOF'
+import json, sys, pathlib
+path = pathlib.Path(sys.argv[1])
+data = json.loads(path.read_text()) if path.exists() else {}
+plugins = data.setdefault("plugin", [])
+if "@dietrichgebert/ponytail" not in plugins:
+    plugins.append("@dietrichgebert/ponytail")
+path.write_text(json.dumps(data, indent=2) + "\n")
+PYEOF
+  ok "ponytail plugin registered in $GLOBAL_OPENCODE_JSON"
+else
+  warn "python3 not found — add manually to $GLOBAL_OPENCODE_JSON:"
+  warn '  { "plugin": ["@dietrichgebert/ponytail"] }'
 fi
 echo ""
 

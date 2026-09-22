@@ -2,12 +2,13 @@
 # Install tools required by the AI harness.
 # Run from any directory: bash scripts/install-claude.sh
 #
-# Steps 1-17 run automatically. Step 9 self-installs this repo as a Claude plugin.
+# Steps 1-18 run automatically. Step 9 self-installs this repo as a Claude plugin.
 # Step 10 installs the Codex plugin and custom-agent adapters when Codex exists.
 # Steps 11-14 inject the global Claude Code guidance blocks (step 11 also
 # installs the caveman output style and sets it as the default).
 # Step 15 installs the commit-msg git hook in the current project.
 # Step 17 installs cost-visibility plugins (context-guard, claude-context-optimizer).
+# Step 18 installs the ponytail (YAGNI/lazy-dev) plugin.
 
 set -euo pipefail
 
@@ -432,6 +433,28 @@ else
   claude plugin install claude-context-optimizer@cco \
     && ok "claude-context-optimizer installed" \
     || warn "claude-context-optimizer install failed"
+fi
+echo ""
+
+# ── 18. Ponytail (YAGNI / lazy-dev enforcement plugin) ───────────────────────
+echo "18. Ponytail (YAGNI / lazy-dev skill pack)"
+if ! check_cmd node; then
+  warn "node not on PATH — ponytail's lifecycle hooks stay silent until it is"
+fi
+if ! check_cmd claude; then
+  warn "claude CLI not found — run these manually:"
+  warn "  claude plugin marketplace add DietrichGebert/ponytail"
+  warn "  claude plugin install ponytail@ponytail"
+else
+  info "Registering ponytail marketplace..."
+  claude plugin marketplace add DietrichGebert/ponytail \
+    && ok "ponytail marketplace registered" \
+    || warn "marketplace add failed — may already be registered"
+
+  info "Installing ponytail plugin..."
+  claude plugin install ponytail@ponytail \
+    && ok "ponytail installed" \
+    || warn "ponytail install failed"
 fi
 echo ""
 

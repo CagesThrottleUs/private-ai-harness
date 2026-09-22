@@ -280,6 +280,7 @@ These are installed via `scripts/install-claude.sh` and available alongside this
 | `pbakaus/impeccable` | UI quality review |
 | `emilkowalski/skill` | Frontend component patterns |
 | `Leonxlnx/taste-skill` | Visual taste heuristics |
+| `DietrichGebert/ponytail` | YAGNI/lazy-dev ladder — reach for stdlib/native/existing-dependency before new code; installed for every host (Claude Code and Copilot via `plugin marketplace add`/`plugin install`, Codex via `codex plugin marketplace add`/`codex plugin add`, opencode via a `plugin` entry in `~/.config/opencode/opencode.json` plus its `skills/` symlinked into opencode's global skill dir) |
 | Android skill pack (step 16) | Kotlin/Compose/KMP: `chrisbanes/skills`, `skydoves/android-testing-skills`, `skydoves/compose-performance-skills`, `rcosteira79/android-skills`, `new-silvermoon/awesome-android-agent-skills`, `aldefy/compose-skill`, `hamen/compose_skill`, `Meet-Miyani/compose-skill`, `Drjacky/claude-android-ninja`, `ceorkm/mobile-app-ui-design`, `jimliu/baoyu-skills` — overlapping by design; the `android-advisor` overlay resolves precedence per sub-task |
 
 > `mukul975/Anthropic-Cybersecurity-Skills` (754 skills) is commented out in `scripts/install-claude.sh` — uncomment to enable.

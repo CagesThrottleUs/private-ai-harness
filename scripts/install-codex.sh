@@ -57,6 +57,16 @@ info "Installing private-ai-harness from the local marketplace"
 codex plugin add private-ai-harness@private-ai-harness
 ok "Codex plugin installed"
 
+info "Registering the ponytail marketplace"
+if codex plugin marketplace add DietrichGebert/ponytail; then
+  ok "ponytail marketplace registered"
+else
+  warn "marketplace registration returned an error; it may already be registered"
+fi
+
+info "Installing ponytail (YAGNI / lazy-dev skill pack)"
+codex plugin add ponytail@ponytail && ok "ponytail installed" || warn "ponytail install failed"
+
 info "Installing Codex custom-agent adapters"
 python3 "$REPO_ROOT/scripts/install-codex-agents.py"
 ok "Codex agents installed"

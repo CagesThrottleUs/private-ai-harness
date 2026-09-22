@@ -198,6 +198,7 @@ This script installs (in order):
 13. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
 14. **Android team skills** — Kotlin/Compose/KMP pack (chrisbanes, skydoves testing + performance, rcosteira79, new-silvermoon, aldefy, hamen, Meet-Miyani, Drjacky, ceorkm, baoyu); overlapping on purpose — the `android-advisor` overlay resolves which wins per sub-task
 15. **Cost-visibility plugins** — `context-guard` + `statusline` (context budget enforcement, subagent spend tracking) and `claude-context-optimizer` (`/cco*` dashboard, ROI reports, CLAUDE.md bloat audit)
+16. **Ponytail** — `DietrichGebert/ponytail`, the YAGNI/lazy-dev ladder plugin (stdlib/native/existing-dependency before new code)
 
 Host-specific steps are skipped when their CLI is not installed. GitHub
 Copilot is not chained into this script — run `bash scripts/install-copilot.sh`
@@ -216,6 +217,10 @@ existing Claude agent files as the single source of truth. It also wires
 same sounds as Claude Code (`scripts/hook-beep.sh` / `assets/sounds/`) — Codex
 has only one notify hook (turn-complete), not Claude's per-event hooks, so all
 event types collapse onto `Stop`/`Notification`.
+
+Also registers the `DietrichGebert/ponytail` marketplace and installs the
+ponytail plugin (`codex plugin add ponytail@ponytail`) — same YAGNI/lazy-dev
+ladder as the Claude Code install.
 
 After installation, start a new Codex session and open `/plugins`. Use `/agent`
 to inspect reviewer agents.
@@ -240,7 +245,11 @@ Reviewer agents (`agents/*.md`) are adapted by
 the invoking primary agent's model and permissions (`mode: subagent`, no
 `model` key) and are dispatched via the Task tool or @mention. Claude/Codex's
 plugin marketplace, LSP servers, Android skill pack, and cost-visibility
-plugins have no opencode equivalent and are skipped with a warning.
+plugins have no opencode equivalent and are skipped with a warning. It also
+clones `DietrichGebert/ponytail`, symlinks its six `skills/` into the same
+global skill dir, and registers `@dietrichgebert/ponytail` in the `plugin`
+array of `~/.config/opencode/opencode.json` (opencode's global config, loaded
+the same way as a project's `opencode.json`).
 
 ### Copilot-only install
 
@@ -268,6 +277,7 @@ verified against the actual CLIs rather than assumed:
 - **UI + Android skills** (impeccable, taste-skill, chrisbanes/skills, ceorkm/mobile-app-ui-design, baoyu-skills, hamen/compose_skill, drjacky/claude-android-ninja) — the `skills` CLI (`npx skills add`) has a `github-copilot` agent target built in
 - **skydoves, new-silvermoon, Meet-Miyani, rcosteira79, aldefy skill packs** — no Copilot-aware installer of their own, so cloned directly and their `SKILL.md` folders copied into `~/.copilot/skills/` (bypasses Claude's plugin marketplace, which rcosteira79/aldefy are normally installed through)
 - **Sound notify hooks** — Copilot CLI has its own hooks system (`sessionStart`/`agentStop`/`preToolUse`/`postToolUse`/...; no `preCompact` event) read from personal hook files in `~/.copilot/hooks/*.json`, not `config.json`; the installer writes `~/.copilot/hooks/private-ai-harness.json` (merge, timestamped backup) wiring `scripts/copilot-notify.sh` into all four events, reusing `hook-beep.sh` + `assets/sounds/`
+- **Ponytail** — Copilot CLI has the same plugin-marketplace mechanism as Claude/Codex (`copilot plugin marketplace add`/`copilot plugin install`), so `DietrichGebert/ponytail` installs the same way
 
 Not portable, and skipped with a reason printed at the end of the run:
 claude-mem (Claude-specific hook/plugin memory, no standalone MCP

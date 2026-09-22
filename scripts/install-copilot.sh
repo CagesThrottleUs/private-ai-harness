@@ -175,8 +175,21 @@ clone_or_pull "https://github.com/aldefy/compose-skill.git" "$ALDEFY"
 copy_skills_from "$ALDEFY" && ok "aldefy/compose-skill copied" || warn "aldefy/compose-skill copy failed"
 echo ""
 
-# ── 6. Audio feedback (hooks) ─────────────────────────────────────────────────
-echo "6. Audio feedback (Copilot CLI hooks)"
+# ── 6. Ponytail (YAGNI / lazy-dev enforcement plugin) ────────────────────────
+echo "6. Ponytail (YAGNI / lazy-dev skill pack)"
+info "Registering ponytail marketplace..."
+copilot plugin marketplace add DietrichGebert/ponytail \
+  && ok "ponytail marketplace registered" \
+  || warn "marketplace add failed — may already be registered"
+
+info "Installing ponytail plugin..."
+copilot plugin install ponytail@ponytail \
+  && ok "ponytail installed" \
+  || warn "ponytail install failed"
+echo ""
+
+# ── 7. Audio feedback (hooks) ─────────────────────────────────────────────────
+echo "7. Audio feedback (Copilot CLI hooks)"
 # Personal hooks live in their own files under ~/.copilot/hooks/*.json, NOT
 # under a "hooks" key in config.json (that key is silently ignored — verified
 # against docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks).
@@ -224,8 +237,8 @@ PYEOF
 ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse)"
 echo ""
 
-# ── 7. Global Copilot instructions ────────────────────────────────────────────
-echo "7. Global Copilot instructions"
+# ── 8. Global Copilot instructions ────────────────────────────────────────────
+echo "8. Global Copilot instructions"
 python3 - "$GLOBAL_INSTRUCTIONS" <<'PYEOF'
 from pathlib import Path
 import sys
