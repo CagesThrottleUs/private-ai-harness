@@ -306,7 +306,7 @@ Three local skills are sourced from external references and can drift:
 | Skill | Upstream | Check |
 |-------|----------|-------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill --web` |
-| `skills/using-superpowers/SKILL.md` | upstream superpowers skill | `gh search repos "claude superpowers skill"` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.1 | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | Karpathy guidelines | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve local customizations, bump patch version.

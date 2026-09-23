@@ -162,7 +162,7 @@ Three skills are sourced from external references and can drift. Check and sync 
 | File | Source | How to check |
 |------|--------|-------------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view JuliusBrussee/caveman --web` |
-| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — last synced v6.3.0 | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.1 (Muse/Pi/Antigravity host refs skipped as unsupported; v6.4.1 concepts integrated into writing-plans, test-driven-development, pr-reviewer, subagent-driven-development) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | [Karpathy tweet](https://x.com/karpathy/status/2015883857489522876) + community distillations | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve any local customizations, bump patch version.
