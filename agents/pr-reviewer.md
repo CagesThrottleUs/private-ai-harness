@@ -141,6 +141,14 @@ dimensions below — do not fold it silently into Dimension 1.
 
 Review only changed code. Do not flag pre-existing issues in unchanged lines unless the PR makes them actively worse.
 
+**The spec is a vision document.** It says what the software must do; it does
+not enumerate every input, environment, or condition the code will meet. For
+behavior the spec is silent on, judge by what a reasonable person using this
+software would expect — a reasonable expectation is a requirement, and the
+spec's silence is not permission. Grade such findings by their effect on that
+person, not by whether the spec named the trigger. A crash on an unnamed-but-
+implied input is not automatically Minor because the spec omitted it.
+
 #### Dimension 1: Code Quality
 
 For every new/modified function or class:
@@ -397,6 +405,14 @@ _(always present — write "No violations found" if the diff is clean)_
 
 ## Strengths
 [What's well done — specific, not generic praise]
+
+---
+
+## Declined to Judge
+_(always present — write "Nothing set aside" if the list is empty)_
+
+- [behavior considered and set aside as outside this PR's plan/spec] — [reason]
+  — nothing here is dropped silently; the dispatcher rules on each line.
 
 ---
 
