@@ -135,6 +135,19 @@ limits, naming and copy rules, platform requirements — one line each, with
 exact values copied verbatim from the spec. Every task's requirements
 implicitly include this section.]
 
+## Review Focus
+
+[The up-to-five input classes or failure modes the spec *implies* but no
+task's tests exercise, most likely to bite a real user first. One line each:
+name the input or condition and the behavior a reasonable person would
+expect. The spec is a vision document — it says what the software must do,
+not every input it will meet, and its silence on an input is not permission
+for that input to break. Write this list once with the spec in front of you,
+then for each line add the pinning test to the task that owns the code, in
+that task's own step style, and reference the REQ it defends (or note "no REQ
+— spec-implied"). An empty section means you checked and found none, not that
+you skipped the check.]
+
 ---
 ```
 
@@ -216,6 +229,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 **2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
 
 **3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+
+**4. Review Focus:** For each input class or failure mode the spec implies, is there a task whose tests exercise it? The five uncovered ones most likely to bite a real user go in the Review Focus section, and each gets its pinning test added to the owning task. An empty section means you checked and found none — not that you skipped the check.
 
 If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
 
