@@ -30,6 +30,8 @@ GLOBAL_CONFIG="$COPILOT_HOME/config.json"
 GLOBAL_HOOKS_FILE="$COPILOT_HOME/hooks/private-ai-harness.json"
 GLOBAL_SKILLS_DIR="$COPILOT_HOME/skills"
 AGENT_SKILLS_DIR="$HOME/.agents/skills"
+CUSTOM_AGENTS_DIR="$COPILOT_HOME/agents"
+SETTINGS_FILE="$COPILOT_HOME/settings.json"
 ANDROID_SKILLS_SRC="$HOME/.copilot-skills-sources"
 
 if ! check_cmd copilot; then
@@ -70,6 +72,30 @@ info "Validating Copilot agent-skill adapters"
 python3 "$REPO_ROOT/scripts/install-copilot-agents.py" --check
 ok "agent definitions valid"
 
+info "Registering this checkout as a live Copilot plugin"
+if copilot plugin marketplace add "$REPO_ROOT"; then
+  ok "local harness marketplace registered"
+elif copilot plugin marketplace list --json | python3 -c '
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1]).resolve()
+marketplaces = json.load(sys.stdin)
+sys.exit(0 if any(
+    entry.get("name") == "private-ai-harness"
+    and entry.get("source") == f"Local: {root}"
+    for entry in marketplaces
+) else 1)
+' "$REPO_ROOT"; then
+  ok "local harness marketplace already registered"
+else
+  fail "private-ai-harness marketplace points elsewhere; refusing to install a different plugin"
+  exit 1
+fi
+copilot plugin install private-ai-harness@private-ai-harness
+ok "harness plugin loaded live from $REPO_ROOT"
+
 info "Linking harness skills into $GLOBAL_SKILLS_DIR"
 mkdir -p "$GLOBAL_SKILLS_DIR"
 linked=0
@@ -84,9 +110,9 @@ for skill_dir in "$REPO_ROOT"/skills/*/; do
 done
 ok "linked $linked skills → $GLOBAL_SKILLS_DIR"
 
-info "Installing Copilot agent skills (reviewer definitions)"
-python3 "$REPO_ROOT/scripts/install-copilot-agents.py" --dest-dir "$AGENT_SKILLS_DIR"
-ok "agent skills installed → $AGENT_SKILLS_DIR"
+info "Installing Copilot reviewer skills and native custom agents"
+python3 "$REPO_ROOT/scripts/install-copilot-agents.py" --dest-dir "$AGENT_SKILLS_DIR" --agent-dir "$CUSTOM_AGENTS_DIR"
+ok "reviewers installed → $AGENT_SKILLS_DIR and $CUSTOM_AGENTS_DIR"
 echo ""
 
 # ── 2. RTK ────────────────────────────────────────────────────────────────────
@@ -188,8 +214,25 @@ copilot plugin install ponytail@ponytail \
   || warn "ponytail install failed"
 echo ""
 
-# ── 7. Audio feedback (hooks) ─────────────────────────────────────────────────
-echo "7. Audio feedback (Copilot CLI hooks)"
+# ── 7. Copilot HUD (status-line plugin) ────────────────────────────────────────
+echo "7. Copilot HUD (status-line plugin)"
+if ! check_cmd node; then
+  warn "node not found — HUD renderer requires Node.js 18+"
+fi
+if ! check_cmd jq; then
+  warn "jq not found — HUD tool and agent activity tracking requires jq"
+fi
+copilot plugin marketplace add griches/copilot-hud \
+  && ok "copilot-hud marketplace registered" \
+  || warn "copilot-hud marketplace add failed — may already be registered"
+copilot plugin install copilot-hud@copilot-hud \
+  && ok "copilot-hud installed" \
+  || warn "copilot-hud install failed"
+echo "Run /copilot-hud:setup once in Copilot to enable the status line."
+echo ""
+
+# ── 8. Audio feedback (hooks) ─────────────────────────────────────────────────
+echo "8. Audio feedback (Copilot CLI hooks)"
 # Personal hooks live in their own files under ~/.copilot/hooks/*.json, NOT
 # under a "hooks" key in config.json (that key is silently ignored — verified
 # against docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks).
@@ -237,8 +280,15 @@ PYEOF
 ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse)"
 echo ""
 
-# ── 8. Global Copilot instructions ────────────────────────────────────────────
-echo "8. Global Copilot instructions"
+# ── 9. Copilot defaults ───────────────────────────────────────────────────────
+echo "9. Copilot defaults"
+mkdir -p "$COPILOT_HOME"
+python3 "$REPO_ROOT/scripts/configure-copilot.py" --settings "$SETTINGS_FILE"
+ok "new interactive Copilot sessions default to autopilot ($SETTINGS_FILE)"
+echo ""
+
+# ── 10. Global Copilot instructions ───────────────────────────────────────────
+echo "10. Global Copilot instructions"
 python3 - "$GLOBAL_INSTRUCTIONS" <<'PYEOF'
 from pathlib import Path
 import sys
@@ -251,8 +301,9 @@ block = f"""{start}
 
 - Skills auto-load from `~/.copilot/skills/` (symlinked to the harness `skills/` tree)
   — invoke by describing the task, or by name (e.g. "use the workflow skill").
-- Reviewer agent skills live in `~/.agents/skills/private-ai-harness-*` — same
-  trigger model, loaded when a task matches their description.
+- Reviewer agent skills live in `~/.agents/skills/<name>/`; native custom
+  agents live in `~/.copilot/agents/private-ai-harness-<name>.agent.md` and
+  are selectable with `/agent`.
 - Repos built with this harness already ship an `AGENTS.md`; Copilot coding
   agent and Copilot CLI read it natively — no extra step needed per repo.
 {end}"""
@@ -280,8 +331,8 @@ echo "                      plugins, Understand-Anything, context-guard,"
 echo "                      claude-context-optimizer — Claude's plugin-marketplace"
 echo "                      system has no Copilot counterpart (installed-plugins/"
 echo "                      exists in ~/.copilot/ but is unused on this machine)"
-echo "  statusline        — Claude Code terminal UI feature, not applicable to a"
-echo "                      Copilot CLI/Chat session"
+echo "  Claude statusline — Claude's plugin is not portable; Copilot HUD provides"
+echo "                      a Copilot CLI status line after /copilot-hud:setup"
 echo "═══════════════════════════════════════════"
 echo "Start a new Copilot CLI / Copilot Chat session to pick up the changes."
 echo "Verify: ask Copilot to list its available skills; run 'copilot mcp list'."

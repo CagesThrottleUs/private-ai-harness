@@ -161,6 +161,7 @@ session is the single Stop beep at the end.
 | [Claude Code](https://claude.ai/code) CLI (`claude`) | plugin install, marketplace registration |
 | [Codex](https://developers.openai.com/codex/) CLI (`codex`) | Codex plugin install and custom-agent dispatch |
 | [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) (`copilot`) | Copilot agent-skill install and global instructions sync |
+| [`jq`](https://jqlang.github.io/jq/download/) | Copilot HUD tool and agent activity tracking |
 | Python ≥ 3.11 | validates and renders Codex custom-agent TOML files and Copilot agent-skill files |
 | [GitHub CLI](https://cli.github.com/) (`gh`) | checking upstream skill repos for updates |
 
@@ -257,16 +258,24 @@ the same way as a project's `opencode.json`).
 bash scripts/install-copilot.sh
 ```
 
+The installer registers this checkout as a **local Copilot marketplace** and
+installs `private-ai-harness@private-ai-harness` from it. The plugin is loaded
+live from this directory: edits to skills take effect on `/restart` or in a
+new session, without reinstalling. Keep this checkout in place. There is no
+need to symlink the whole plugin; existing per-skill symlinks remain for
+compatibility. Edits to canonical `agents/*.md` require rerunning the
+installer to regenerate native Copilot agent profiles and Agent Skills.
+
 The harness's `skills/*/SKILL.md` layout is GitHub's native Agent Skills
 discovery convention, so no adapter is needed for skills — the installer
 symlinks each `skills/<name>` folder individually into `~/.copilot/skills/`
 (not the whole tree at once, since that directory is shared with other
 tools' own skill installs — this machine already had ~20 unrelated skill
-folders there). Reviewer agents (`agents/*.md`) have no equivalent in Copilot
-(no subagent dispatch with a per-agent model tier), so
-`scripts/install-copilot-agents.py` renders each into its own
-`~/.agents/skills/<name>/SKILL.md` — same trigger-by-description model as any
-other Copilot skill.
+folders there). Reviewer agents (`agents/*.md`) are rendered both as native user-level
+Copilot custom agents (`~/.copilot/agents/private-ai-harness-<name>.agent.md`,
+selectable via `/agent` or as subagents) and as Agent Skills at
+`~/.agents/skills/<name>/SKILL.md` for backward-compatible skill discovery.
+The Claude model tiers are not mapped to Copilot models.
 
 Beyond the harness's own skills, the installer also ports what
 `install-claude.sh` sets up, wherever a real Copilot equivalent exists,
@@ -278,13 +287,21 @@ verified against the actual CLIs rather than assumed:
 - **skydoves, new-silvermoon, Meet-Miyani, rcosteira79, aldefy skill packs** — no Copilot-aware installer of their own, so cloned directly and their `SKILL.md` folders copied into `~/.copilot/skills/` (bypasses Claude's plugin marketplace, which rcosteira79/aldefy are normally installed through)
 - **Sound notify hooks** — Copilot CLI has its own hooks system (`sessionStart`/`agentStop`/`preToolUse`/`postToolUse`/...; no `preCompact` event) read from personal hook files in `~/.copilot/hooks/*.json`, not `config.json`; the installer writes `~/.copilot/hooks/private-ai-harness.json` (merge, timestamped backup) wiring `scripts/copilot-notify.sh` into all four events, reusing `hook-beep.sh` + `assets/sounds/`
 - **Ponytail** — Copilot CLI has the same plugin-marketplace mechanism as Claude/Codex (`copilot plugin marketplace add`/`copilot plugin install`), so `DietrichGebert/ponytail` installs the same way
+- **Copilot HUD** — installs [`griches/copilot-hud`](https://github.com/griches/copilot-hud) from its marketplace as `copilot-hud@copilot-hud`. Run `/copilot-hud:setup` once in Copilot to enable its status line; existing HUD configuration is left intact.
+- **Autopilot default** — sets `defaultMode` to `autopilot` in `~/.copilot/settings.json` (or `$COPILOT_HOME/settings.json`), preserving all other user settings. New interactive sessions start in autopilot; resumed and non-interactive sessions retain their own modes.
 
 Not portable, and skipped with a reason printed at the end of the run:
 claude-mem (Claude-specific hook/plugin memory, no standalone MCP
 mode), Claude's plugin-marketplace items with no skill-only mirror
 (code-review, code-simplifier, skill-creator, claude-md-management,
 security-guidance, the 6 LSP plugins, Understand-Anything, context-guard,
-claude-context-optimizer), and statusline (Claude Code terminal UI only).
+claude-context-optimizer), and Claude's statusline plugin (Copilot HUD
+provides the Copilot CLI equivalent).
+
+Check installed harness agents with `/agent` in a new Copilot session;
+reviewers appear as `private-ai-harness-<name>`. Use `copilot skill list`
+to check the separate Agent Skill copies. Plugin installation alone does not
+enable the HUD's status line; `/copilot-hud:setup` performs its one-time setup.
 
 ### Claude Code manual steps
 

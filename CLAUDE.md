@@ -16,12 +16,13 @@ agents/<name>.md            subagent definitions
 scripts/install-claude.sh    one-shot environment setup (Claude Code)
 scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
 scripts/install-opencode.sh opencode installer (skills, Context7, sound plugin, agents, hooks)
-scripts/install-copilot.sh  GitHub Copilot installer (skills symlink, agent-skill adapter, global instructions)
+scripts/install-copilot.sh  GitHub Copilot installer (skills, native agents, HUD, autopilot default)
 scripts/codex-notify.sh     Codex notify hook adapter → hook-beep.sh
 scripts/copilot-notify.sh   Copilot CLI hooks adapter → hook-beep.sh
 scripts/install-codex-agents.py  Markdown-to-Codex-agent adapter
 scripts/install-opencode-agents.py Markdown-to-opencode-subagent adapter
-scripts/install-copilot-agents.py  Markdown-to-Copilot-Agent-Skill adapter
+scripts/install-copilot-agents.py  Markdown-to-Copilot-agent and Agent-Skill adapter
+scripts/configure-copilot.py  Preserve user settings while setting Copilot's autopilot default
 scripts/commit-msg.sh       conventional commits enforcement hook
 .claude-plugin/plugin.json  Claude Code plugin manifest
 .claude-plugin/marketplace.json  Claude/local marketplace manifest
@@ -72,6 +73,15 @@ TOML agents, mapping Opus/Sonnet/Haiku to high/medium/low reasoning while
 inheriting the active Codex model. `scripts/install-opencode-agents.py`
 generates opencode subagents (`mode: subagent`, no `model`), so opencode
 agents inherit the invoking primary agent's model and permissions.
+`scripts/install-copilot-agents.py` also generates native Copilot agent
+profiles in `~/.copilot/agents/` (selectable via `/agent`), alongside
+the existing Agent Skills; no Claude model tier is mapped to a Copilot model.
+The installer registers this checkout as a local Copilot marketplace and
+installs the harness plugin live; changes to skills apply after `/restart`,
+while native agent adapters need installer re-run after source changes.
+The Copilot installer preserves existing `~/.copilot/settings.json` keys,
+setting only `defaultMode` to `autopilot`. It installs the copilot-hud plugin;
+run `/copilot-hud:setup` once in Copilot to enable its status line.
 
 ---
 

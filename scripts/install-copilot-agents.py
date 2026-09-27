@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Install Claude-style harness agent definitions as GitHub Copilot Agent Skills."""
+"""Install harness agent definitions as Copilot custom agents and Agent Skills."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -95,6 +96,19 @@ def render_skill(agent: AgentDefinition) -> str:
     return frontmatter + agent.copilot_instructions + "\n"
 
 
+def render_agent(agent: AgentDefinition) -> str:
+    frontmatter = "\n".join(
+        (
+            "---",
+            f"name: {yaml_string('private-ai-harness-' + agent.name)}",
+            f"description: {yaml_string(agent.description)}",
+            "---",
+            "",
+        )
+    )
+    return frontmatter + agent.copilot_instructions + "\n"
+
+
 def parse_args() -> argparse.Namespace:
     repo_root = Path(__file__).resolve().parent.parent
     parser = argparse.ArgumentParser(
@@ -113,6 +127,12 @@ def parse_args() -> argparse.Namespace:
         help="Global Copilot Agent Skills directory (default: ~/.agents/skills).",
     )
     parser.add_argument(
+        "--agent-dir",
+        type=Path,
+        default=Path(os.environ.get("COPILOT_HOME", str(Path.home() / ".copilot"))) / "agents",
+        help="User-level Copilot custom agents directory.",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Validate and render in memory without writing files.",
@@ -126,24 +146,33 @@ def main() -> None:
     if not paths:
         raise SystemExit(f"No agent definitions found in {args.source_dir}")
 
-    rendered: list[tuple[AgentDefinition, str]] = []
+    rendered: list[tuple[AgentDefinition, str, str]] = []
     for path in paths:
         agent = parse_frontmatter(path)
-        rendered.append((agent, render_skill(agent)))
+        profile = render_agent(agent)
+        if len(profile) > 30_000:
+            raise ValueError(f"{path}: Copilot agent profile exceeds 30,000 characters")
+        rendered.append((agent, render_skill(agent), profile))
 
     if args.check:
-        print(f"Validated {len(rendered)} Copilot agent-skill adapters")
+        print(f"Validated {len(rendered)} Copilot agent and agent-skill adapters")
         return
 
-    for agent, content in rendered:
+    args.agent_dir.mkdir(parents=True, exist_ok=True)
+    for agent, content, profile in rendered:
         skill_dir = args.dest_dir / agent.name
         skill_dir.mkdir(parents=True, exist_ok=True)
         destination = skill_dir / "SKILL.md"
         temporary = destination.with_suffix(".md.tmp")
         temporary.write_text(content, encoding="utf-8")
         temporary.replace(destination)
+        agent_file = args.agent_dir / f"private-ai-harness-{agent.name}.agent.md"
+        temporary = agent_file.with_suffix(".md.tmp")
+        temporary.write_text(profile, encoding="utf-8")
+        temporary.replace(agent_file)
 
     print(f"Installed {len(rendered)} Copilot agent skills in {args.dest_dir}")
+    print(f"Installed {len(rendered)} Copilot custom agents in {args.agent_dir}")
 
 
 if __name__ == "__main__":
