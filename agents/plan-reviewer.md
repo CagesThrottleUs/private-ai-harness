@@ -84,17 +84,23 @@ The test: could a reviewer approve the first deliverable and block the second? I
 
 ### D3 — Placeholder Detection
 
-Flag every instance of these plan failure patterns:
+A step must let the implementer write exactly one reasonable thing, and carry
+no more than that. Flag both directions.
+
+**Gaps — the implementer cannot act (Critical):**
 - `TBD`, `TODO`, `implement later`, `fill in details`
-- `"Add appropriate error handling"` — no spec, no code
-- `"Add validation"` — no spec, no code
+- `"Add appropriate error handling"` / `"Add validation"` — no spec, no signature
 - `"Handle edge cases"` — no named edge cases
-- `"Write tests for the above"` — no actual test code
-- `"Similar to Task N"` — copy-paste the code; agents may read out of order
-- Steps that describe what to do without showing how (code blocks required for code steps)
+- `"Write tests for the above"` — no test names or assertions
+- A code step missing its exact signature (name, parameters, return type), the file it lives in, or the spec's pinned values
+- `"Similar to Task N"` with no pointer to that task's Interfaces block
 - References to functions, types, or methods not defined in any task
 
-**Critical:** Any of the above patterns. These are not warnings — they are plan failures. An agent executing this plan will produce wrong or incomplete code.
+**Transcripts — the plan wrote the code instead of the decision (Advisory):**
+- A full function body for logic the signature and its tests already determine
+- A code step repeating a neighboring task's code the Interfaces block already exposes
+
+**Critical:** any Gap pattern — an agent executing this plan produces wrong or incomplete code. Transcripts bloat the plan and are Advisory, not blocking.
 
 ---
 

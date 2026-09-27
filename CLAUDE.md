@@ -162,7 +162,7 @@ Three skills are sourced from external references and can drift. Check and sync 
 | File | Source | How to check |
 |------|--------|-------------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view JuliusBrussee/caveman --web` |
-| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.1 (Muse/Pi/Antigravity host refs skipped as unsupported; v6.4.1 concepts integrated into writing-plans, test-driven-development, pr-reviewer, subagent-driven-development) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.2 (Muse/Pi/Antigravity host refs skipped as unsupported; concepts integrated into writing-plans, test-driven-development, pr-reviewer, subagent-driven-development. v6.4.2 shifted writing-plans from "transcribe complete code" to "document only the decisions the implementer can't make" — signatures + spec-pinned values over full bodies — and added the Proportion self-review check; upstream's now-superseded `plan-document-reviewer-prompt.md` dropped in favor of the local `plan-reviewer` agent) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | [Karpathy tweet](https://x.com/karpathy/status/2015883857489522876) + community distillations | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve any local customizations, bump patch version.
