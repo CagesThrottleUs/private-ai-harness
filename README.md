@@ -55,7 +55,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `receiving-code-review` | `/receiving-code-review` | How to act on review feedback — verify before implementing, propagate the fix to every sibling occurrence and analogous path (CLI vs MCP, primary vs fallback), every call site of a changed shared helper, plus a determinism check on new concurrency; then a Proportionality Gate — simpler fix or a follow-up ticket, not a maximal rewrite |
 | `closing-review-loops` | `/closing-review-loops` | Close a review round to zero negotiable rounds — batch findings, fix once, internal self-review clean before re-triggering any external reviewer, push once; re-checks cumulative size/cohesion every round and reports a commits/LOC receipt |
 | `requesting-code-review` | `/requesting-code-review` | How to request a review; gates external re-trigger on `closing-review-loops` |
-| `review` | `/review` | Multi-dimension code review |
+| `review` | `/review`, `/review auto` | Multi-dimension review; auto lists every reviewer and its purpose, selects relevant agents and codebase/diff scopes, and reports skipped agents without changing `/review all` |
 | `feature-flags` | `/feature-flags` | For gradual rollout/A/B test/kill switch — OpenFeature SDK, naming conventions, flag registry, CI hygiene |
 | `infrastructure-as-code` | `/infrastructure-as-code` | When feature needs new infrastructure — Terraform/Pulumi with pinned versions, remote state, environment separation, tfsec CI |
 | `database-erd` | `/database-erd` | During HLD or writing-plans for DB changes — Mermaid erDiagram with entities, FKs, cardinality, index strategy |

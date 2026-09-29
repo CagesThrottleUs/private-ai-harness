@@ -1,6 +1,6 @@
 ---
 name: review
-description: Central entry point for all code review types. Routes to the right agent(s) based on what you need reviewed — PR diff, spec correctness, test quality, security, or full project. Invoke as /review, /review pr, /review spec, /review tests, /review security, /review full, or /review all. Also handles direct chat requests like "review my PR" or "check security".
+description: Use when requesting a codebase or PR review, choosing suitable reviewer agents, or checking a specific review artifact such as security, tests, CI, or an API contract.
 ---
 
 # Review Orchestrator
@@ -20,6 +20,7 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review security` | Adversarial security review (threat model, OWASP, future attack surface) |
 | `/review full` | Full project review (all dimensions, whole codebase) |
 | `/review all` | All PR-scoped agents in parallel (pr + spec + tests + security) |
+| `/review auto` | Publish every available reviewer and its purpose, then choose and run applicable reviewers on the requested codebase or diff |
 | `/review lang` | Language-expert review (10 dimensions — type system, UB, idioms, ownership, concurrency, etc.) |
 | `/review ci` | CI/CD pipeline review (stage completeness, security hygiene, coverage gate, DORA readiness) |
 | `/review hld` | High-level design review (C4, tech selection, STRIDE, failure modes, capacity, ADRs) |
@@ -41,13 +42,14 @@ Single entry point for all reviews. Routes to the right agent(s), collects requi
 | `/review sequence` | Sequence diagram review (flow coverage, error paths, auth boundary, arrow types, HLD alignment) |
 | `/review performance` | Load test review (NFR-aligned thresholds, smoke test, realistic traffic, CI on staging) |
 
-Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec".
+Also triggers on direct chat: "review my PR", "check my tests", "security review", "does this satisfy the spec", "review this codebase and choose reviewers".
 
 ---
 
 ## Agent Roster
 
 **`/review all` scope:** runs only pr-reviewer + spec-impl-reviewer + test-quality-reviewer + security-reviewer in parallel. All other agents run independently via their specific subcommand.
+**`/review auto` scope:** the entire reviewer inventory below, including artifact gates not exposed as individual `/review` subcommands. Reconcile it with the harness's `agents/*-reviewer.md` at invocation time; the agent definitions are authoritative when a reviewer is added or its inputs change.
 
 **Platform dispatch:** Claude Code uses `private-ai-harness:<agent>` through
 the `Agent` tool. Codex uses the installed custom agent
@@ -64,6 +66,10 @@ the spawned agent's instructions.
 | `security-reviewer` | PR diff | Any PR touching auth, input, data access, external comms, config |
 | `full-project-reviewer` | Entire codebase | Before releases, after major milestones, holistic audit |
 | `language-expert-reviewer` | PR diff or full | Type system, UB, ownership, idioms, concurrency, error handling — 10 dimensions |
+| `business-context-reviewer` | Business context document | User-focused problem, JTBD, measurable outcomes, compliance, non-goals, stakeholders |
+| `spec-quality-reviewer` | Requirements spec | Falsifiability, test-case coverage, consistency, requirements smells |
+| `plan-reviewer` | Implementation plan and spec | Spec coverage, task granularity, interfaces, placeholders, design principles |
+| `portfolio-reviewer` | Portfolio manifest | WSJF, WIP limits, dependencies, OKR links |
 | `ci-reviewer` | CI/CD config | When CI config is created or modified |
 | `hld-reviewer` | HLD document | When HLD is written or updated |
 | `observability-reviewer` | Observability artifacts | When observability is set up or updated |
@@ -76,9 +82,15 @@ the spawned agent's instructions.
 | `database-erd-reviewer` | ERD files | When ERD is written or updated |
 | `visual-regression-reviewer` | Visual test files | When visual regression tests are written |
 | `chaos-reviewer` | Chaos test files | When chaos tests are written |
+| `formal-verification-reviewer` | Proof verdict and source | Proof obligations, correct specification, bounded vs unbounded claims |
 | `incident-response-reviewer` | IR docs | When IR docs are created/updated |
+| `production-readiness-reviewer` | Production readiness report | Evidence for service levels, capacity, rollback, operations, testing and security |
 | `onboarding-reviewer` | `wiki/ONBOARDING.md` | When onboarding guide is written or updated |
+| `outcome-review-reviewer` | Outcome report and business context | Measured business outcomes, timing, evidence, launch decision |
 | `dast-reviewer` | CI config / ZAP files | When DAST is configured |
+| `linter-reviewer` | Changed files and lint output | Language-specific lint/type-check gate, suppressions |
+| `delivery-metrics-reviewer` | Delivery report and ledger | DORA/Flow calculations, source evidence, metric honesty |
+| `service-scaffolding-reviewer` | New service scaffold | CI, observability, contract, limits, catalog, scorecard completeness |
 | `accessibility-reviewer` | E2E test files | When UI feature ships |
 | `api-versioning-reviewer` | Versioning artifacts | When versioning strategy is defined |
 | `sequence-diagram-reviewer` | Sequence diagrams | When sequence diagrams are written |
@@ -104,6 +116,10 @@ If any item fails → fix, re-verify, then dispatch.
 ## Execution
 
 ### Step 1 — Collect Shared Inputs
+
+For `/review auto`, inspect the requested scope first; collect BASE/HEAD only
+if a selected reviewer needs a real diff. Do not make a whole-codebase review
+depend on `origin/main` existing.
 
 ```bash
 BASE=$(git merge-base origin/main HEAD)
@@ -171,6 +187,40 @@ For artifact reviews, auto-detect paths per footnotes below.
 ¹⁸ `wiki/guides/incident-response.md`
 ¹⁹ Check `.ai/*/lld/` for `*sequences*.md`.
 ²⁰ Check `tests/performance/` for `*.js`, `*.py` (Locust), `*.scala` (Gatling).
+
+### Step 2.5 — `/review auto` (inventory, select, dispatch)
+
+Use this mode for a repository review whose reviewer selection is not already
+specified. It does not change `/review all` or the individual commands.
+
+1. Resolve the harness root from this skill's location (`../../agents/`),
+   not from the project being reviewed. Enumerate its `*-reviewer.md` files
+   and read each frontmatter description. For plausible candidates, read the
+   agent's required inputs before marking it eligible. Publish **every**
+   discovered reviewer in a table:
+   `Agent | Useful for | Scope or required artifact | Selected / skipped (reason)`.
+   Use the roster above as a quick reference, not a closed list. Do not omit
+   inapplicable reviewers or treat their absence as a passed review.
+2. Determine the requested boundary first: whole codebase, named paths, or
+   branch/PR diff. Inspect relevant files and artifacts, language, CI, and
+   available base/head commits. Map each candidate to the specific files or
+   diff it can review. Select only agents with relevant evidence and *all*
+   required inputs in their own `agents/<name>.md` contract. The user's
+   explicit scope overrides inferred scope. A whole-codebase request does not
+   turn a diff-only agent into a whole-project reviewer; if no valid diff
+   exists, skip it with a reason. A missing spec, staging scan configuration,
+   proof verdict, or report is not an invitation to invent one.
+3. Show the selection plan (`agent -> exact scope -> why -> inputs`) alongside
+   the full inventory **before** dispatch. Dispatch the selected agents with
+   their original instructions and required inputs; pass `REPORT_FILE` where
+   supported and run independent reviews in parallel. Never feed an agent
+   unrelated files or broaden its documented remit. `dast-reviewer` reviews
+   scan configuration, not the running application; live DAST belongs to
+   `dast-testing` and requires an actual scan target.
+4. Aggregate verdicts with cited findings, list skipped reviewers and
+   missing prerequisites, and distinguish *not reviewed* from *passed*.
+   If none apply, report that explicitly rather than claiming merge readiness.
+   Do not replace the `/review all` PR gate with this mode.
 
 ### Step 3 — `/review all` (conditional parallel dispatch)
 
@@ -246,6 +296,7 @@ Save to `.ai/YYYY-MM-DD-<feature-slug>/reports/reports-<branch>-review-summary.m
 | "security review" / "check for vulnerabilities" | `/review security` |
 | "full review" / "audit the codebase" | `/review full` |
 | "review everything" / "full suite" | `/review all` |
+| "review auto" / "choose reviewers for this codebase" / "review my codebase and pick agents" | `/review auto` |
 | "language review" / "C++ review" / "Rust review" / "expert review" / "check idioms" | `/review lang` |
 | "review my pipeline" / "check CI config" / "review CI" / "check my ci" | `/review ci` |
 | "review the HLD" / "check the design doc" / "review architecture doc" / "validate HLD" | `/review hld` |

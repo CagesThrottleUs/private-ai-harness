@@ -147,6 +147,11 @@ work, not starting fresh. Before the first fix:
 
 This binds in every repo the harness touches, not just this one.
 
+For an exploratory codebase review, `/review auto` publishes the entire
+reviewer inventory (including inapplicable agents) and their purposes, selects
+agents with valid artifacts and exact scopes, then runs them. `/review all`
+remains the four-agent, PR-scoped gate; auto does not replace it.
+
 ---
 
 ## Meta-doc sync rule
