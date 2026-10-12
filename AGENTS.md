@@ -51,7 +51,7 @@ the task, or name the skill directly in the prompt.
 | Skill name | Invocation | When to use |
 |------------|------------|-------------|
 | `android-advisor` | `/android-advisor` | First `domain-overlay` instance — for Android/Kotlin/Compose/KMP work with multiple overlapping installed global skills, resolves which specialist wins per sub-task (precedence table + tie-break reason), maps each to an engineer lane step, defines the hamen+skydoves-perf pre-review audit gate; activated by the engineer Universal-constraints domain-overlay hook |
-| `brainstorming` | `/brainstorming` | Before any feature/component work |
+| `brainstorming` | `/brainstorming` | Before any feature/component work — draws out intent (open-question first message, play-back, sizing) then writes the spec; builder check after `spec-quality-gate` |
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — structured interview capturing user problem, JTBD, measurable success metrics, compliance, non-goals, stakeholder map; runs `business-context-reviewer`; hard gate before brainstorming |
 | `caveman` | `/caveman` | Ultra-compressed comms, ~75% token reduction |
 | `code-documentation` | `/code-documentation` | Writing or modifying any public construct |
@@ -310,7 +310,7 @@ Three local skills are sourced from external references and can drift:
 | Skill | Upstream | Check |
 |-------|----------|-------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill --web` |
-| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.2 (v6.4.2's writing-plans philosophy shift integrated; upstream `plan-document-reviewer-prompt.md` dropped, superseded by the local `plan-reviewer` agent) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v7.0.0 (v7.0.0's brainstorming rebuild integrated — open-question first message, play-back chunks, sizing, how-it-gets-made ownership, builder check replacing the spec-document reviewer prompt — layered under the local business-context/REQ-spec/spec-quality-gate hard gates; also integrated the visual-companion literal-replace fix, systematic-debugging secret-safe example, and sdd-workspace `.gitignore` preservation; Antigravity/Hermes/Windows-hook/`task-done` changes skipped as unsupported or not present locally; v6.4.2's writing-plans philosophy shift previously integrated; upstream `plan-document-reviewer-prompt.md` dropped, superseded by the local `plan-reviewer` agent) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | Karpathy guidelines | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve local customizations, bump patch version.

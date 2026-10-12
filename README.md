@@ -26,7 +26,7 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
 | `android-advisor` | `/android-advisor` | First `domain-overlay` instance — routes overlapping installed Android/Kotlin/Compose/KMP global skills to a single winner per sub-task with a stated tie-break reason; activated by engineer on Android work |
-| `brainstorming` | `/brainstorming` | Explore intent before implementing |
+| `brainstorming` | `/brainstorming` | Draw out what the user wants and why (open-question first message, play-back, sizing), then design/spec before implementing |
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — captures user problem, JTBD, measurable success metrics, compliance constraints, non-goals; hard gate before design |
 | `caveman` | `/caveman` | 75% token reduction, full technical accuracy |
 | `code-documentation` | `/code-documentation` | Spec-traceable docs at authorship time |
@@ -173,7 +173,7 @@ Check them periodically with `gh` and sync if they've changed:
 | Skill | Upstream | Check command |
 |-------|----------|---------------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view emilkowalski/skill` |
-| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v6.4.2 | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v7.0.0 | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | [Karpathy guidelines](https://x.com/karpathy/status/2015883857489522876) | manual review |
 
 ### Install every detected host

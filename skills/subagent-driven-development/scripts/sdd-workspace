@@ -12,7 +12,9 @@
 # root. Claude Code treats .git/ as a protected path and denies agent writes
 # there, so .git/sdd/ is not an option. A self-ignoring .gitignore at
 # .ai/sdd/ keeps every plan's workspace out of `git status` and out of
-# accidental commits without modifying any tracked file.
+# accidental commits without modifying any tracked file. An existing
+# .gitignore is left alone so a repo can commit its own version (e.g. to
+# track progress ledgers).
 #
 # Single source of truth for the workspace location, so task-brief and
 # review-package cannot drift to different directories.
@@ -36,5 +38,5 @@ root=$(git rev-parse --show-toplevel)
 base="$root/.ai/sdd"
 dir="$base/$slug"
 mkdir -p "$dir"
-printf '*\n' > "$base/.gitignore"
+[ -e "$base/.gitignore" ] || printf '*\n' > "$base/.gitignore"
 cd "$dir" && pwd

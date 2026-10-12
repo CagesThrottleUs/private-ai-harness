@@ -110,7 +110,7 @@ function isFullDocument(html) {
 }
 
 function wrapInFrame(content) {
-  return frameTemplate.replace('<!-- CONTENT -->', content);
+  return frameTemplate.replace('<!-- CONTENT -->', () => content);
 }
 
 function getNewestScreen() {
@@ -135,7 +135,7 @@ function handleRequest(req, res) {
       : WAITING_PAGE;
 
     if (html.includes('</body>')) {
-      html = html.replace('</body>', helperInjection + '\n</body>');
+      html = html.replace('</body>', () => helperInjection + '\n</body>');
     } else {
       html += helperInjection;
     }
