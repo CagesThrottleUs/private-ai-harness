@@ -237,9 +237,10 @@ echo "8. Audio feedback (Copilot CLI hooks)"
 # under a "hooks" key in config.json (that key is silently ignored — verified
 # against docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks).
 # Each file needs {"version": 1, "hooks": {...}} and entries use "bash"/
-# "timeoutSec", not "command"/"timeout". Copilot CLI has no preCompact event
-# (valid: sessionStart, sessionEnd, userPromptSubmitted, preToolUse,
-# postToolUse, errorOccurred, agentStop). preToolUse/postToolUse are wired
+# "timeoutSec", not "command"/"timeout". Valid events (per
+# docs.github.com/en/copilot/reference/hooks-reference): sessionStart,
+# sessionEnd, userPromptSubmitted, preToolUse, postToolUse, errorOccurred,
+# agentStop, preCompact, notification, permissionRequest. preToolUse/postToolUse are wired
 # too — without them the only audible cue all session is the single Stop
 # beep at the very end, since Copilot fires no other event hook-beep.sh has
 # a dedicated sound for.
@@ -260,16 +261,24 @@ data.setdefault("version", 1)
 hooks = data.setdefault("hooks", {})
 notify_cmd = f"{repo_root}/scripts/copilot-notify.sh"
 
-def ensure_hook(event_key: str, claude_event_name: str) -> None:
+def ensure_hook(event_key: str, claude_event_name: str, matcher: str = "") -> None:
     entries = hooks.setdefault(event_key, [])
     bash_cmd = f"{notify_cmd} {claude_event_name}"
     if not any(e.get("bash") == bash_cmd for e in entries):
-        entries.append({"type": "command", "bash": bash_cmd, "timeoutSec": 5})
+        entry = {"type": "command", "bash": bash_cmd, "timeoutSec": 5}
+        if matcher:
+            entry["matcher"] = matcher
+        entries.append(entry)
 
 ensure_hook("sessionStart", "SessionStart")
 ensure_hook("agentStop", "Stop")
 ensure_hook("preToolUse", "PreToolUse")
 ensure_hook("postToolUse", "PostToolUse")
+# notification/permission_prompt fires only when the CLI actually asks the
+# user to approve a tool (permissionRequest also fires for auto-approved
+# calls, so it would beep on every command).
+ensure_hook("notification", "PermissionRequest", "permission_prompt")
+ensure_hook("preCompact", "PreCompact")
 
 if path.exists():
     backup = path.with_name(f"{path.name}.bak.{datetime.datetime.now():%Y%m%d%H%M%S}")
@@ -277,7 +286,7 @@ if path.exists():
 
 path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 PYEOF
-ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse)"
+ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse/PermissionRequest/PreCompact)"
 echo ""
 
 # ── 9. Copilot defaults ───────────────────────────────────────────────────────
