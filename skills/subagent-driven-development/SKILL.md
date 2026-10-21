@@ -77,62 +77,15 @@ digraph process {
 
 ## Pre-Flight Plan Review
 
-Before dispatching Task 1, read the plan's `Spec:` pointer (if not `N/A`) and
-scan the plan once for conflicts, against the spec's actual text rather than
-a guess at what it meant:
-
-- tasks that contradict each other or the plan's Global Constraints
-- anything the plan explicitly mandates that is a known defect pattern (a
-  test that asserts nothing, verbatim duplication of a logic block)
-
-Record the scan in the ledger either way —
-`Pre-flight: clean` or `Pre-flight: N conflicts found` — so a resumed
-session can see the scan happened instead of re-running it.
-
-**Non-catastrophic conflicts and ambiguities do not stall the run.** Decide
-and record a ruling, then continue: `Pre-flight: <finding> — ruling: <what
-governs and why>`. Only stop for your human partner when the conflict is
-destructive or irreversible (deleting data, an auth/security boundary
-change, a decision that cannot be undone by a later task) — a session left
-blocked on a decision the controller could safely make is a wasted turn, not
-a caution. The final whole-branch review remains the net for conflicts that
-only emerge from implementation.
+Before dispatching Task 1, read [references/preflight.md](references/preflight.md) and run the scan it describes. Ledger the result either way.
 
 ## Oracle-Independent Tasks (Critical tier)
 
-A task whose brief carries `**Oracle:** independent` (set by `writing-plans`'
-Oracle-Independence Gate) is dispatched as two implementer calls, not one:
-
-1. Run `scripts/task-brief PLAN_FILE N`, then strip the brief to REQ
-   statement + Acceptance Criteria + Test Cases only before handing it to
-   the oracle dispatch — the oracle must not see any other task's
-   interfaces, any existing code in the touched files, or your own analysis
-   of how to implement it. Dispatch it with `test-driven-development`'s RED
-   step only: write the failing test(s), verify the failure reason, commit,
-   report DONE. This is a fresh subagent — never the same agent instance
-   that implements GREEN.
-2. Record the oracle's commit. Dispatch the implementer as normal (full
-   task brief, per File Handoffs), plus the oracle's test file path and the
-   instruction from the Oracle-Independence Gate: make it pass; flag,
-   don't edit, a suspected wrong assertion.
-3. Before marking the task complete, confirm GREEN didn't modify the
-   oracle's assertions.
-
-Everything else about the task — ledger, completion — is
-unchanged; only RED authorship is split into a separate, blinder dispatch.
+A task whose brief carries `**Oracle:** independent` is dispatched as two implementer calls (blind RED, then GREEN). Read [references/oracle-independent.md](references/oracle-independent.md) before dispatching it.
 
 ## Batching Small Same-Shape Tasks
 
-When consecutive tasks are the same shape (e.g. "add field X to model A", "add
-field Y to model B", each touching one file with a complete, literal spec),
-dispatch them as one implementer call carrying all the briefs, not one
-dispatch per task. Batch only when: each task is independently a cheap-model
-task per Model Selection below, none depends on another's output, and the
-plan's per-task Interfaces blocks don't collide. The final whole-branch
-review still verifies every file named across all the batched briefs shows
-up in the diff — a batch that silently drops one task's file is not
-complete. Tightly
-coupled or judgment-heavy tasks are never batched.
+When consecutive tasks are the same small shape, read [references/batching.md](references/batching.md) before dispatching them one by one.
 
 ## Model Selection
 
@@ -165,65 +118,15 @@ that implementer. Single-file mechanical fixes also take the cheapest tier.
 
 ## Cheaper Orchestration (opt-in, Claude Code)
 
-The controller session is the most expensive seat in an SDD run: it reads
-every dispatch result and every report, usually on the session's most capable
-model. Claude Code allows nested subagents (three layers deep by default;
-`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` adjusts it), so the whole loop can run
-one layer down for roughly half the cost and wall-clock.
-
-Do this only when your human partner asks for it, or has said the session
-model is too expensive to spend on coordination:
-
-- Dispatch **one** orchestrator subagent on a mid-tier model with the plan
-  path and the instruction to run this skill end to end.
-- The orchestrator dispatches its own implementers and reviewers per Model
-  Selection above. The workspace and ledger live on disk, so nothing is lost
-  to the extra layer.
-- Its final message must carry the **Completion Report** and every pre-flight
-  ruling **verbatim** — that relay is how the decisions reach your human
-  partner. Relay it, do not summarize it.
-
-Nest a whole plan, never a single task's dispatch — one task buys nothing and
-adds a seat.
+Only when your human partner asks for cheaper coordination: read [references/nested-orchestration.md](references/nested-orchestration.md).
 
 ## Handling Implementer Status
 
-Record BASE (`git rev-parse HEAD`) before dispatching the implementer — the
-final whole-branch review needs the full commit range.
-
-Implementer subagents report one of four statuses. Handle each appropriately:
-
-**DONE:** Mark the task complete in the todo list and progress ledger, then move to the next task.
-
-**DONE_WITH_CONCERNS:** The implementer completed the work but flagged doubts. Read the concerns before proceeding. If the concerns are about correctness or scope, address them before moving on. If they're observations (e.g., "this file is getting large"), note them in the ledger and proceed.
-
-**NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
-
-**BLOCKED:** The implementer cannot complete the task. Assess the blocker:
-1. If it's a context problem, provide more context and re-dispatch with the same model
-2. If the task requires more reasoning, re-dispatch with a more capable model
-3. If the task is too large, break it into smaller pieces
-4. If the plan itself is wrong, escalate to the human
-
-**Never** ignore an escalation or force the same model to retry without changes. If the implementer said it's stuck, something needs to change.
+Record BASE (`git rev-parse HEAD`) before dispatching the implementer. **DONE:** mark the task complete in the todo list and progress ledger, then move on. Any other status (DONE_WITH_CONCERNS, NEEDS_CONTEXT, BLOCKED): read [references/handling-reports.md](references/handling-reports.md) and follow it.
 
 ## Final Review
 
-The final whole-branch review gets a package too: run
-`scripts/review-package PLAN_FILE MERGE_BASE HEAD` (MERGE_BASE = the commit the
-branch started from, e.g. `git merge-base main HEAD`) and include the
-printed path in the final review dispatch, so the final reviewer reads
-one file instead of re-deriving the branch diff with git commands.
-
-If the final whole-branch review returns findings, dispatch ONE fix
-subagent with the complete findings list — not one fixer per finding.
-Per-finding fixers each rebuild context and re-run suites; a real
-session's final-review fix wave cost more than all its tasks combined.
-Then run exactly one scoped re-review of the fix wave
-(`scripts/review-package PLAN_FILE FIX_BASE HEAD` over the fix range,
-[re-review-prompt.md](re-review-prompt.md)). Load-bearing residual findings
-surface to your human partner when finishing-a-development-branch presents
-the options. There is no second fix wave.
+After the last task, read [references/final-review.md](references/final-review.md) and follow it. It covers the review package, the single fix wave, and the one scoped re-review.
 
 ## File Handoffs
 
@@ -291,53 +194,6 @@ a ledger file, not only in todos.
 | "I'll fix it myself, dispatching is overhead" | Controller fixes pollute your context. Dispatch a fix subagent. |
 | "Ledger bookkeeping is overhead" | The ledger is what survives compaction. Controllers without one have re-dispatched entire completed task sequences. |
 | "Skip the final review, tasks looked fine individually" | Per-task issues compound across a branch — the final whole-branch review is the only gate left; skipping it ships unverified. |
-
-## Example Workflow
-
-```
-You: I'm using Subagent-Driven Development to execute this plan.
-
-[Read plan file once: .ai/YYYY-MM-DD-feature-plan/plans/plans-feature-plan.md]
-[Create todos for all tasks]
-
-Task 1: Hook installation script
-
-[Run task-brief for Task 1; dispatch implementer with brief + report paths + context]
-
-Implementer: "Before I begin - should the hook be installed at user or system level?"
-
-You: "User level (~/.config/hooks/)"
-
-Implementer: "Got it. Implementing now..."
-[Later] Implementer:
-  - Implemented install-hook command
-  - Added tests, 5/5 passing
-  - Self-review: Found I missed --force flag, added it
-  - Committed
-
-[Mark Task 1 complete in ledger]
-
-Task 2: Recovery modes
-
-[Run task-brief for Task 2; dispatch implementer with brief + report paths + context]
-
-Implementer: [No questions, proceeds]
-Implementer:
-  - Added verify/repair modes
-  - 8/8 tests passing
-  - Self-review: All good
-  - Committed
-
-[Mark Task 2 complete in ledger]
-
-...
-
-[After all tasks]
-[Dispatch final code-reviewer]
-Final reviewer: All requirements met, ready to merge
-
-Done!
-```
 
 ## Red Flags
 
