@@ -1,0 +1,9 @@
+feat(skills): add senior-dialogue working model
+
+Agents now write most code and nobody reads it line by line, so
+ownership has to come from the human being able to explain each
+decision. The skill runs understand, discuss, recorded agreement, docs,
+then a test-first build; ships the consent-ledger script the hooks
+call; and records the rule that skills teach reasoning, not constants.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

@@ -1,0 +1,12 @@
+feat(skills)!: route /engineer through senior dialogue
+
+Every lane now opens with card D-000 and splits into DISCUSS, which
+waits for ledger-recorded agreement, and BUILD, which runs without
+check-ins; downstream approval asks are pre-satisfied by the ledger.
+Cost and review-discipline detail moves to references, taking the skill
+from 24 KB to 18 KB. Bumps all three manifests to 5.0.0.
+
+BREAKING CHANGE: /engineer no longer starts work on an unrecorded yes;
+D-000 must be agreed through the host ask tool or a typed agreement.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

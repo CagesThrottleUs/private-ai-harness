@@ -1,0 +1,9 @@
+feat(agents): add test-scenario-reviewer
+
+The Senior Dialogue agrees test scenarios before any code exists, but
+test-quality-reviewer only reviews test code after the fact, so nothing
+checked the REQ to TC matrix itself: traceability, honest kills, level
+fit, MC/DC on critical logic. Opus, because judging whether a subtly
+wrong implementation passes a scenario is reasoning, not matching.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

@@ -1,0 +1,9 @@
+feat(plugin)!: wire consent hooks for all four hosts
+
+Autopilot and allow-all approve tool calls, not design decisions. Hooks
+now record agreement only from human input (ask-user answers, or typed
+prompts where the host cannot be spoofed) and a PreToolUse guard stops
+the model touching the ledger, its key or the hook wiring. Claude skips
+typed agreements because UserPromptSubmit also fires for model turns.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

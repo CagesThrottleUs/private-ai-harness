@@ -1,0 +1,9 @@
+refactor(skills): split oversized skills into references
+
+Claude Code truncates re-attached skills over 20,000 bytes after
+compaction, so high-level-design (21.5 KB) risked losing its approval
+gate and review (20.1 KB) its tail. Move the HLD template, the ADR
+format, the brainstorming flow graph and the review chat-trigger table
+verbatim into references/ with pointers, leaving room for 5.0.0.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
