@@ -88,6 +88,7 @@ block = f"""{start}
 - Apply `private-ai-harness:karpathy` and `private-ai-harness:commit-discipline` when writing code or commit messages.
 - Use the `private-ai-harness-<agent-name>` Codex custom agents when a harness skill requests a named reviewer.
 - Read `private-ai-harness:using-superpowers` for Codex tool and subagent mappings when a skill uses Claude-oriented tool names.
+- Senior Dialogue: `/engineer` discussion phases wait for the human even with approvals bypassed; agreement is recorded only by the plugin's consent hooks from a `request_user_input` answer or a typed message whose first line is the agreement. With no human present, park with one question and never self-agree.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""
@@ -122,4 +123,5 @@ fi
 echo ""
 echo "Start a new Codex session, then open /plugins to verify the plugin."
 echo "Use /agent to inspect harness reviewer agents."
+echo "Open /hooks and trust the private-ai-harness hooks: the Senior Dialogue consent ledger is skipped until they are trusted."
 echo ""

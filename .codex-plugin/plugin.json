@@ -1,6 +1,6 @@
 {
   "name": "private-ai-harness",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Personal AI engineering harness with structured planning, implementation, testing, debugging, review, and delivery workflows",
   "author": {
     "name": "CagesThrottleUs"
@@ -13,6 +13,7 @@
     "workflow"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/codex-dialogue-consent.json",
   "interface": {
     "displayName": "Private AI Harness",
     "shortDescription": "Opinionated engineering workflows and reviewers",

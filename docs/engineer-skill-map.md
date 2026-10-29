@@ -5,6 +5,13 @@ runs a skill chain → some skills pair with a reviewer agent (⊘ = quality gat
 
 Every skill below = "how to reason/work" for one job. Only `/engineer` is an entry point.
 
+**5.0.0 — Senior Dialogue.** Every lane now opens with `senior-dialogue`: card
+D-000, then a DISCUSS phase that waits for ledger-recorded human agreement,
+then a BUILD phase with zero check-ins. The lane chains below are the BUILD
+chains; DISCUSS uses `codebase-comprehension`, `brainstorming`'s conversation
+practices, `business-context-intake`'s territory, `high-level-design`'s
+analyses, and `test-scenario-reviewer`.
+
 ## Verified reachability (not assumed)
 
 Edges below are extracted from actual skill-file cross-references (one skill's body

@@ -75,6 +75,8 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
 | `teacher` | `/teacher` | Independent track (not an `/engineer` step) that checks and deepens your own understanding — evidence-maps actual vs. ideal solution (cited, no hand-waving), Socratic-questions the drift without ever stating the fix, assigns near/far transfer exercises, grades on return, logs for spaced re-quizzing |
+| `engineer` | `/engineer` | Universal entry point — classifies the request into a lane, opens the Senior Dialogue (card D-000), waits for recorded human agreement during DISCUSS, then runs the lane's BUILD chain with zero check-ins |
+| `senior-dialogue` | via `/engineer` | Senior Dialogue working model — evidence-backed Feynman decision cards, runtime risk reasoning for depth, human agreement recorded by host hooks in a signed consent ledger (autopilot is not consent; no human → park), docs generated from the agreed record, test scenarios agreed before code |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
 | `using-git-worktrees` | `/using-git-worktrees` | Parallel branches without stash churn |
 | `using-superpowers` | `/using-superpowers` | Leverage MCP tools effectively |
@@ -127,6 +129,7 @@ reviewer prompts do not drift between hosts.
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |
 | `delivery-metrics-reviewer` | **Sonnet** — Delivery-metrics honesty gate: DORA bands match 2024 clusters, no fabricated failure-dependent key, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome |
+| `test-scenario-reviewer` | Pre-code test-scenario gate — REQ→TC traceability, honest kills, level fit, MC/DC on Critical-tier logic, determinism, C/C++ and web hazards; feeds the Senior Dialogue's test-scenario loop |
 
 ### Hooks
 
@@ -147,6 +150,18 @@ session is the single Stop beep at the end.
 - Script: `scripts/hook-beep.sh`
 - Sounds: `assets/sounds/<Event>/default.mp3`, falls back to `assets/sounds/fallback.mp3`
 - Disable: create `~/.private-ai-harness/beep-disabled`, or set `PAH_BEEP_ENABLED=false`
+
+**Senior Dialogue consent hooks.** `/engineer` records a human's agreement to
+each decision card through host hooks, never through the model:
+`skills/senior-dialogue/scripts/dialogue-consent.py` appends to a hash-chained,
+HMAC-signed ledger at `<git-root>/.ai/dialogue/consent.jsonl`, and a
+`PreToolUse` guard denies tool calls that touch the ledger, its key, or the hook
+wiring. Claude Code loads `hooks/dialogue-consent.json` from the plugin
+manifest; Codex loads `hooks/codex-dialogue-consent.json` (trust it in
+`/hooks`); the Copilot and opencode installers wire their equivalents. To edit
+the guarded files, launch the host with `PRIVATE_AI_HARNESS_CONSENT_GUARD=off`.
+Set `PRIVATE_AI_HARNESS_CONSENT_DEBUG=1` to capture raw hook payloads in
+`~/.private-ai-harness/consent-debug.jsonl`.
 
 ---
 
@@ -289,6 +304,7 @@ verified against the actual CLIs rather than assumed:
 - **Ponytail** — Copilot CLI has the same plugin-marketplace mechanism as Claude/Codex (`copilot plugin marketplace add`/`copilot plugin install`), so `DietrichGebert/ponytail` installs the same way
 - **Copilot HUD** — installs [`griches/copilot-hud`](https://github.com/griches/copilot-hud) from its marketplace as `copilot-hud@copilot-hud`. Run `/copilot-hud:setup` once in Copilot to enable its status line; existing HUD configuration is left intact.
 - **Autopilot default** — sets `defaultMode` to `autopilot` in `~/.copilot/settings.json` (or `$COPILOT_HOME/settings.json`), preserving all other user settings. New interactive sessions start in autopilot; resumed and non-interactive sessions retain their own modes.
+- **Senior Dialogue consent hooks** — adds `userPromptSubmitted`, `postToolUse`, and `preToolUse` entries to `~/.copilot/hooks/private-ai-harness.json`. Autopilot speeds up execution but is not consent: `/engineer` still waits for an `ask_user` answer or a typed agreement before building, and parks when nobody answers.
 
 Not portable, and skipped with a reason printed at the end of the run:
 claude-mem (Claude-specific hook/plugin memory, no standalone MCP

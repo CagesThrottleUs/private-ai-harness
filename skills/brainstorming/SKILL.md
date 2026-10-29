@@ -118,49 +118,8 @@ You MUST create a task for each of these items and complete them in order:
 
 ## Process Flow
 
-```dot
-digraph brainstorming {
-    "Explore project context" [shape=box];
-    "Everything in request?" [shape=diamond];
-    "Do it, say what you did" [shape=doublecircle];
-    "Look, then first message:\necho+findings+question" [shape=box];
-    "Converse + play back\n(offer recon/spike/visuals)" [shape=box];
-    "Size the work" [shape=diamond];
-    "Short design doc,\nuser approves" [shape=box];
-    "Propose 2-3 approaches" [shape=box];
-    "Present design sections" [shape=box];
-    "User approves design?" [shape=diamond];
-    "Write design doc" [shape=box];
-    "Spec self-review\n(fix inline)" [shape=box];
-    "Run spec-quality-gate" [shape=box];
-    "Gate passes?" [shape=diamond];
-    "Builder check\n(answer/settle/ask once)" [shape=box];
-    "User reviews spec?" [shape=diamond];
-    "Invoke writing-plans skill" [shape=doublecircle];
-
-    "Explore project context" -> "Everything in request?";
-    "Everything in request?" -> "Do it, say what you did" [label="yes"];
-    "Everything in request?" -> "Look, then first message:\necho+findings+question" [label="no"];
-    "Look, then first message:\necho+findings+question" -> "Converse + play back\n(offer recon/spike/visuals)";
-    "Converse + play back\n(offer recon/spike/visuals)" -> "Size the work";
-    "Size the work" -> "Do it, say what you did" [label="quick, clear"];
-    "Size the work" -> "Short design doc,\nuser approves" [label="small change"];
-    "Short design doc,\nuser approves" -> "Invoke writing-plans skill";
-    "Size the work" -> "Propose 2-3 approaches" [label="feature/project"];
-    "Propose 2-3 approaches" -> "Present design sections";
-    "Present design sections" -> "User approves design?";
-    "User approves design?" -> "Present design sections" [label="no, revise"];
-    "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Spec self-review\n(fix inline)";
-    "Spec self-review\n(fix inline)" -> "Run spec-quality-gate";
-    "Run spec-quality-gate" -> "Gate passes?";
-    "Gate passes?" -> "Write design doc" [label="FAIL — fix spec"];
-    "Gate passes?" -> "Builder check\n(answer/settle/ask once)" [label="PASS"];
-    "Builder check\n(answer/settle/ask once)" -> "User reviews spec?";
-    "User reviews spec?" -> "Write design doc" [label="changes requested"];
-    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
-}
-```
+The flow graph is in `references/process-flow.md`; the Checklist above walks
+the same flow in order.
 
 **The terminal state is invoking high-level-design (for architectural changes) or writing-plans (for non-architectural changes).** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The only valid next skills after brainstorming are `high-level-design` and `writing-plans`.
 
@@ -193,6 +152,11 @@ After `spec-quality-gate` passes, dispatch a fresh subagent with `builder-check-
 Bring the "theirs" pile in one message, most important first. Update the spec with their answers, re-run `spec-quality-gate` if requirements changed, then hand it over with a short list of the calls you made so they can check those while reading. That is the only round of questions the check produces. Without a subagent tool, read the spec as that builder yourself.
 
 **User Review Gate:**
+*Senior Dialogue:* inside `/engineer` (the work item has
+`dialogue/decisions.json`), the spec is generated from agreed decision cards
+and this review is already satisfied by a passing consent `check`; skip the ask
+and continue.
+
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
 > "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."

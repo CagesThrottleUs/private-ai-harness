@@ -18,6 +18,7 @@ plugin-reload step of its own).
 |-----------|------|
 | `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex; the same `skills/*/SKILL.md` layout is GitHub's native Agent Skills discovery convention, so Copilot loads it unmodified too |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
+| `skills/senior-dialogue/scripts/dialogue-consent.py` | Senior Dialogue consent ledger (stdlib Python): host hook entry point (`hook --host … --event prompt`/`answer`/`guard`) plus `activate`/`status`/`check`/`selftest`; ledger `<git-root>/.ai/dialogue/consent.jsonl`, hash-chained and HMAC-signed |
 | `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex, opencode, and Copilot adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
@@ -26,13 +27,14 @@ plugin-reload step of its own).
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
 | `scripts/copilot-notify.sh` | Adapter: Copilot CLI's per-event hooks (`sessionStart`/`agentStop`/`preToolUse`/`postToolUse`) → `hook-beep.sh` event names, invoked with the target event name as an argument since Copilot's own hook payloads don't always name the firing event |
 | `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
+| `scripts/opencode-dialogue-consent-plugin.js` | opencode plugin copied into `plugin/` by `install-opencode.sh`: bridges `chat.message` and `tool.execute.before`/`after` to the Senior Dialogue consent script (typed agreement, `question` answers, guard) |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/install-opencode-agents.py` | Deterministic Markdown-to-opencode-subagent adapter (renders `agents/*.md` → `private-ai-harness-<name>.md` in opencode's global agents dir, `mode: subagent`, no `model` → inherits the invoking agent's model) |
 | `scripts/install-copilot-agents.py` | Deterministic Copilot adapter: renders each `agents/*.md` as `~/.copilot/agents/private-ai-harness-<name>.agent.md` for native dispatch and `~/.agents/skills/<name>/SKILL.md` for skill discovery; replaces Claude model labels with "(GitHub Copilot)" without assuming model-tier mapping |
 | `scripts/configure-copilot.py` | Merge `defaultMode: autopilot` into Copilot's `settings.json` without discarding other user settings |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
-| `hooks/*.json` | Claude Code hook manifests wiring events to `scripts/hook-beep.sh` (Claude Code only, not loaded by Codex) |
+| `hooks/*.json` | Claude Code hook manifests: sound feedback via `scripts/hook-beep.sh`, and `dialogue-consent.json` (Senior Dialogue consent ledger). `codex-dialogue-consent.json` is the Codex equivalent, loaded through `.codex-plugin/plugin.json`'s `hooks` key; Claude does not load it |
 | `assets/sounds/` | Default beep sound files, ported from voicemode (MIT) so the sound survives uninstalling that plugin |
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
 | `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
@@ -71,7 +73,8 @@ the task, or name the skill directly in the prompt.
 | `api-contract-first` | `/api-contract-first` | Before any handler/gRPC service implementation — writes OpenAPI 3.1 spec or .proto file, sets up Spectral linting, Prism mock server, CI spec lint job; runs `api-contract-reviewer`; hard gate before handler code |
 | `e2e-testing` | `/e2e-testing` | Before `finishing-a-development-branch` for user-facing features — identifies critical user journeys, sets up Playwright with POM/auth fixtures/semantic locators, adds post-deploy CI E2E job against staging; runs `e2e-reviewer` |
 | `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
-| `engineer` | `/engineer` | **Universal entry point** — routes any request to the right lane (quick-fix/task/epic/research), classifies complexity from observable signals, proposes a skill chain, waits for user confirmation, then starts the flow |
+| `engineer` | `/engineer` | **Universal entry point** — classifies the request into a lane (quick-fix/task/epic/portfolio/research/refactoring), opens the Senior Dialogue with card D-000 (lane, depth, risk-ordered agenda with runtime reasoning, skill chain, test-scenario cap N, doc targets), waits for ledger-recorded human agreement even in autopilot/allow-all, then runs the lane's BUILD phase with zero check-ins; `/engineer resume .ai/<id>` re-enters a parked work item; cost and review-discipline detail in `references/` |
+| `senior-dialogue` | via `/engineer` | The Senior Dialogue working model behind every `/engineer` lane — understand → discuss → explicit human agreement recorded by host hooks in a signed consent ledger → documentation generated from the agreed record → test-first build with zero check-ins. Feynman-style decision cards with citations and numbers derived at runtime; agenda ordered by runtime risk reasoning; waits for the human in autopilot/allow-all and parks instead of self-agreeing; test-scenario loop with `test-scenario-reviewer` to sync or a human-set cap N; C23 / C++23/26 and web-frontend depth in `references/` |
 | `epic-decomposition` | `/epic-decomposition` | After HLD human approval in the epic lane — breaks epic into bounded stories, creates child work-item manifests under `.ai/<epic-slug>/children/`, identifies parallel vs sequential dependency waves |
 | `portfolio-management` | `/portfolio-management` | The layer ABOVE a single epic — SAFe Portfolio Kanban (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), WSJF ranking (cost of delay ÷ job size), WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; pulls the top-WSJF epic into the epic lane when WIP allows; the engineer PORTFOLIO lane routes here; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffolding for a NEW service (CNCF Platform Eng Maturity L3) — emits the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, `catalog-info.yaml`, scorecard) so the service is born compliant; registers it in the service catalog; runs in the epic lane before children build into it; runs `service-scaffolding-reviewer` |
@@ -171,6 +174,7 @@ installer after an agent definition changes.
 | `load-test-reviewer` | opus | Load test quality gate — validates NFR-aligned thresholds (arbitrary numbers = Critical), smoke test presence, realistic traffic modeling, appropriate test types (no soak for 99.9% availability = Critical), CI integration against staging (localhost = Critical), script quality. 6 dimensions. Invoked by `load-testing` skill. |
 | `linter-reviewer` | **sonnet** | Linter gate validator — detects language from manifests, verifies correct 2025 tool used (Ruff/Biome/golangci-lint/Clippy), confirms zero output, type checker run, no new suppression comments. 4 checks. Invoked by `verification-before-completion`. First Sonnet review agent. |
 | `delivery-metrics-reviewer` | **sonnet** | Delivery-metrics honesty gate — DORA bands match the 2024 clusters, no failure-dependent key (lead time/CFR/MTTR/reliability) fabricated when its signal is absent, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome. 5 checks. Invoked by `delivery-metrics` skill. |
+| `test-scenario-reviewer` | opus | Pre-code test-scenario gate — validates the REQ→TC matrix before any test or production code exists: traceability (every REQ/AC covered, no orphans), honesty (each TC names the wrong implementation it kills), level fit (unit/integration/contract/e2e/property/fuzz/simulation/perf/chaos/a11y/visual/security), MC/DC on Critical-tier decision logic, boundaries and error paths, determinism, C/C++ UB/ABI and web-frontend hazards; splits findings into mechanical vs substantive so substantive ones return to the human as decision cards. Invoked by `senior-dialogue` topic (h). |
 
 Code review agents (`pr-reviewer`, `security-reviewer`, `spec-impl-reviewer`, `test-quality-reviewer`, `full-project-reviewer`, `language-expert-reviewer`) require `BASE_SHA` and `HEAD_SHA` (and usually `SPEC_PATH`). `pr-reviewer` and `spec-impl-reviewer` accept optional `DIFF_FILE` (pre-generated by `scripts/review-package PLAN_FILE BASE HEAD`) — if present, the agent reads it instead of running git commands. `pr-reviewer` also accepts optional `PR_NUMBER` (read existing review threads via `gh` to flag adverse prior advice and amplify sound suggestions) and `REVIEW_POLICY` (repo review-policy file; auto-checks `.ai/review-policy.md` then repo-root `review-policy.md`) — both portable, `gh`/file-read only, no code-index dependency.
 All reviewer agents accept optional `REPORT_FILE` — if present, full findings are written there and only the verdict summary is returned to context.
@@ -203,6 +207,7 @@ DAST agents (`dast-reviewer`) require `CI_CONFIG_PATH`; `OPENAPI_PATH` and `ZAP_
 Accessibility agents (`accessibility-reviewer`) require `TEST_FILES`; `SPEC_PATH` and `BUSINESS_CONTEXT_PATH` optional.
 Linter agents (`linter-reviewer`) require `PROJECT_ROOT` and `CHANGED_FILES`.
 Delivery-metrics agents (`delivery-metrics-reviewer`) require `REPORT_PATH`; `LEDGER_PATH` optional.
+Test-scenario agents (`test-scenario-reviewer`) require `SCENARIOS_PATH` and `SPEC_PATH`; `LLD_PATH` and `ITERATION` (`k/N`) optional.
 See each `agents/<name>.md` for the full input contract.
 
 ### Model Right-Sizing Criteria
@@ -255,6 +260,7 @@ See each `agents/<name>.md` for the full input contract.
 | `accessibility-reviewer` | sonnet | Mechanical — is axe called? (pattern match), correct tags? (set comparison), assertion pattern? (code pattern), exclusion comments? (text search). No accessibility judgment required. | ✅ Correct — Sonnet |
 | `linter-reviewer` | sonnet | Mechanical — tool detection via manifest pattern matching, output-clean check is deterministic, suppression scan is regex. No architectural judgment required. First Sonnet review agent. | ✅ Correct |
 | `delivery-metrics-reviewer` | sonnet | Mechanical — band label vs 2024 DORA cluster (table lookup), fabricated-key detection (number present with no ledger/incident row = deterministic cross-check), flow-efficiency formula/withhold check, source-citation presence, delivery-vs-outcome keyword scan. No performance judgment. | ✅ Correct — Sonnet |
+| `test-scenario-reviewer` | opus | High — "would a subtly wrong implementation pass this scenario?" and "is this the cheapest level that can observe the behavior?" are judgment calls, as are MC/DC independence on real decision logic and spotting failure modes the spec implies but never states; a checklist-matcher would pass vague oracles | ✅ Correct |
 
 **When adding a new agent:** fill in the right-size verdict before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.
 
@@ -272,6 +278,31 @@ The harness measures two different things, and conflating them is a documented f
 | Owned by | `delivery-metrics`, `observability-standards`, `ci-pipeline-setup`, `deployment-workflow`, `incident-response` | `business-context-intake` (defines) → spec `north_star` → `outcome-review` (measures) |
 
 A delivery metric is a **guardrail**, not the needle. "Deployment frequency is elite" or "p99 is under target" says the machine runs well — it does **not** say the feature succeeded. That question belongs to `outcome-review` against the business north-star. A skill that presents a DORA/SLO number as evidence of business success has confused the layers; `delivery-metrics-reviewer` (D5) and `spec-quality-reviewer` (§2f) both reject that confusion.
+
+---
+
+## Senior Dialogue consent model
+
+`/engineer` runs every lane through `senior-dialogue`: DISCUSS waits for the
+human at each decision card; BUILD runs with zero check-ins once every card is
+agreed. Agreement is recorded only by host hooks from human input, never by the
+model, into `<git-root>/.ai/dialogue/consent.jsonl` (hash-chained, HMAC-signed
+with `~/.private-ai-harness/consent.key`). A PreToolUse guard denies tool calls
+that touch the ledger, the key, or the hook wiring, or that carry the agreement
+token outside the ask-user tool. Script:
+`skills/senior-dialogue/scripts/dialogue-consent.py`.
+
+| Host | Agreement channel | Wiring |
+|------|-------------------|--------|
+| Claude Code | `AskUserQuestion` answers only (its `UserPromptSubmit` also fires for model-originated turns) | `hooks/dialogue-consent.json` via `.claude-plugin/plugin.json` |
+| Copilot CLI | `ask_user` answers + typed first-line agreement | `~/.copilot/hooks/private-ai-harness.json` (installer) |
+| Codex | `request_user_input` answers + typed first-line agreement | `hooks/codex-dialogue-consent.json` via `.codex-plugin/plugin.json` (trust it in `/hooks`) |
+| opencode | `question` answers + typed first-line agreement | `~/.config/opencode/plugin/private-ai-harness-dialogue-consent.js` (installer) |
+
+With no human present the agent parks with one question; it never fabricates
+agreement. Editing the guarded files needs the host launched with
+`PRIVATE_AI_HARNESS_CONSENT_GUARD=off` (only a human can set the hook
+environment).
 
 ---
 

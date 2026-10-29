@@ -287,6 +287,10 @@ The plan-reviewer runs with fresh context — no brainstorming or spec history. 
 
 ## Execution Handoff
 
+*Senior Dialogue:* inside `/engineer` BUILD, do not ask — the human already
+agreed the build; use Subagent-Driven execution. Every task's test steps cite
+TC ids from the agreed test-scenario matrix.
+
 After plan-reviewer passes, offer execution choice:
 
 **"Plan complete and saved to `.ai/<feature-slug>/plans/plans-<feature-slug>.md`. Two execution options:**

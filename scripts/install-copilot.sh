@@ -280,6 +280,21 @@ ensure_hook("postToolUse", "PostToolUse")
 ensure_hook("notification", "PermissionRequest", "permission_prompt")
 ensure_hook("preCompact", "PreCompact")
 
+# Senior Dialogue consent ledger (skills/senior-dialogue): record human
+# agreement from typed prompts and ask_user answers; guard the ledger.
+consent_script = f"{repo_root}/skills/senior-dialogue/scripts/dialogue-consent.py"
+
+def ensure_consent_hook(event_key: str, consent_event: str) -> None:
+    entries = hooks.setdefault(event_key, [])
+    bash_cmd = (f'python3 "{consent_script}" hook --host copilot '
+                f'--event {consent_event} 2>/dev/null || true')
+    if not any(e.get("bash") == bash_cmd for e in entries):
+        entries.append({"type": "command", "bash": bash_cmd, "timeoutSec": 10})
+
+ensure_consent_hook("userPromptSubmitted", "prompt")
+ensure_consent_hook("postToolUse", "answer")
+ensure_consent_hook("preToolUse", "guard")
+
 if path.exists():
     backup = path.with_name(f"{path.name}.bak.{datetime.datetime.now():%Y%m%d%H%M%S}")
     shutil.copy2(path, backup)
@@ -287,6 +302,7 @@ if path.exists():
 path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 PYEOF
 ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse/PermissionRequest/PreCompact)"
+ok "Senior Dialogue consent hooks wired into $GLOBAL_HOOKS_FILE (userPromptSubmitted/postToolUse/preToolUse)"
 echo ""
 
 # ── 9. Copilot defaults ───────────────────────────────────────────────────────
@@ -315,6 +331,11 @@ block = f"""{start}
   are selectable with `/agent`.
 - Repos built with this harness already ship an `AGENTS.md`; Copilot coding
   agent and Copilot CLI read it natively — no extra step needed per repo.
+- Senior Dialogue: `/engineer` discussion phases wait for the human even in
+  autopilot or allow-all; those permissions are not consent. Agreement is
+  recorded only by the consent hooks from an `ask_user` answer or a typed
+  message whose first line is the agreement. With no human present, park
+  with one question and never self-agree.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""

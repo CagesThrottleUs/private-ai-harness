@@ -24,6 +24,9 @@ scripts/install-opencode-agents.py Markdown-to-opencode-subagent adapter
 scripts/install-copilot-agents.py  Markdown-to-Copilot-agent and Agent-Skill adapter
 scripts/configure-copilot.py  Preserve user settings while setting Copilot's autopilot default
 scripts/commit-msg.sh       conventional commits enforcement hook
+skills/senior-dialogue/scripts/dialogue-consent.py  Senior Dialogue consent ledger + hook entry point
+hooks/dialogue-consent.json Claude consent hooks (codex-dialogue-consent.json: Codex)
+scripts/opencode-dialogue-consent-plugin.js  opencode consent bridge (copied by installer)
 .claude-plugin/plugin.json  Claude Code plugin manifest
 .claude-plugin/marketplace.json  Claude/local marketplace manifest
 .codex-plugin/plugin.json   Codex plugin manifest
@@ -52,6 +55,18 @@ Rules:
 - Keep body focused — one skill, one responsibility
 - Auxiliary files (examples, prompts, references) go in `skills/<name>/` alongside SKILL.md
 - Do not nest skills inside other skill directories
+- **Teach reasoning, don't hardcode it.** A skill explains how to think about
+  its job and how to iterate with the human; it does not hand the model fixed
+  numbers, thresholds, word counts, or step counts to apply mechanically.
+  Estimates, thresholds, and depth are derived at runtime for the case at
+  hand, with the reasoning shown. Hardcode only what is intrinsic to the
+  skill — a security mechanism (the consent ledger), a host or API limit, a
+  standard's own definition (MC/DC, Core Web Vitals), or a format another
+  tool parses. Worked numbers belong in clearly labeled examples, never in
+  rules.
+- **SKILL.md stays under 20,000 bytes.** Claude Code truncates re-attached
+  skills after compaction. Move detail into `references/` and point to it
+  from the step that needs it.
 
 ---
 
@@ -82,6 +97,21 @@ while native agent adapters need installer re-run after source changes.
 The Copilot installer preserves existing `~/.copilot/settings.json` keys,
 setting only `defaultMode` to `autopilot`. It installs the copilot-hud plugin;
 run `/copilot-hud:setup` once in Copilot to enable its status line.
+
+---
+
+## Senior Dialogue consent ledger
+
+`/engineer` waits for the human during discussion and records agreement only
+through host hooks (see `AGENTS.md` → *Senior Dialogue consent model*). When
+working on this repo with the plugin installed:
+
+- The guard blocks edits to the consent script, the hook wiring, and any tool
+  input containing the agreement token followed by a decision id. Launch the
+  host with `PRIVATE_AI_HARNESS_CONSENT_GUARD=off` for that maintenance.
+- In docs and examples, write the token as `AGREE D-<NNN>`, never with a real
+  id; in code, build it at runtime (see the script's `TOKEN`).
+- After changing the script, run its `selftest` subcommand.
 
 ---
 
@@ -190,3 +220,4 @@ When upgrading: diff upstream against local, preserve any local customizations, 
 - Don't add a build step — the plugin is loaded raw by Claude Code and Codex
 - Don't flatten `skills/` — each skill must be its own subdirectory
 - Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`
+- Don't write the agreement token followed by a real decision id into any repo file; the consent guard treats it as attempted self-agreement

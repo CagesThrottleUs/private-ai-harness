@@ -129,6 +129,10 @@ sed "s#__HOOK_BEEP_PATH__#$REPO_ROOT/scripts/hook-beep.sh#" \
 ok "sound-notify plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
 info "Note: the installed copy has an absolute path to this checkout's hook-beep.sh"
 info "baked in — do not move or delete this repo checkout, or re-run this installer after moving it."
+sed "s#__CONSENT_SCRIPT_PATH__#$REPO_ROOT/skills/senior-dialogue/scripts/dialogue-consent.py#" \
+  "$REPO_ROOT/scripts/opencode-dialogue-consent-plugin.js" \
+  > "$GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js"
+ok "Senior Dialogue consent plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js"
 echo ""
 
 # ── 6. commit-msg git hook ───────────────────────────────────────────────────
@@ -178,6 +182,11 @@ They inherit the invoking primary agent's model and permissions. When a skill
 asks for a named reviewer, dispatch the matching `private-ai-harness-<name>`
 subagent via the Task tool or @mention — do not read the file and re-derive
 the brief.
+
+Senior Dialogue: `/engineer` discussion phases wait for the human even when
+permissions are set to allow; agreement is recorded only by the consent plugin
+from a `question` answer or a typed message whose first line is the agreement.
+With no human present, park with one question and never self-agree.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""

@@ -72,6 +72,10 @@ digraph tdd_cycle {
 
 Write one minimal test showing what should happen.
 
+Inside `/engineer`, each RED test implements one TC from the agreed
+test-scenario matrix: carry the TC id and `@validates_req REQ-NNN`, and make it
+fail for the reason in the TC's Kills column.
+
 <Good>
 ```typescript
 test('retries failed operations 3 times', async () => {

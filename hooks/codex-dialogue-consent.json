@@ -1,0 +1,39 @@
+{
+  "description": "Senior Dialogue consent ledger (Codex): record human agreement from typed prompts and request_user_input answers; guard the ledger, its key, the hook wiring, and the agreement token",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/skills/senior-dialogue/scripts/dialogue-consent.py\" hook --host codex --event prompt 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^request_user_input$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/skills/senior-dialogue/scripts/dialogue-consent.py\" hook --host codex --event answer 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/skills/senior-dialogue/scripts/dialogue-consent.py\" hook --host codex --event guard 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

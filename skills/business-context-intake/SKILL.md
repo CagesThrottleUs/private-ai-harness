@@ -293,6 +293,10 @@ docs(context): add business context for [feature name]
 
 ## Transition to Brainstorming
 
+*Senior Dialogue:* inside `/engineer`, this interview happens as topic (b)
+decision cards and the document is generated from the agreed cards; a passing
+consent `check` on them is the approval.
+
 After human approves the document:
 
 > "Business context committed to `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`.

@@ -47,6 +47,29 @@ Documented behavior must exactly match actual behavior. The test suite is the pr
 
 This approach is not bureaucratic overhead. It is the mechanism by which AI-generated code remains trustworthy at scale. The spec quality determines the code quality. There is no other lever.
 
+## Ownership Through Dialogue
+
+Most code is now written by an agent and rarely read line by line. That moves
+ownership: you own a system when you can explain every decision that shaped
+it — why this boundary, why this data structure, what fails first and how we
+would know. The harness therefore treats the human and the agent as two senior
+engineers. The agent brings evidence, numbers, and options; the human brings
+intent, context, and judgment. They discuss until the human explicitly agrees
+and could re-explain the decision to a third engineer; only then is the
+agreement documented and built, test-first.
+
+This is not a detour from "time from intent to done": an unexamined decision
+is the most expensive rework there is. Two consequences follow:
+
+- **Agreement is a recorded human act, not a model inference.** Autopilot or
+  allow-all permissions speed up execution; they never stand in for consent to
+  a design decision. When no human is present, the agent stops with one clear
+  question instead of guessing.
+- **Skills teach reasoning, not recipes.** A skill explains how to think about
+  its job and how to iterate with the human. Numbers, thresholds, and depth are
+  derived for the case at hand and shown with their basis, so the human can
+  challenge an input instead of accepting a constant.
+
 ## The Measure of Success
 
 One metric: time from intent to done.
@@ -63,6 +86,7 @@ If a new plugin adds friction instead of removing it, it doesn't belong here.
 
 ## The Operating Model
 
+0. **Discuss to agreement** — understand the problem, discuss each decision with evidence and numbers, and record the human's explicit agreement.
 1. **Write the spec** — requirements as testable statements of truth, not prose descriptions.
 2. **Write the tests** — derived from the spec, covering every requirement and assumption.
 3. **Generate the code** — AI produces the implementation; the test suite is the acceptance criterion.

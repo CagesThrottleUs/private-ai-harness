@@ -1,0 +1,28 @@
+{
+  "description": "Senior Dialogue consent ledger (Claude Code): record human agreement from AskUserQuestion answers; guard the ledger, its key, the hook wiring, and the agreement token",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/senior-dialogue/scripts/dialogue-consent.py\" hook --host claude --event answer 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/senior-dialogue/scripts/dialogue-consent.py\" hook --host claude --event guard 2>/dev/null || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
