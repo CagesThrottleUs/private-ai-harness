@@ -163,6 +163,31 @@ the guarded files, launch the host with `PRIVATE_AI_HARNESS_CONSENT_GUARD=off`.
 Set `PRIVATE_AI_HARNESS_CONSENT_DEBUG=1` to capture raw hook payloads in
 `~/.private-ai-harness/consent-debug.jsonl`.
 
+### Copilot cache keepalive
+
+Copilot keeps a Claude model's prompt cache for 5 minutes. A message sent after
+that rebuilds the whole context at the cache-write price (25× the read price on
+Opus). `extensions/private-ai-harness-keepalive/extension.mjs` keeps the cache
+warm automatically while you are away:
+
+- **When:** one short message about 30s before the cache expires, whenever the
+  main agent is between turns, including while background agents or shells run.
+  Expiry, context size, and prices come from each call's usage event, so it
+  adapts to every model's cache lifetime.
+- **Until:** keepalive spend plus the next keepalive would exceed the smaller of
+  your cap (default $1) and what one rebuild would cost extra. Then it compacts
+  and waits. Your next message resets the spend.
+- **`/break:long`:** compact now; keepalives pause until you type again.
+- **`/break:off`:** no keepalives for the rest of the session.
+
+Copilot loads plugin extensions from this checkout, so there is no install step.
+If compaction fails, a timeline warning (with a beep) asks you to run `/compact`.
+Disable with `PRIVATE_AI_HARNESS_KEEPALIVE=off`. Tune with
+`PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD` / `_LEAD_SECONDS` or
+`~/.private-ai-harness/keepalive.json` (`{"capUsd": 1, "leadSeconds": 30}`).
+Log: `~/.private-ai-harness/keepalive.jsonl`. Selftest:
+`node extensions/private-ai-harness-keepalive/extension.mjs --selftest`.
+
 ---
 
 ## Installation
@@ -305,6 +330,7 @@ verified against the actual CLIs rather than assumed:
 - **Copilot HUD** — installs [`griches/copilot-hud`](https://github.com/griches/copilot-hud) from its marketplace as `copilot-hud@copilot-hud`. Run `/copilot-hud:setup` once in Copilot to enable its status line; existing HUD configuration is left intact.
 - **Autopilot default** — sets `defaultMode` to `autopilot` in `~/.copilot/settings.json` (or `$COPILOT_HOME/settings.json`), preserving all other user settings. New interactive sessions start in autopilot; resumed and non-interactive sessions retain their own modes.
 - **Senior Dialogue consent hooks** — adds `userPromptSubmitted`, `postToolUse`, and `preToolUse` entries to `~/.copilot/hooks/private-ai-harness.json`. Autopilot speeds up execution but is not consent: `/engineer` still waits for an `ask_user` answer or a typed agreement before building, and parks when nobody answers.
+- **Cache keepalive extension** — nothing to install: the plugin ships `extensions/private-ai-harness-keepalive/`, which Copilot loads live with the plugin (see [Copilot cache keepalive](#copilot-cache-keepalive)).
 
 Not portable, and skipped with a reason printed at the end of the run:
 claude-mem (Claude-specific hook/plugin memory, no standalone MCP

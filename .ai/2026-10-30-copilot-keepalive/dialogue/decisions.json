@@ -1,0 +1,20 @@
+{
+  "decisions": [
+    {
+      "id": "D-000",
+      "title": "Working agreement: task lane, light depth, cost-aware skill chain, $20 build cap",
+      "topic": "working-agreement",
+      "door": "two-way",
+      "ev_hours": 0.5,
+      "status": "built-directly (human waived ledger)"
+    },
+    {
+      "id": "D-001",
+      "title": "Keepalive design contract (expiry trigger, ski-rental stop, compact safety, /break:long, /break:off)",
+      "topic": "lld",
+      "door": "two-way",
+      "ev_hours": 1,
+      "status": "built-directly (human waived ledger)"
+    }
+  ]
+}

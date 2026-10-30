@@ -27,6 +27,7 @@ scripts/commit-msg.sh       conventional commits enforcement hook
 skills/senior-dialogue/scripts/dialogue-consent.py  Senior Dialogue consent ledger + hook entry point
 hooks/dialogue-consent.json Claude consent hooks (codex-dialogue-consent.json: Codex)
 scripts/opencode-dialogue-consent-plugin.js  opencode consent bridge (copied by installer)
+extensions/<name>/extension.mjs  Copilot CLI extensions, loaded live with the plugin (keepalive)
 .claude-plugin/plugin.json  Claude Code plugin manifest
 .claude-plugin/marketplace.json  Claude/local marketplace manifest
 .codex-plugin/plugin.json   Codex plugin manifest
@@ -97,6 +98,16 @@ while native agent adapters need installer re-run after source changes.
 The Copilot installer preserves existing `~/.copilot/settings.json` keys,
 setting only `defaultMode` to `autopilot`. It installs the copilot-hud plugin;
 run `/copilot-hud:setup` once in Copilot to enable its status line.
+
+---
+
+## Editing Copilot extensions
+
+`extensions/<name>/extension.mjs` files are Copilot CLI extensions. Copilot
+loads them live from this checkout as part of the plugin; there is no install
+step and no build. After changing one, run `extensions_reload` (or start a new
+session) and, for the keepalive, its `--selftest`. Claude Code, Codex, and
+opencode ignore this directory.
 
 ---
 
