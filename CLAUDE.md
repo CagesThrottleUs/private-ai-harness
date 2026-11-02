@@ -106,7 +106,11 @@ run `/copilot-hud:setup` once in Copilot to enable its status line.
 `extensions/<name>/extension.mjs` files are Copilot CLI extensions. Copilot
 loads them live from this checkout as part of the plugin; there is no install
 step and no build. After changing one, run `extensions_reload` (or start a new
-session) and, for the keepalive, its `--selftest`. Claude Code, Codex, and
+session) and, for the keepalive, its `--selftest`. Live-test keepalive timing
+with a short `ttlSeconds` in `~/.private-ai-harness/keepalive.json`, then delete
+it: the file is shared by every session. Don't return `additionalContext` from
+an extension pre-tool hook: Copilot delivers it as a steering message, which
+interrupts `read_bash` and reads as human input. Claude Code, Codex, and
 opencode ignore this directory.
 
 ---

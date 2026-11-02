@@ -14,12 +14,20 @@
 // cache-read price). Then compact and wait for your next message, which resets
 // the spend.
 //
+// Mid-turn: a turn stays open while a tool blocks, and no message can reach the
+// model until the tool returns. So a main-agent pre-tool hook caps sync bash
+// `initial_wait` and read_bash `delay` at (expiry − now − lead), and moves a
+// sync `task` subagent to background when the cache would expire first. The
+// agent's next poll is a cache read instead of a full rebuild.
+//
 // Commands: /break:long  compact now; keepalives pause until you type again.
-//           /break:off   no keepalives for the rest of this session.
+//           /break:off   no keepalives or wait capping for the rest of this session.
 // Config:   PRIVATE_AI_HARNESS_KEEPALIVE=off disables the extension.
-//           Cap and lead: PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD and
-//           PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS, or
-//           ~/.private-ai-harness/keepalive.json {"capUsd": 1, "leadSeconds": 30}.
+//           Cap, lead, and a shorter test TTL: PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD,
+//           PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS and
+//           PRIVATE_AI_HARNESS_KEEPALIVE_TTL_SECONDS, or ~/.private-ai-harness/
+//           keepalive.json {"capUsd": 1, "leadSeconds": 30, "ttlSeconds": 60}.
+//           ttlSeconds only ever shortens the real cache lifetime.
 // Log:      ~/.private-ai-harness/keepalive.jsonl
 // Selftest: node extension.mjs --selftest
 import { spawn } from "node:child_process";
@@ -34,7 +42,16 @@ const PROMPT = `${TAG} Cache keepalive while the user is away. Reply with exactl
   `If a task_complete tool is available, call it with summary "ok (keepalive)". Call no other tools.`;
 const COMPACT_INSTRUCTIONS = "The user stepped away. Preserve open tasks, agreed decisions, " +
   "file paths, commands, and the next step so work resumes without re-explaining.";
-const DEFAULTS = Object.freeze({ capUsd: 1, leadSeconds: 30 });
+const DEFAULTS = Object.freeze({ capUsd: 1, leadSeconds: 30, ttlSeconds: null });
+// Blocking-wait arguments per tool, with the tool's own minimum and default (seconds).
+const WAIT_ARGS = Object.freeze({
+  bash: { key: "initial_wait", min: 30, fallback: 30 },
+  read_bash: { key: "delay", min: 1, fallback: 0 },
+});
+// A sync subagent's run time is unknown. Below this much cache life (Claude's
+// 5-minute cache) it likely outlives the cache; above it (GPT's 30 minutes) the
+// extra background round trip is not worth it.
+const TASK_BACKGROUND_BELOW_MS = 10 * 60_000;
 // An autopilot continuation can follow a turn end; never fire right after one.
 const MIN_QUIET_MS = 15_000;
 const COMPACT_TIMEOUT_MS = 60_000;
@@ -89,6 +106,28 @@ export function decide(s) {
   return s.spent + s.next > s.limit ? "stop" : "send";
 }
 
+export function effectiveExpiryMs(expiresAtMs, nowMs, ttlSeconds) {
+  return ttlSeconds > 0 ? Math.min(expiresAtMs, nowMs + ttlSeconds * 1000) : expiresAtMs;
+}
+
+// Returns { kind, args } when a main-agent tool call would block past the cache
+// expiry, else null. No note goes with it: hook additionalContext arrives as a
+// steering message, which interrupts read_bash at once and looks like human input.
+// The tools' own results already say "still running" or "started in background".
+export function shortenBlockingWait({ toolName, toolArgs, remainingMs, leadMs }) {
+  if (!(remainingMs > 0) || !toolArgs || typeof toolArgs !== "object") return null;
+  if (toolName === "task") {
+    if ((toolArgs.mode ?? "sync") !== "sync" || remainingMs >= TASK_BACKGROUND_BELOW_MS) return null;
+    return { kind: "to-background", args: { ...toolArgs, mode: "background" } };
+  }
+  const spec = WAIT_ARGS[toolName];
+  if (!spec || (toolName === "bash" && (toolArgs.mode ?? "sync") !== "sync")) return null;
+  const limit = Math.floor((remainingMs - leadMs) / 1000);
+  const requested = Number(toolArgs[spec.key] ?? spec.fallback);
+  if (limit < spec.min || !(requested > limit)) return null;
+  return { kind: "clamp", args: { ...toolArgs, [spec.key]: limit } };
+}
+
 export function isHumanMessage(data) {
   const source = data?.source;
   if (source && source !== "user") return false;
@@ -111,7 +150,8 @@ export function loadConfig(env = {}, fileText = null) {
   return {
     enabled: String(env.PRIVATE_AI_HARNESS_KEEPALIVE ?? "").toLowerCase() !== "off",
     capUsd: pick("PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD", "capUsd", DEFAULTS.capUsd, 0, 1000),
-    leadSeconds: pick("PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS", "leadSeconds", DEFAULTS.leadSeconds, 5, 3600),
+    leadSeconds: pick("PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS", "leadSeconds", DEFAULTS.leadSeconds, 1, 3600),
+    ttlSeconds: pick("PRIVATE_AI_HARNESS_KEEPALIVE_TTL_SECONDS", "ttlSeconds", DEFAULTS.ttlSeconds, 1, 86_400),
   };
 }
 
@@ -207,7 +247,7 @@ async function main() {
         break;
       case "assistant.usage": {
         const expires = Date.parse(d.cacheExpiresAt ?? "");
-        if (Number.isFinite(expires)) st.expiresAtMs = expires;
+        if (Number.isFinite(expires)) st.expiresAtMs = effectiveExpiryMs(expires, Date.now(), config.ttlSeconds);
         if (d.inputTokens > 0) st.context = d.inputTokens;
         const p = tokenPrices(d.copilotUsage);
         if (p.read != null) st.prices.read = p.read;
@@ -274,7 +314,23 @@ async function main() {
     }
   }
 
+  function onPreToolUse(input) {
+    if (input.agentId || st.off || st.expiresAtMs == null) return;
+    const r = shortenBlockingWait({
+      toolName: input.toolName, toolArgs: input.toolArgs,
+      remainingMs: st.expiresAtMs - Date.now(), leadMs: config.leadSeconds * 1000,
+    });
+    if (!r) return;
+    log({ kind: r.kind, tool: input.toolName, from: input.toolArgs, to: r.args, expiresAt: new Date(st.expiresAtMs).toISOString() });
+    return { modifiedArgs: r.args };
+  }
+
   session = await joinSession({
+    hooks: {
+      onPreToolUse: (input) => {
+        try { return onPreToolUse(input); } catch (err) { log({ kind: "hook-error", detail: String(err?.message ?? err) }); }
+      },
+    },
     commands: [
       {
         name: "break:long",
@@ -288,7 +344,7 @@ async function main() {
       },
       {
         name: "break:off",
-        description: "Stop cache keepalives for the rest of this session",
+        description: "Stop cache keepalives and wait capping for the rest of this session",
         handler: () => {
           st.off = true;
           try {
@@ -304,7 +360,7 @@ async function main() {
   sessionId = session.sessionId;
   st.off = existsSync(join(OFF_DIR, sessionId));
   const compactApi = typeof session.rpc?.history?.compact;
-  log({ kind: "joined", cliVersion, off: st.off, compactApi, capUsd: config.capUsd, leadSeconds: config.leadSeconds });
+  log({ kind: "joined", cliVersion, off: st.off, compactApi, capUsd: config.capUsd, leadSeconds: config.leadSeconds, ttlSeconds: config.ttlSeconds });
   if (compactApi !== "function") {
     note(`history.compact is missing on Copilot CLI ${cliVersion}; /break:long and the keepalive limit will ask you to run /compact.`, "warning");
   }
@@ -374,7 +430,43 @@ function selftest() {
 
   const cfg = loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD: "0.5" }, '{"capUsd": 2, "leadSeconds": 60}');
   check("config: env beats file, file beats default", cfg.capUsd === 0.5 && cfg.leadSeconds === 60 && cfg.enabled);
-  check("config: invalid values fall back", loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS: "1" }, "not json").leadSeconds === 30);
+  check("config: invalid values fall back", loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS: "0" }, "not json").leadSeconds === 30);
+  check("config: ttl override from env or file, unset by default",
+    loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_TTL_SECONDS: "60" }).ttlSeconds === 60 &&
+    loadConfig({}, '{"ttlSeconds": 90}').ttlSeconds === 90 && loadConfig({}).ttlSeconds === null);
+
+  check("ttl: override shortens expiry", effectiveExpiryMs(300_000, 0, 60) === 60_000);
+  check("ttl: override never lengthens expiry", effectiveExpiryMs(30_000, 0, 60) === 30_000);
+  check("ttl: unset keeps real expiry", effectiveExpiryMs(300_000, 0, null) === 300_000);
+
+  // Claude: about 290s of cache left when the tool call starts, 30s lead → 260s limit.
+  const claude = { remainingMs: 290_000, leadMs: 30_000 };
+  const rb = shortenBlockingWait({ ...claude, toolName: "read_bash", toolArgs: { shellId: "1", delay: 600 } });
+  check("clamp: read_bash delay capped at expiry − lead",
+    rb?.kind === "clamp" && rb.args.delay === 260 && rb.args.shellId === "1");
+  const sb = shortenBlockingWait({ ...claude, toolName: "bash", toolArgs: { command: "x", initial_wait: 600 } });
+  check("clamp: sync bash initial_wait capped", sb?.args.initial_wait === 260 && sb.args.command === "x");
+  check("clamp: explicit sync bash capped", shortenBlockingWait({ ...claude, toolName: "bash", toolArgs: { mode: "sync", initial_wait: 600 } })?.args.initial_wait === 260);
+  check("clamp: waits inside the limit untouched",
+    shortenBlockingWait({ ...claude, toolName: "read_bash", toolArgs: { delay: 260 } }) === null &&
+    shortenBlockingWait({ ...claude, toolName: "bash", toolArgs: { command: "x" } }) === null);
+  check("clamp: async bash untouched", shortenBlockingWait({ ...claude, toolName: "bash", toolArgs: { mode: "async", initial_wait: 600 } }) === null);
+  check("clamp: GPT 30-minute cache never caps a 600s wait",
+    shortenBlockingWait({ remainingMs: 1_790_000, leadMs: 30_000, toolName: "read_bash", toolArgs: { delay: 600 } }) === null);
+  check("clamp: expired or nearly expired cache untouched",
+    shortenBlockingWait({ ...claude, remainingMs: 0, toolName: "read_bash", toolArgs: { delay: 600 } }) === null &&
+    shortenBlockingWait({ ...claude, remainingMs: 50_000, toolName: "bash", toolArgs: { initial_wait: 600 } }) === null);
+  check("clamp: read_bash may go below bash's 30s minimum",
+    shortenBlockingWait({ ...claude, remainingMs: 40_000, toolName: "read_bash", toolArgs: { delay: 600 } })?.args.delay === 10);
+  check("clamp: other tools and missing args untouched",
+    shortenBlockingWait({ ...claude, toolName: "view", toolArgs: { delay: 600 } }) === null &&
+    shortenBlockingWait({ ...claude, toolName: "read_bash", toolArgs: undefined }) === null);
+
+  const tk = shortenBlockingWait({ ...claude, toolName: "task", toolArgs: { name: "a", prompt: "p" } });
+  check("task: sync subagent moved to background on a short cache",
+    tk?.kind === "to-background" && tk.args.mode === "background" && tk.args.prompt === "p");
+  check("task: background subagent untouched", shortenBlockingWait({ ...claude, toolName: "task", toolArgs: { mode: "background" } }) === null);
+  check("task: long cache keeps sync", shortenBlockingWait({ remainingMs: 1_790_000, leadMs: 30_000, toolName: "task", toolArgs: { mode: "sync" } }) === null);
   check("config: kill switch", !loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE: "OFF" }).enabled);
 
   if (failures.length) {

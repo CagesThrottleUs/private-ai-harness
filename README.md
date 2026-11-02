@@ -177,14 +177,22 @@ warm automatically while you are away:
 - **Until:** keepalive spend plus the next keepalive would exceed the smaller of
   your cap (default $1) and what one rebuild would cost extra. Then it compacts
   and waits. Your next message resets the spend.
+- **Mid-turn:** no message reaches the model while a tool blocks, so a 10-minute
+  build would expire the cache. A main-agent pre-tool hook caps sync `bash`
+  `initial_wait` and `read_bash` `delay` at the time left before expiry minus
+  the lead, and runs a sync `task` subagent in background when the cache has
+  under 10 minutes left. The shell keeps running; each poll is a cache read
+  instead of a rebuild. GPT's 30-minute cache is never capped.
 - **`/break:long`:** compact now; keepalives pause until you type again.
-- **`/break:off`:** no keepalives for the rest of the session.
+- **`/break:off`:** no keepalives or wait capping for the rest of the session.
 
 Copilot loads plugin extensions from this checkout, so there is no install step.
 If compaction fails, a timeline warning (with a beep) asks you to run `/compact`.
 Disable with `PRIVATE_AI_HARNESS_KEEPALIVE=off`. Tune with
 `PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD` / `_LEAD_SECONDS` or
 `~/.private-ai-harness/keepalive.json` (`{"capUsd": 1, "leadSeconds": 30}`).
+To test on short windows, `_TTL_SECONDS` / `"ttlSeconds": 60` shortens the
+cache lifetime the extension assumes (it never lengthens it).
 Log: `~/.private-ai-harness/keepalive.jsonl`. Selftest:
 `node extensions/private-ai-harness-keepalive/extension.mjs --selftest`.
 
