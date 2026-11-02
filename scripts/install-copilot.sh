@@ -137,6 +137,22 @@ else
 fi
 echo ""
 
+# CodeScene CodeHealth MCP (npm package provides the `cs-mcp` binary)
+echo "CodeScene CodeHealth MCP"
+if check_cmd npm; then
+  npm install -g @codescene/codehealth-mcp \
+    && ok "@codescene/codehealth-mcp installed" \
+    || warn "@codescene/codehealth-mcp install failed"
+  if check_cmd cs-mcp; then
+    copilot mcp add codescene -- cs-mcp \
+      && ok "codescene MCP server registered" \
+      || warn "codescene registration failed — may already be registered"
+  fi
+else
+  warn "npm not found — skipping CodeScene MCP"
+fi
+echo ""
+
 # ── 4. UI skills ──────────────────────────────────────────────────────────────
 echo "4. Skills (impeccable, taste-skill)"
 if check_cmd npx; then

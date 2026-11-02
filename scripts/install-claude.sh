@@ -68,6 +68,22 @@ info "Running: npx ctx7 setup"
 npx ctx7 setup && ok "Context7 setup done" || warn "Context7 setup failed — check output above"
 echo ""
 
+# CodeScene CodeHealth MCP (npm package provides the `cs-mcp` binary)
+echo "CodeScene CodeHealth MCP"
+if check_cmd npm; then
+  npm install -g @codescene/codehealth-mcp \
+    && ok "@codescene/codehealth-mcp installed" \
+    || warn "@codescene/codehealth-mcp install failed"
+  if check_cmd cs-mcp; then
+    claude mcp add codescene -s user -- cs-mcp \
+      && ok "codescene MCP server registered" \
+      || warn "codescene registration failed — may already be registered"
+  fi
+else
+  warn "npm not found — skipping CodeScene MCP"
+fi
+echo ""
+
 # ── 4. claude-mem ────────────────────────────────────────────────────────────
 echo "4.  claude-mem"
 info "Running: npx claude-mem install"

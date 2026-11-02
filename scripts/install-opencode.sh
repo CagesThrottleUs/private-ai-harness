@@ -96,6 +96,22 @@ else
 fi
 echo ""
 
+# CodeScene CodeHealth MCP (npm package provides the `cs-mcp` binary)
+echo "CodeScene CodeHealth MCP"
+if check_cmd npm; then
+  npm install -g @codescene/codehealth-mcp \
+    && ok "@codescene/codehealth-mcp installed" \
+    || warn "@codescene/codehealth-mcp install failed"
+  if check_cmd cs-mcp; then
+    opencode mcp add codescene cs-mcp \
+      && ok "codescene MCP server registered" \
+      || warn "codescene registration failed — may already be registered"
+  fi
+else
+  warn "npm not found — skipping CodeScene MCP"
+fi
+echo ""
+
 # ── 3. FFmpeg ─────────────────────────────────────────────────────────────────
 echo "3. FFmpeg"
 if check_cmd ffmpeg; then

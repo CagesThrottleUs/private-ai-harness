@@ -67,6 +67,16 @@ fi
 info "Installing ponytail (YAGNI / lazy-dev skill pack)"
 codex plugin add ponytail@ponytail && ok "ponytail installed" || warn "ponytail install failed"
 
+info "Installing CodeScene CodeHealth MCP"
+if command -v npm >/dev/null 2>&1; then
+  npm install -g @codescene/codehealth-mcp && ok "@codescene/codehealth-mcp installed" || warn "@codescene/codehealth-mcp install failed"
+  if command -v cs-mcp >/dev/null 2>&1; then
+    codex mcp add codescene -- cs-mcp && ok "codescene MCP server registered" || warn "codescene registration failed — may already be registered"
+  fi
+else
+  warn "npm not found — skipping CodeScene MCP"
+fi
+
 info "Installing Codex custom-agent adapters"
 python3 "$REPO_ROOT/scripts/install-codex-agents.py"
 ok "Codex agents installed"

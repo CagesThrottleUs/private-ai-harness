@@ -322,6 +322,7 @@ Beyond the harness's own skills, the installer also ports what
 verified against the actual CLIs rather than assumed:
 
 - **RTK** — `rtk init -g --copilot` (its own documented Copilot integration: writes `~/.copilot/hooks/rtk-rewrite.json` and merges a block into `~/.copilot/copilot-instructions.md`)
+- **CodeScene CodeHealth MCP** — every installer (Claude Code, Codex, opencode, Copilot) runs `npm install -g @codescene/codehealth-mcp` and registers the `cs-mcp` binary as the `codescene` MCP server
 - **Context7** — `copilot mcp add context7 -- npx -y @upstash/context7-mcp` (MCP is host-agnostic)
 - **UI + Android skills** (impeccable, taste-skill, chrisbanes/skills, ceorkm/mobile-app-ui-design, baoyu-skills, hamen/compose_skill, drjacky/claude-android-ninja) — the `skills` CLI (`npx skills add`) has a `github-copilot` agent target built in
 - **skydoves, new-silvermoon, Meet-Miyani, rcosteira79, aldefy skill packs** — no Copilot-aware installer of their own, so cloned directly and their `SKILL.md` folders copied into `~/.copilot/skills/` (bypasses Claude's plugin marketplace, which rcosteira79/aldefy are normally installed through)
