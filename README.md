@@ -187,7 +187,10 @@ warm automatically while you are away:
 - **`/break:off`:** no keepalives or wait capping for the rest of the session.
 
 Copilot loads plugin extensions from this checkout, so there is no install step.
-If compaction fails, a timeline warning (with a beep) asks you to run `/compact`.
+Compaction is skipped when only keepalives ran since the last one (including
+your own `/compact`), and never starts while another is running. A slow
+compaction is waited out, not failed. If compaction really fails, a timeline
+warning (with a beep) asks you to run `/compact`.
 Disable with `PRIVATE_AI_HARNESS_KEEPALIVE=off`. Tune with
 `PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD` / `_LEAD_SECONDS` or
 `~/.private-ai-harness/keepalive.json` (`{"capUsd": 1, "leadSeconds": 30}`).

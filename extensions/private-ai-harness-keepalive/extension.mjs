@@ -20,6 +20,9 @@
 // sync `task` subagent to background when the cache would expire first. The
 // agent's next poll is a cache read instead of a full rebuild.
 //
+// Compaction is skipped when nothing but keepalives ran since the last one
+// (yours or ours), and never starts while another is running.
+//
 // Commands: /break:long  compact now; keepalives pause until you type again.
 //           /break:off   no keepalives or wait capping for the rest of this session.
 // Config:   PRIVATE_AI_HARNESS_KEEPALIVE=off disables the extension.
@@ -54,7 +57,9 @@ const WAIT_ARGS = Object.freeze({
 const TASK_BACKGROUND_BELOW_MS = 10 * 60_000;
 // An autopilot continuation can follow a turn end; never fire right after one.
 const MIN_QUIET_MS = 15_000;
-const COMPACT_TIMEOUT_MS = 60_000;
+// Copilot compactions take 30-80s and finish even when slow, so this only
+// reports; it never fails one (a false failure led to a second, manual /compact).
+const COMPACT_SLOW_MS = 90_000;
 const CONFIG_REFRESH_MS = 15_000;
 const NANO_AIU_PER_USD = 1e11;
 const HOME = join(homedir(), ".private-ai-harness");
@@ -135,8 +140,18 @@ export function isHumanMessage(data) {
   return !String(data?.content ?? "").startsWith(TAG);
 }
 
-export function compactSucceeded(result) {
-  return result?.success === true && !result.aborted && !result.cancelled && result.tokensRemoved > 0;
+// Returns "compacted" | "nothing" | "failed".
+export function compactOutcome(result) {
+  if (result?.success !== true || result.aborted || result.cancelled) return "failed";
+  return result.tokensRemoved > 0 ? "compacted" : "nothing";
+}
+
+// Whether a compaction now would fold away real work. Keepalive turns don't
+// count; any completed compaction, including a manual /compact, clears it.
+export function changedSinceCompaction(changed, { type, data, inKeepalive }) {
+  if (type === "session.compaction_complete") return data?.success === true ? false : changed;
+  if (type === "assistant.turn_start") return changed || !inKeepalive;
+  return changed;
 }
 
 export function loadConfig(env = {}, fileText = null) {
@@ -165,12 +180,6 @@ function detectCliVersion() {
     const url = import.meta.resolve("@github/copilot-sdk/extension");
     return url.match(/\/(\d+\.\d+\.\d+[^/]*)\/copilot-sdk\//)?.[1] ?? "unknown";
   } catch { return "unknown"; }
-}
-
-function withTimeout(promise, ms) {
-  let timer;
-  const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`timed out after ${ms / 1000}s`)), ms); });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 function beep() {
@@ -207,13 +216,13 @@ async function main() {
     expiresAtMs: null, handledExpiryMs: null, betweenTurns: false, lastTurnEnd: 0,
     context: 0, prices: { read: null, write: null },
     spent: 0, count: 0, inKeepalive: false, keepaliveTurnUsd: 0,
-    paused: false, off: false, sending: false, pendingCompact: null, compacting: false,
+    paused: false, off: false, sending: false, pendingCompact: null, compacting: false, changedSinceCompact: true,
   };
   let session;
 
   const note = (message, level = "info") => { session.log(`keepalive: ${message}`, { level }).catch(() => {}); };
 
-  async function compact(reason) {
+  function compact(reason) {
     const api = session.rpc?.history;
     const fail = (detail) => {
       log({ kind: "compact-failed", reason, detail, cliVersion });
@@ -221,23 +230,38 @@ async function main() {
       beep();
     };
     if (typeof api?.compact !== "function") return fail("history.compact is not available");
-    try {
-      const res = await withTimeout(api.compact({ customInstructions: COMPACT_INSTRUCTIONS, trigger: "manual" }), COMPACT_TIMEOUT_MS);
-      if (!compactSucceeded(res)) {
-        const { success, aborted, cancelled, tokensRemoved } = res ?? {};
-        return fail(`unexpected result ${JSON.stringify({ success, aborted, cancelled, tokensRemoved })}`);
-      }
-      log({ kind: "compacted", reason, tokensRemoved: res.tokensRemoved, messagesRemoved: res.messagesRemoved, cliVersion });
-      note(`compacted (${reason}); ${res.tokensRemoved} tokens removed. Keepalives resume after your next message.`);
-    } catch (err) {
-      fail(String(err?.message ?? err));
-    }
+    st.compacting = true;
+    const slow = setTimeout(() => {
+      log({ kind: "compact-slow", reason, afterSeconds: COMPACT_SLOW_MS / 1000 });
+      note(`compaction still running after ${COMPACT_SLOW_MS / 1000}s; waiting for Copilot to finish it.`);
+    }, COMPACT_SLOW_MS);
+    api.compact({ customInstructions: COMPACT_INSTRUCTIONS, trigger: "manual" })
+      .then((res) => {
+        const outcome = compactOutcome(res);
+        if (outcome === "failed") {
+          const { success, aborted, cancelled, tokensRemoved } = res ?? {};
+          return fail(`unexpected result ${JSON.stringify({ success, aborted, cancelled, tokensRemoved })}`);
+        }
+        st.changedSinceCompact = false;
+        log({ kind: outcome === "compacted" ? "compacted" : "compact-nothing", reason, tokensRemoved: res.tokensRemoved, messagesRemoved: res.messagesRemoved, cliVersion });
+        note(outcome === "compacted"
+          ? `compacted (${reason}); ${res.tokensRemoved} tokens removed. Keepalives resume after your next message.`
+          : `nothing to compact (${reason}). Keepalives resume after your next message.`);
+      }, (err) => fail(String(err?.message ?? err)))
+      .finally(() => { clearTimeout(slow); st.compacting = false; });
   }
 
   function onEvent(e) {
     if (e.agentId) return; // subagent calls never refresh the main session's cache
     const d = e.data ?? {};
+    st.changedSinceCompact = changedSinceCompaction(st.changedSinceCompact, { type: e.type, data: d, inKeepalive: st.inKeepalive });
     switch (e.type) {
+      case "session.compaction_start":
+        st.compacting = true;
+        break;
+      case "session.compaction_complete":
+        st.compacting = false;
+        break;
       case "assistant.turn_start":
         st.betweenTurns = false;
         break;
@@ -259,10 +283,9 @@ async function main() {
         break;
       }
       case "user.message":
-        if (d.source === SOURCE) {
-          st.inKeepalive = true;
-        } else if (isHumanMessage(d)) {
-          Object.assign(st, { spent: 0, count: 0, inKeepalive: false, keepaliveTurnUsd: 0, paused: false });
+        st.inKeepalive = d.source === SOURCE;
+        if (isHumanMessage(d)) {
+          Object.assign(st, { spent: 0, count: 0, keepaliveTurnUsd: 0, paused: false });
         }
         break;
     }
@@ -274,11 +297,13 @@ async function main() {
       config = loadConfig(process.env, readText(CONFIG_FILE));
       configReadAt = now;
     }
-    if (st.pendingCompact && st.betweenTurns && !st.compacting) {
+    if (st.compacting) return;
+    if (st.pendingCompact && st.betweenTurns) {
       const reason = st.pendingCompact;
       st.pendingCompact = null;
-      st.compacting = true;
-      try { await compact(reason); } finally { st.compacting = false; }
+      if (st.changedSinceCompact) return compact(reason);
+      log({ kind: "compact-skipped", reason });
+      note(`nothing new since the last compaction, so none ran (${reason}). Keepalives resume after your next message.`);
       return;
     }
     const limit = stopLimitUsd({ context: st.context, prices: st.prices, capUsd: config.capUsd });
@@ -423,10 +448,21 @@ function selftest() {
   check("human: autopilot continuation is not human", !isHumanMessage({ isAutopilotContinuation: true, content: "x" }));
   check("human: system source is not human", !isHumanMessage({ source: "system", content: "x" }));
 
-  check("compact: success", compactSucceeded({ success: true, tokensRemoved: 10 }));
-  check("compact: aborted, cancelled, nothing removed or missing fail",
+  check("compact: success", compactOutcome({ success: true, tokensRemoved: 10 }) === "compacted");
+  check("compact: success removing nothing is not a failure", compactOutcome({ success: true, tokensRemoved: 0 }) === "nothing");
+  check("compact: aborted, cancelled, unsuccessful or missing fail",
     [{ success: true, aborted: true, tokensRemoved: 1 }, { success: true, cancelled: true, tokensRemoved: 1 },
-      { success: true, tokensRemoved: 0 }, { success: false, tokensRemoved: 5 }, undefined].every((r) => !compactSucceeded(r)));
+      { success: false, tokensRemoved: 5 }, undefined].every((r) => compactOutcome(r) === "failed"));
+
+  // Real sequence (2026-11-05): manual /compact, keepalive turns, then /break:long compacted again for 4k tokens.
+  const replay = (events, from = true) => events.reduce((c, ev) => changedSinceCompaction(c, ev), from);
+  const done = { type: "session.compaction_complete", data: { success: true } };
+  const keepaliveTurn = { type: "assistant.turn_start", inKeepalive: true };
+  const realTurn = { type: "assistant.turn_start", inKeepalive: false };
+  check("changed: unknown history counts as changed", replay([]));
+  check("changed: manual /compact then keepalives only → skip", !replay([done, keepaliveTurn, keepaliveTurn]));
+  check("changed: real turn after compaction → compact", replay([done, keepaliveTurn, realTurn]));
+  check("changed: failed compaction keeps it", replay([{ type: "session.compaction_complete", data: { success: false } }]));
 
   const cfg = loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD: "0.5" }, '{"capUsd": 2, "leadSeconds": 60}');
   check("config: env beats file, file beats default", cfg.capUsd === 0.5 && cfg.leadSeconds === 60 && cfg.enabled);
