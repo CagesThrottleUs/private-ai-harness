@@ -6,7 +6,7 @@ Part of the brainstorming skill: structured questions, scoring approaches (ATAM/
 
 **Using AskUserQuestion for clarifying questions:**
 
-Open questions come first (see The Conversation). Use the `AskUserQuestion` tool for structured choices only when the user is stuck or the answer picks a significant branch between 2-4 discrete options (approach A vs B vs C) — it presents options as a structured UI rather than a free-text prompt.
+Until you know why they want it, ask open questions (see The Conversation). Use the `AskUserQuestion` tool for structured choices once you know why and the answer picks a significant branch between 2-4 discrete options (approach A vs B vs C) — give each option its trade-off and mark your recommended pick. It presents options as a structured UI rather than a free-text prompt.
 Example:
 ```
 AskUserQuestion({
@@ -29,8 +29,10 @@ For open-ended questions ("describe your problem"), continue using prose — the
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
-- Open questions first; offer a menu only when they're stuck
+- Ask only when the answer would change what gets built and nothing already answers it; otherwise state your call as a proposal they can correct
+- Ask why first (open, nothing to pick from) when they haven't said; once you know why, show named choices with trade-offs and your pick
 - Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Process steps (writing up, file locations, looking further, how to show something) are your calls: do them and say so
 - Focus on understanding: purpose, why, constraints, success criteria, and who owns the how-it-gets-made choices
 
 **Exploring approaches:**

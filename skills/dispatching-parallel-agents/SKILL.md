@@ -68,7 +68,8 @@ Each agent gets:
 Pasted context stays resident in your session for every subsequent turn.
 Three parallel agents × pasted task text = 3× context growth before you read a result.
 
-- **Task content from a plan:** run `skills/subagent-driven-development/scripts/task-brief PLAN N`,
+- **Task content from a plan:** run `skills/subagent-driven-development/scripts/task-brief PLAN N`
+  by its absolute path, from the working tree the plan executes in, and
   pass the printed file path. Agent reads once; you never hold the text.
 - **Agent reports:** specify a report file path in each dispatch prompt. Agent writes there;
   you read it after completion. Never paste agent output into later dispatches.

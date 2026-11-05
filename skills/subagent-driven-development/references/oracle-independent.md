@@ -5,7 +5,8 @@ Part of subagent-driven-development. Read from disk at the step that needs it, s
 A task whose brief carries `**Oracle:** independent` (set by `writing-plans`'
 Oracle-Independence Gate) is dispatched as two implementer calls, not one:
 
-1. Run `scripts/task-brief PLAN_FILE N`, then strip the brief to REQ
+1. Run `scripts/task-brief PLAN_FILE N` (by its absolute path, from the
+   working tree you're executing in), then strip the brief to REQ
    statement + Acceptance Criteria + Test Cases only before handing it to
    the oracle dispatch — the oracle must not see any other task's
    interfaces, any existing code in the touched files, or your own analysis

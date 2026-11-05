@@ -18,44 +18,44 @@ Before you reply, ask: what do I know about what they want, and why?
 - **Everything that matters is in the request** ("make the icon cornflower blue"). This is a quick, clear task. Do it and say what you did — no spec, no gate.
 - **Something non-trivial is missing.** Look first, then start the conversation (below).
 
-Before you implement anything else, you must, in order: (1) lay out the approaches in a message of their own and have them pick one; (2) write the design doc, short or full (see Size the Work); (3) get their approval of that doc; (4) invoke the next skill (`high-level-design` or `writing-plans`). A spike they said yes to is not implementing.
+Before you implement anything else, you must, in order: (1) lay out the approaches in a message of their own and have them pick one; (2) write the design doc, short or full (see Size the Work); (3) get their approval of that doc; (4) invoke the next skill (`high-level-design` or `writing-plans`). A spike they said yes to is not implementing. If nothing is open when you write your first message and there's one sensible way, steps 1 to 3 happen in that message (see Your First Message); feature work still goes through the business-context and spec gates below.
 
 ## Look Before You Ask
 
-In an existing project, or when they've given you context (a spec, a plan, a handoff, a business-context doc, files they pointed at, earlier conversation), dig in before your first message. Read what they referred to and the code or material it connects to, until you can explain how the relevant parts work today and what this change would touch. Never ask what the project or their context already answers.
+In an existing project, or when they've given you context (a spec, a plan, a handoff, a business-context doc, files they pointed at, earlier conversation), dig in before your first message. Read what they referred to and the code or material it connects to, until you can explain how the relevant parts work today and what this change would touch. Never ask what the project or their context already answers, or reopen what they've already decided.
 
 ## Your First Message
 
 Move the work forward with one of these:
 
-- **They've already said what they want** (a spec, a plan, a detailed request): about 200 words. Echo the request in your own words — what, for whom, why, as far as they've said. Add what you found that bears on it: how the relevant parts work today and what the change would touch. If you found a constraint, conflict, or cheaper path they may not have considered, say so plainly. How to build it comes later (Lay out the approaches). End with one line inviting corrections, then one question about the thing their request leaves open whose answer would most change what gets built.
-- **They haven't:** one open question, in their terms, about the biggest thing still unsettled, and say what the answer would change about what you build.
+- **They've already said what they want** (a spec, a plan, a detailed request): about 200 words. Echo the request in your own words — what, for whom, why, as far as they've said. Add what you found that bears on it: how the relevant parts work today and what the change would touch. If you found a constraint, conflict, or cheaper path they may not have considered, say so plainly. How to build it comes later (Lay out the approaches). End with one line inviting corrections. Then, if they haven't told you why they want it — even if you can guess — ask about that: one open question in their own terms, with nothing to pick from. If they have, and their request and the project leave open something whose answer would change what gets built, ask about the one that would change it most; when its choices can be named, sketch each concretely, with what it trades off and which you'd pick. If nothing like that is open, there's one sensible way: end with the short design itself (the approach, a line on why the others don't fit, the design in a few lines) and ask them to approve it. Their approval covers the approach and the design: for a small change, write the short design doc as approved and go on to `writing-plans`; for a feature, it settles the approach and the REQ spec still goes through the gates below.
+- **They haven't:** one open question, in their terms — about why they want it if they haven't said, otherwise about the biggest thing still unsettled — and say what the answer would change about what you build.
 
 How it ends depends on whether they asked for brainstorming:
 
-- **They asked for it** (by name, `/brainstorming`, or asked for a design discussion): end with your question. They want this conversation.
-- **They didn't:** after your question, add a light one-line offer to just get going ("Or if you'd rather I just dive in, say so"). If they take it, the *conversation* is done: state any significant how-it-gets-made choice (platform, language, medium) in one plain line, then proceed through the harness gates below (Business Context and spec still apply to feature work — they are harness policy, not questions).
+- **They asked for it** (by name, `/brainstorming`, or asked for a design discussion): end there. They want this conversation.
+- **They didn't:** end with a light one-line offer to just get going ("Or if you'd rather I just dive in, say so"). If they take it, the *conversation* is done: state any significant how-it-gets-made choice (platform, language, medium) in one plain line, then proceed through the harness gates below (Business Context and spec still apply to feature work — they are harness policy, not questions).
 
 You never need to quote this skill to your human partner.
 
 ## The Conversation
 
-Each message ends with one question — a single sentence, no list of example answers hanging off it. Plain language, pitched slightly above where they are; match their vocabulary, never use process jargon. Lead with what matters; offer the rest.
+Ask a question only when the answer would change what gets built and neither the request nor the project answers it. Otherwise, state your call and your reason as a proposal they can correct, and move the work forward. Process steps are always your calls — writing things up, where files go, looking further, how to show something: do them and say so. Ask one at a time. Plain language, pitched slightly above where they are; match their vocabulary, never use process jargon. Lead with what matters; offer the rest.
 
-- **Get them describing.** Open questions first — their own words carry intent your options can't. Offer a short menu (or `AskUserQuestion`) only when they're stuck. When they say "just guess" or "what do you think?", propose something concrete. A guess they can correct ("I'm guessing this is because X keeps biting you?") often beats a question.
-- **How it gets made.** Find out early which choices about medium and tools (platform, language, libraries; medium for non-software) they want to own, which they hand to you, and what they already have. Strong views → talk it through. Handing over → pick sensible defaults and say them out loud. With existing work, build on what it already uses. Any choice you make goes in the spec as *your call*, never as something they agreed to. (Upstream added this after a session designed an iOS app, never asked about platform, and built a web app.)
+- **Get them describing.** Until you know why they want it, ask open questions with no example answers attached — their own words carry intent your options can't. Once you know why, when a decision has choices you can name, sketch each concretely, with what it trades off and which you'd pick (`AskUserQuestion` fits a 2-4 option branch). When they say "just guess" or "what do you think?", propose something concrete. A guess they can correct ("I'm guessing this is because X keeps biting you?") often beats a question.
+- **How it gets made.** Every project rests on choices about medium and tools (platform, language, libraries; medium for non-software). Read from how they talk which of those choices they want to make. Someone who raises the how or asks about trade-offs wants the options with your pick. Someone who talks about outcomes is handing you the how: make those calls and state each in a line. With existing work, build on what it already uses. Any choice you make goes in the spec as *your call*, never as something they agreed to. (Upstream added this after a session designed an iOS app, never asked about platform, and built a web app.)
 - **Ground to cover** (territory, not a script — never read these out as questions): what kind of thing this is and what makes it special; why now and what success looks like to them; goals, non-goals, anti-goals (what would make it a failure even if it technically works); prior art they loved or hated; current state and what they've tried; the details they care about.
 - **Make every question specific** to their project and what they've told you. Ask Socratically, like a sharp colleague: build each question on their last answer or on something you found, so it helps them think through a consequence or case they may have missed. When the reason isn't plain, say what the answer would change. A proposal they can correct, plus your reason for it, often beats a question.
-- **Offer recon.** Once you have some grounding and looking would help, offer to look — their codebase/project, their files and data, or the web. Say what you'd look for; they decide.
-- **Lay out the approaches.** Once you understand what they want, and before you write anything up, put the ways of building it in a message of its own. Generate several real alternatives privately and drop the weak ones (including any that work against *why* they want it or that the existing work rules out). Present the two or three that remain, grounded in what the project actually does, with what each trades off; recommend one and say why, then ask which way they want to go. If there's genuinely one sensible way, say so and why the others don't fit.
-- **Show, don't tell.** Offer the Visual Companion (below) whenever seeing would help more than reading.
+- **Do recon.** Once you have some grounding and looking further would help, go look — their codebase/project, their files and data, or the web. Say what you looked for and what you found.
+- **Lay out the approaches.** Once you understand what they want, and before you write anything up, put the ways of building it in a message of its own. Generate several real alternatives privately and drop the weak ones (including any that work against *why* they want it or that the existing work rules out). Sketch the two or three that remain concretely enough to picture, grounded in what the project actually does, with what each trades off; recommend one and say why, then ask which way they want to go — if they've handed you the how, say you'll go with your pick instead. If there's genuinely one sensible way, say so in that message and why the others don't fit; the design comes in the next one.
+- **Show, don't tell.** Whenever seeing would help more than reading, sketch it in text: a few lines of what they'd see. Offer the Visual Companion (below) when the look itself is theirs to decide.
 - **Spike to feel things out.** A quick throwaway build is often the cheapest way to learn what they want or whether something works. Offer one when it would help. When they just want to spike, get out of the way: spikes get no/minimal tests, aren't bulletproof, and skip plan/implementation/review. Bring what it taught you back into the conversation. Keeping spike output is a new request that returns through the gates.
 
 ## Play It Back
 
 As soon as you understand one part well enough to describe it (what it's for and who it serves, how one piece behaves), describe that part back in ~200-300 words, then return to questions about the next part. Playback and questions alternate; the last chunk covers what's left. Only what they said goes in as theirs; anything you filled in goes in as *your proposal*, with your reason. End each chunk by asking what's wrong or missing.
 
-If a chunk describes something they'll look at (page, screen, schedule, printout) and they haven't seen the Visual Companion offer yet, send the offer instead (its own message) and hold the chunk. Once they've accepted, put a mockup next to the description.
+If a chunk describes something they'll look at (page, screen, schedule, printout), put a text sketch next to the description. If the look itself is theirs to decide and they haven't seen the Visual Companion offer yet, send the offer instead (its own message) and hold the chunk. Once they've accepted, put a mockup next to the description.
 
 ## Size the Work
 
@@ -79,8 +79,9 @@ The bar is SQLite, RFC 8446, seL4, WebAssembly, and DO-178C: every statement tes
 
 | Thought | Reality |
 |---------|---------|
-| "I'll offer a menu of what they might want" | Options steer. Ask them to describe it first. |
-| "I've answered their questions, so I'll write the doc" | Lay out the approaches first, in a message of their own. |
+| "I'll offer a menu of what they might want" | Until you know why, options steer. Ask them to describe it first. |
+| "I'll just ask which one they want" | When the choices can be named, sketch each with its trade-off and your pick. |
+| "I've answered their questions, so I'll write the doc" | Lay out the approaches first, in a message of their own (or, when nothing was open from the start, in your first message's short design). |
 | "I'll fill in sensible defaults" | Good. Say them out loud — a default they never heard is one they couldn't reject. |
 | "I should explain the process first" | Ask your question. The process shows itself. |
 | "The spike works, I'll keep building on it" | Keeping it is a new request. Back through the gate. |
@@ -104,9 +105,9 @@ If present: read it. Every design question must be anchored to the problem, pers
 You MUST create a task for each of these items and complete them in order:
 
 1. **Explore project context** — check files, docs, recent commits; read the task's `.ai/<feature-slug>/business-context/` if exists
-2. **Look before you ask, then first message** — echo + findings + one question, or one open question (see Your First Message)
-3. **Converse and play back** — open questions first, one per message; play each understood part back in ~200-300 words, marking your guesses; offer recon, spike, and the visual companion (its own message) when each would help
-4. **Lay out 2-3 approaches** — in a message of its own, with trade-offs and your recommendation; they pick
+2. **Look before you ask, then first message** — echo + findings, then the why (if unsaid) as one open question, else the one open choice with named options and your pick, else a short design to approve (see Your First Message)
+3. **Converse and play back** — ask only what would change what gets built, one at a time, open until you know why; otherwise propose your call; play each understood part back in ~200-300 words, marking your guesses; do recon, offer a spike, sketch in text, and offer the visual companion (its own message) when the look is theirs to decide
+4. **Lay out 2-3 approaches** — in a message of its own, with trade-offs and your recommendation; they pick (already done if they approved a first-message short design)
 5. **Size the work** — say it in plain words; quick clear task → do it; small change → short design doc → approval → `writing-plans`; feature/project → continue below
 6. **Present design** — in sections scaled to their complexity, get user approval after each section
 7. **Write design doc** — save to `.ai/YYYY-MM-DD-<topic-slug>/specs/specs-<topic-slug>-design.md` using the requirement format in `references/requirement-format.md`; commit

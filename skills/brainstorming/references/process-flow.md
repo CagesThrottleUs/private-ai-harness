@@ -9,8 +9,8 @@ digraph brainstorming {
     "Explore project context" [shape=box];
     "Everything in request?" [shape=diamond];
     "Do it, say what you did" [shape=doublecircle];
-    "Look, then first message:\necho+findings+question" [shape=box];
-    "Converse + play back\n(offer recon/spike/visuals)" [shape=box];
+    "Look, then first message:\necho+findings+why/choice/short design" [shape=box];
+    "Converse + play back\n(do recon; offer spike/visuals)" [shape=box];
     "Size the work" [shape=diamond];
     "Short design doc,\nuser approves" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -26,9 +26,9 @@ digraph brainstorming {
 
     "Explore project context" -> "Everything in request?";
     "Everything in request?" -> "Do it, say what you did" [label="yes"];
-    "Everything in request?" -> "Look, then first message:\necho+findings+question" [label="no"];
-    "Look, then first message:\necho+findings+question" -> "Converse + play back\n(offer recon/spike/visuals)";
-    "Converse + play back\n(offer recon/spike/visuals)" -> "Size the work";
+    "Everything in request?" -> "Look, then first message:\necho+findings+why/choice/short design" [label="no"];
+    "Look, then first message:\necho+findings+why/choice/short design" -> "Converse + play back\n(do recon; offer spike/visuals)";
+    "Converse + play back\n(do recon; offer spike/visuals)" -> "Size the work";
     "Size the work" -> "Do it, say what you did" [label="quick, clear"];
     "Size the work" -> "Short design doc,\nuser approves" [label="small change"];
     "Short design doc,\nuser approves" -> "Invoke writing-plans skill";

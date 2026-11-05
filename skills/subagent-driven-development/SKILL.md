@@ -135,7 +135,9 @@ prints back — stays resident in your context for the rest of the session
 and is re-read on every later turn. Hand artifacts over as files:
 
 - **Task brief:** before dispatching an implementer, run this skill's
-  `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a
+  `scripts/task-brief PLAN_FILE N` by its absolute path, from the working
+  tree you're executing in (or pass `-C DIR` first to target another
+  worktree) — it extracts the task's full text to a
   uniquely named file and prints the path. Compose the dispatch so the
   brief stays the single source of requirements. Your dispatch should
   contain: (1) one line on where this task fits in the project; (2) the
@@ -161,7 +163,8 @@ sequences — the single most expensive failure observed. Track progress in
 a ledger file, not only in todos.
 
 - Each plan owns a workspace: at skill start, run this skill's
-  `scripts/sdd-workspace PLAN_FILE` — it prints the plan's git-ignored
+  `scripts/sdd-workspace PLAN_FILE` by its absolute path, from the working
+  tree you're executing in — it prints the plan's git-ignored
   directory (`<repo-root>/.ai/<feature-slug>/sdd/`), home to every
   artifact for THIS plan: ledger, briefs, reports, review packages.
   Another plan's directory is never yours to read or write.

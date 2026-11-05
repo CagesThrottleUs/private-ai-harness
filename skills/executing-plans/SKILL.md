@@ -34,7 +34,8 @@ Conversation memory does not survive compaction; the ledger is your recovery map
 ### Step 2: Execute Tasks
 
 For each task:
-1. Extract task brief: `skills/subagent-driven-development/scripts/task-brief PLAN_FILE N`
+1. Extract task brief: run `skills/subagent-driven-development/scripts/task-brief PLAN_FILE N`
+   by its absolute path (inside the installed harness plugin), from the working tree you're executing in
    — read the printed file path; do not paste task text into context
 2. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)

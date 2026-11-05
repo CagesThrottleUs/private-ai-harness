@@ -191,6 +191,8 @@ block = f"""{start}
 
 Skills are installed natively (symlinked into ~/.config/opencode/skills/) and
 auto-invoke like any other opencode skill — no manual reference needed.
+opencode registers skills by bare id: when a skill names another as
+`superpowers:<name>` or `private-ai-harness:<name>`, load it as `<name>`.
 
 Reviewer agents from `{repo_root}/agents/*.md` are adapted into opencode
 subagents in ~/.config/opencode/agents/, named `private-ai-harness-<name>`.
