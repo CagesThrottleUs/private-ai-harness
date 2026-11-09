@@ -26,7 +26,7 @@ Unit tests verify internal logic. Integration tests verify contracts — how you
 
 ## When to Use
 
-**Required** during the TDD GREEN phase for any component that:
+**Use** during the TDD GREEN phase for any component that:
 - Queries or writes to a database
 - Publishes to or consumes from a queue or event bus
 - Calls an external HTTP API

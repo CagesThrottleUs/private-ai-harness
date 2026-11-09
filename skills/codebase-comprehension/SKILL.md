@@ -4,8 +4,8 @@ description: >
   Understand a codebase area before making any change. Maps relevant symbols, callers,
   call chains, data flow, and dependencies using whatever structural tools the repo has —
   codegraph or Scout when indexed, LSP / ctags / ripgrep as portable fallback.
-  Invoke before touching code in any engineering lane. Inline summary for quick-fix;
-  comprehension.md artifact for task and epic.
+  Invoke before touching code you don't know well. Inline summary for a small change;
+  comprehension.md artifact for larger work.
 user-invocable: true
 ---
 
@@ -13,14 +13,14 @@ user-invocable: true
 
 Understand before you change. Maps the relevant area structurally — what exists, what calls what, what owns what, what would break. Output is a confirmed map the next phase reads.
 
-## Depth by lane
+## Depth by size of change
 
-| Lane | Depth | Artifact |
+| Change | Depth | Artifact |
 |---|---|---|
-| quick-fix | 1–3 codegraph calls, inline | none |
-| task | Full area map | `.ai/<id>/comprehension.md` |
-| epic | Subsystem-wide map | `.ai/<id>/comprehension.md` |
-| research | Inline, area being evaluated | none |
+| small fix | 1–3 codegraph calls, inline | none |
+| bounded feature | Full area map | `.ai/<id>/comprehension.md` |
+| new system or multi-story initiative | Subsystem-wide map | `.ai/<id>/comprehension.md` |
+| research question | Inline, area being evaluated | none |
 
 ## Process
 

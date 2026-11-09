@@ -1,7 +1,7 @@
 ---
 name: business-context-intake
 description: >
-  Use before brainstorming — for any feature, enhancement, or new capability requiring engineering work. Conducts a structured interview to capture business context: user problem, JTBD statement, measurable success metrics, compliance constraints, out-of-scope exclusions, and stakeholder map. Produces .ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md. Runs business-context-reviewer agent before committing. Brainstorming MUST NOT activate without a completed business-context document.
+  Use when a feature's user problem, success metric, compliance constraints, and non-goals aren't written down — ideally before brainstorming. Conducts a structured interview to capture business context: user problem, JTBD statement, measurable success metrics, compliance constraints, out-of-scope exclusions, and stakeholder map. Produces .ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md. Runs business-context-reviewer agent before committing.
 ---
 
 # Business Context Intake
@@ -19,17 +19,19 @@ Engineering without a defined success metric is engineering toward an unknown de
 
 ---
 
-## The Iron Law
+## Why it comes before design
 
-<HARD-GATE>
-`brainstorming` MUST NOT activate without a completed business-context document at `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`. Check for the file first. If absent, complete this skill before invoking brainstorming.
-</HARD-GATE>
+`brainstorming` designs better with this document in hand: every design
+question gets anchored to a real problem, persona, and metric instead of a
+guess. That is advice, not a gate. `brainstorming` checks for the document and,
+if it is missing, asks the user whether to run this skill first or continue
+without it.
 
 ---
 
 ## When to Use
 
-**Required** for:
+**Use** for:
 - Any new feature or capability
 - Any significant enhancement changing user-visible behavior
 - Any compliance or regulatory requirement
@@ -198,7 +200,7 @@ are expected to drive the north star. These are what you steer on week to week.
 
 ---
 
-## 8. Amazon PR/FAQ (REQUIRED for epic-lane new capabilities; skip only for small enhancements)
+## 8. Amazon PR/FAQ (REQUIRED for new services, products, or capabilities; skip only for small enhancements)
 
 *Written as if the feature has already launched — the Amazon Working Backwards
 forcing function. This is not optional decoration for a new service or product
@@ -293,16 +295,12 @@ docs(context): add business context for [feature name]
 
 ## Transition to Brainstorming
 
-*Senior Dialogue:* inside `/engineer`, this interview happens as topic (b)
-decision cards and the document is generated from the agreed cards; a passing
-consent `check` on them is the approval.
-
 After human approves the document:
 
 > "Business context committed to `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md`.
 >
 > I now have: [problem], [user persona], [success metric], [compliance status], [key non-goals].
 >
-> Ready to begin design. Invoking brainstorming."
+> Next: `brainstorming` to design against this — start it now?"
 
 Invoke `brainstorming` skill — it reads this document as input.

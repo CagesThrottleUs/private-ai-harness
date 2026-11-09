@@ -20,7 +20,7 @@ An API without a versioning strategy is an API that cannot evolve without breaki
 
 ## When to Use
 
-**Required** for any externally-facing API that:
+**Use** for any externally-facing API that:
 - Will be consumed by clients outside this team or service
 - Is expected to evolve over more than one release
 - Has SLA/contract obligations with consumers

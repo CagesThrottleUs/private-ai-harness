@@ -2,20 +2,19 @@
 name: epic-decomposition
 description: >
   Break an approved epic into bounded stories, produce child work-item manifests, and
-  identify parallel vs sequential story dependencies. Fires after HLD human approval in
-  the epic lane of /engineer. Each child story then runs the task lane independently
-  (spec → plan → subagent-driven-development). Human must approve HLD before this skill
-  activates.
+  identify parallel vs sequential story dependencies. Works best after an approved HLD
+  (it asks if there is none). Each child story is then built on its own, with whichever
+  tools it needs (typically spec → plan → subagent-driven-development).
 user-invocable: true
 ---
 
 # Epic Decomposition
 
-An epic is a system. Decomposition turns it into N bounded stories, each independently executable through the task lane. The output is a dependency graph and a set of child manifests — not exhaustive task lists (those come from `writing-plans` inside each story).
+An epic is a system. Decomposition turns it into N bounded stories, each independently buildable. The output is a dependency graph and a set of child manifests — not exhaustive task lists (those come from `writing-plans` inside each story).
 
-## Hard gate — HLD must be approved by human before this runs
+## Works best after — an approved HLD
 
-The HLD C4 Container diagram IS the decomposition map. Without it, stories are invented rather than derived. Do not decompose without an approved HLD.
+The HLD C4 Container diagram IS the decomposition map. Without it, stories are invented rather than derived. If there is no approved HLD, say so and ask the user: run `high-level-design` first, or decompose from what is known now? If no one can answer, decompose and mark every story whose boundary is a guess.
 
 **Inputs required:**
 - Approved HLD at `.ai/YYYY-MM-DD-<epic>/hld/hld-<epic>.md` (human-approved)
@@ -36,7 +35,7 @@ Read the HLD's C4 Container diagram. Each container or component maps to one sto
   force lockstep integration. Split by *user-visible capability* instead.
 - **INVEST:** Independent (minimal cross-story coupling), Negotiable, **Valuable**
   (a user or a downstream system is observably better when it's done), Estimable,
-  **Small** (fits one task-lane run, ~1 session, 1 PR), **Testable** (a clear
+  **Small** (fits one focused build, ~1 session, 1 PR), **Testable** (a clear
   done-state verifiable in isolation).
 - Prefer a **walking skeleton first** — a thin end-to-end slice that proves the
   whole path works — then thicken it with subsequent stories.
@@ -102,18 +101,18 @@ Confirm this decomposition, or tell me to adjust story boundaries?
 
 Wait for confirmation. Adjust if user sees a story as too broad or too narrow.
 
-### Step 5 — Hand off to task lane
+### Step 5 — Hand off each story
 
-When a wave contains 2+ independent stories, invoke `dispatching-parallel-agents` to coordinate their concurrent task-lane runs instead of executing them one at a time.
+When a wave contains 2+ independent stories, invoke `dispatching-parallel-agents` to coordinate their concurrent builds instead of executing them one at a time.
 
 For each story (respecting wave order):
 
-1. Re-invoke `/engineer "<story description>"` at task lane with context:
+1. Build the story on its own — the user names the tools, or `/engineer "<story description>"` picks them — with this context:
    - Parent epic manifest path
    - This story's child manifest path
    - The HLD section covering this story's C4 containers
    - Interface artifacts produced by upstream stories (schema file, OpenAPI stub, event schema)
-2. The task lane (SDD belt) runs independently per story.
+2. Each story is built independently.
 3. When a story produces its interface artifact, commit it before the dependent story starts — this is the handoff that unlocks the next wave.
 
 ## Red flags

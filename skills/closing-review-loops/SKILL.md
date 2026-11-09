@@ -140,5 +140,5 @@ every repo the harness touches, not just this one.
   Proportionality Gate). This skill wraps the loop around those per-finding fixes.
 - **requesting-code-review** — the internal self-review in step 3 uses the same
   reviewer roster; dispatch via that skill's agents.
-- **engineer** — the Universal-constraints zero-round bullet points here for any
-  lane that receives review feedback.
+- **engineer/references/review-discipline.md** — the zero-round rule this
+  skill implements, for any work that receives review feedback.

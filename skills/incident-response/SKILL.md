@@ -19,7 +19,7 @@ Runbooks tell you how to fix known problems. Incident response tells you how to 
 
 ## When to Use
 
-**Required** for any service that:
+**Use** for any service that:
 - Is running in production
 - Has users or downstream consumers
 - Has observability set up (`observability-standards` has been run)

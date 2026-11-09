@@ -1,7 +1,7 @@
 ---
 name: service-scaffolding
 description: >
-  Use when a new service/component is being created (epic lane) — emit the paved
+  Use when a new service/component is being created — emit the paved
   starting artifact so the service is born compliant: CI wired, observability
   instrumented, API contract stub, test harness, runbook stub, resource limits,
   and a service-catalog entry, all from the first commit. Registers the service
@@ -86,7 +86,7 @@ per service, Backstage-compatible). One entry per service:
 ```
 
 The catalog is the single registry of what exists, who owns it, and how healthy
-it is — the lookup the portfolio and incident lanes need.
+it is — the lookup `portfolio-management` and `incident-response` need.
 
 ## Scorecards (maturity checks)
 
@@ -117,9 +117,9 @@ re-review to PASS.
 
 ## Integration
 
-- **engineer (epic lane):** runs for a NEW service after HLD approval and
-  decomposition, before any child story implements into it — the child stories
-  build on the paved artifact.
+- **epic-decomposition:** for a NEW service, run this after the HLD and
+  decomposition, before any child story implements into it — the child
+  stories build on the paved artifact.
 - **ci-pipeline-setup / observability-standards / api-contract-first /
   integration-testing:** the scaffold wires their outputs from birth rather than
   leaving them for later.

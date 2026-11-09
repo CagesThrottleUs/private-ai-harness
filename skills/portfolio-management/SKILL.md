@@ -5,13 +5,13 @@ description: >
   that a department needs. Maintains a portfolio of epics in a SAFe Portfolio
   Kanban, ranks them by WSJF (cost of delay ÷ job size), enforces WIP limits
   (Little's Law), tracks cross-epic dependencies, and links each epic to an OKR.
-  The engineer PORTFOLIO lane routes here; it pulls the top-ranked epic into the
-  epic lane when WIP allows. Runs portfolio-reviewer.
+  When WIP allows, it suggests pulling the top-ranked epic into implementation.
+  Runs portfolio-reviewer.
 ---
 
 # Portfolio Management
 
-A single epic runs end-to-end well in the epic lane, but a department runs
+A single epic can run end-to-end on its own, but a department runs
 *many* epics against finite capacity. Without a layer above the epic, there is
 no prioritization, no WIP discipline, and no cross-epic dependency view — work
 starts because it can, not because it should. This skill is that layer.
@@ -47,7 +47,7 @@ Portfolio Backlog → Implementing → Done.**
 - **Reviewing** — is it worth a WSJF estimate? (filters AI-cheap volume — see below)
 - **Analyzing** — lightweight business case + `business-context-intake` sketch; WSJF estimated.
 - **Portfolio Backlog** — approved, WSJF-ranked, waiting for capacity.
-- **Implementing** — actively running in the epic lane.
+- **Implementing** — actively being built.
 - **Done** — delivered; feeds `delivery-metrics`.
 
 **Every state except Funnel has a WIP limit.**
@@ -74,8 +74,9 @@ Implementing is below its limit.
 
 1. When Implementing WIP < limit, pull the **highest-WSJF** epic from the
    Portfolio Backlog whose `depends_on` epics are all `done`.
-2. Set it `implementing`, create its epic manifest, and dispatch it via
-   `/engineer "<epic>"` at the **epic lane**.
+2. Propose it to the user as the next epic, with its WSJF and why it's
+   unblocked. Once they agree, set it `implementing`, create its epic manifest,
+   and start it (`/engineer "<epic>"` picks its first tools).
 3. On epic completion, set it `done`, record it for `delivery-metrics`, and pull
    the next. Never exceed the WIP limit to "get ahead" — that lengthens every
    in-flight epic's cycle time.
@@ -112,8 +113,8 @@ agent for all findings; re-review to PASS.
 
 ## Integration
 
-- **engineer (PORTFOLIO lane):** classification above the epic lane; this skill
-  runs the Kanban and dispatches the top epic into the epic lane.
+- **engineer:** `/engineer` lists this skill for sequencing several epics;
+  this skill runs the Kanban and proposes the next epic to start.
 - **business-context-intake:** the Analyzing-state business case per epic.
 - **delivery-metrics:** consumes Done epics for DORA/flow; flow load (WIP) here
   is the same WIP the limits cap.

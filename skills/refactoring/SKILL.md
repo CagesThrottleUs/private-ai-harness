@@ -5,7 +5,7 @@ description: >
   code is correct but has the wrong shape — god class, duplication, deep nesting,
   long method, tight coupling, dead code. Enforces: test baseline before touch, one
   structural move per micro-commit, behavior verified after each move. Zero new
-  behavior. Invoked by the refactoring lane of /engineer.
+  behavior.
 user-invocable: true
 ---
 
@@ -17,7 +17,7 @@ Restructure without changing what the code does. The external contract — calle
 
 **No new behavior. Ever.**
 
-If you find yourself adding a parameter, changing a return type, adding a new code path, or fixing a bug along the way — stop. Commit what you have. Open a new lane for the new behavior. Come back.
+If you find yourself adding a parameter, changing a return type, adding a new code path, or fixing a bug along the way — stop. Commit what you have. Start a separate change for the new behavior. Come back.
 
 Mixing refactor + feature in one commit makes both harder to review and harder to revert.
 
@@ -60,7 +60,7 @@ Run the covering tests now, before any change:
 [run test suite covering target area]
 ```
 
-All tests must pass. If any fail → **STOP**. Fix failures first via `systematic-debugging` (separate commit, separate lane). Do not refactor broken code.
+All tests must pass. If any fail → **STOP**. Fix failures first via `systematic-debugging` (separate commit, separate change). Do not refactor broken code.
 
 Record the baseline: N tests, all pass.
 
@@ -103,7 +103,7 @@ Before committing each move, apply the lens:
 - Does this move delete complexity — a branch, a layer, a helper — or only relocate it? Prefer the move that removes concepts; a refactor that just shuffles complexity around hasn't earned the commit. (design-principles: Delete, Don't Rearrange)
 - Would a future reader understand why this shape is better?
 
-Stop when the named smell from Step 1 is gone. Do not continue to the next smell in the same session — open a new lane.
+Stop when the named smell from Step 1 is gone. Do not continue to the next smell in the same session — start a separate refactoring.
 
 ## Step 6 — Final verification
 
@@ -118,9 +118,9 @@ All tests pass. Run `verification-before-completion` (lint gate). Then the final
 ## Red flags
 
 - Tests failing after a move → revert the move immediately, do not debug forward
-- Commit message describing new behavior → wrong lane, stop
-- Session growing beyond one named smell → scope creep, stop and open new lane
-- "I'll just fix this bug while I'm here" → no; separate commit, separate lane
+- Commit message describing new behavior → that's a feature, not a refactoring; stop
+- Session growing beyond one named smell → scope creep, stop and start a separate refactoring
+- "I'll just fix this bug while I'm here" → no; separate commit, separate change
 - Renaming something without updating all callers → `codegraph_impact` first
 - Skipping the test baseline → this is the whole safety net; skipping it makes it rewriting
 ---

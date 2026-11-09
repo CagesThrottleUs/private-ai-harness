@@ -21,7 +21,7 @@ Translate a validated spec into a committed architectural blueprint. Architectur
 
 ## When to Use
 
-**Required** for new architectural elements: new service/process, new data model, new external integration, security boundary changes, traffic-bearing endpoints with capacity requirements.
+**Use** for new architectural elements: new service/process, new data model, new external integration, security boundary changes, traffic-bearing endpoints with capacity requirements.
 
 **Skip** for: bug fixes, config changes, isolated utilities, adding a method/parameter/parsing capability to an existing component, new endpoint following an established service pattern.
 
@@ -34,14 +34,18 @@ Use `AskUserQuestion` when the scope is ambiguous (feature could be small or lar
 
 ## Inputs Required
 
-- **Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` — must have passed `spec-quality-gate`
+- **Spec:** `.ai/YYYY-MM-DD-<feature-slug>/specs/specs-<feature-slug>.md` — ideally passed `spec-quality-gate` (see below)
 - **Business context:** `.ai/YYYY-MM-DD-<feature-slug>/business-context/business-context-<feature-slug>.md` — read if exists
 
 Read both. Extract: NFRs (latency/throughput/availability), security requirements, compliance constraints, component dependencies from REQ-NNN statements.
 
-<HARD-GATE>
-Do NOT activate without a spec that has passed spec-quality-gate. If no spec exists, stop and invoke brainstorming first.
-</HARD-GATE>
+**Works best after:** a spec that has passed `spec-quality-gate`. The HLD derives
+its NFRs, security requirements, and dependencies from the spec's REQ
+statements, so a missing or unchecked spec carries vague requirements straight
+into the architecture. If there is no checked spec, say so and ask the user:
+write or check it first (`brainstorming`, `spec-quality-gate`), or design from
+what is known now? If no one can answer, design from what is known and list the
+missing requirements at the top of the HLD.
 
 ---
 
@@ -145,17 +149,11 @@ After `hld-reviewer` passes, present to human:
 >
 > Open questions remaining: [list, or 'none'].
 >
-> Please review and approve before I proceed to `writing-plans`."
+> Please review and approve. Once approved, `writing-plans` is the natural next tool."
 
-<HARD-GATE>
-Do NOT invoke writing-plans until the human explicitly approves the HLD. Silence is not approval.
-
-*Senior Dialogue:* inside `/engineer`, the HLD is generated after the human
-agreed its decision cards (topic c). That agreement, verified by a passing
-consent `check` on the cards the HLD cites, is the approval — do not re-present
-the document. A reviewer finding that would change an agreed decision opens
-one new card instead.
-</HARD-GATE>
+The HLD is a proposal until the human approves it; silence is not approval.
+Don't start `writing-plans` from it on your own: suggest it once the HLD is
+approved, and let the user decide.
 
 If the human requests changes: update HLD and affected ADRs, re-run `hld-reviewer`, re-present.
 

@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, modifying behavior, or planning anything new. Draws out what the user actually wants and why, plays it back for correction, sizes the work, then produces a design/spec before implementation."
+description: "Use when an idea is still fuzzy, before building a feature, component, or behavior change. Draws out what the user actually wants and why, plays it back for correction, sizes the work, then produces a design/spec before implementation."
 ---
 
 # Brainstorming Ideas Into Designs
@@ -88,17 +88,15 @@ The bar is SQLite, RFC 8446, seL4, WebAssembly, and DO-178C: every statement tes
 
 ## Pre-Condition: Business Context Document
 
-<HARD-GATE>
 Before the first message of a feature/enhancement (not a bug fix, config change, or quick clear task), check if a business context document exists:
 
 ```bash
 ls .ai/*/business-context/*.md 2>/dev/null
 ```
 
-If absent AND this is a feature/enhancement (not a bug fix or config change): stop and invoke `business-context-intake` skill. Do NOT proceed with brainstorming without a completed business context document. The LLM cannot know the user's business context — a human must provide it.
-
 If present: read it. Every design question must be anchored to the problem, persona, and success metrics in that document.
-</HARD-GATE>
+
+If absent AND this is a feature/enhancement: say so and ask the user before designing. Brainstorming works best after `business-context-intake`: the LLM cannot know the user's business (who it is for, what success looks like, what is out of scope), and a design anchored to a guess is built for the wrong target. Offer two paths: run `business-context-intake` first, or continue and capture the problem, persona, and success metric in your first questions here. If no one can answer, continue and list the missing business context at the top of the spec.
 
 ## Checklist
 
@@ -153,11 +151,6 @@ After `spec-quality-gate` passes, dispatch a fresh subagent with `builder-check-
 Bring the "theirs" pile in one message, most important first. Update the spec with their answers, re-run `spec-quality-gate` if requirements changed, then hand it over with a short list of the calls you made so they can check those while reading. That is the only round of questions the check produces. Without a subagent tool, read the spec as that builder yourself.
 
 **User Review Gate:**
-*Senior Dialogue:* inside `/engineer` (the work item has
-`dialogue/decisions.json`), the spec is generated from agreed decision cards
-and this review is already satisfied by a passing consent `check`; skip the ask
-and continue.
-
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
 > "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."

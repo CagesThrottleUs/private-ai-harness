@@ -18,7 +18,7 @@ C4 Container diagrams show **what** exists. Sequence diagrams show **how** thing
 
 ## When to Use
 
-**Required** for any flow that:
+**Use** for any flow that:
 - Crosses 3 or more components from the HLD Container diagram
 - Involves auth/authz (who validates the token, where)
 - Has a retry or circuit breaker requirement

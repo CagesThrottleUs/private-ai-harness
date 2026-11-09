@@ -19,7 +19,7 @@ SAST (static analysis) reviews code. DAST (dynamic analysis) attacks the running
 
 ## When to Use
 
-**Required** for any service with:
+**Use** for any service with:
 - External HTTP endpoints (user-facing or API)
 - Authentication/authorization logic
 - Input fields or parameters (SQL, XSS vectors)

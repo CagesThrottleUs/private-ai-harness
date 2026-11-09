@@ -5,8 +5,8 @@ description: >
   Production Readiness Review (PRR) gate that consolidates the scattered
   readiness signals (SLOs, tested rollback, runbooks, capacity, dependencies,
   on-call) into one enumerated checklist artifact requiring human sign-off.
-  Anchored to Google SRE's Launch Coordination Checklist. Hard gate in the epic
-  lane before go-live; runs production-readiness-reviewer.
+  Anchored to Google SRE's Launch Coordination Checklist. Use before go-live;
+  runs production-readiness-reviewer.
 ---
 
 # Production Readiness Review (PRR)
@@ -28,8 +28,9 @@ evidence, but a human makes the go/no-go call. Never auto-advance a PRR.
 
 ## When it runs
 
-- **Epic lane:** hard gate after `deployment-workflow` + `observability-standards`
-  and before first production traffic. A FAIL blocks launch.
+- **Before first production traffic** for a new service, after
+  `deployment-workflow` + `observability-standards` have produced their
+  evidence. A FAIL is a no-go recommendation; the human makes the call.
 - Any time a **new externally-reachable service** or a **materially new
   production surface** is about to go live.
 - Skip for internal-only libraries, docs, or changes that add no new production
@@ -111,8 +112,8 @@ PASS. A ⚠️ item is yours to resolve.
 
 ## Integration
 
-- **engineer (epic lane):** PRR is the go-live gate before first production
-  traffic; a FAIL blocks launch.
+- **go-live:** PRR is the go/no-go before first production traffic; a FAIL
+  is a no-go recommendation to the human.
 - **observability-standards / deployment-workflow / load-testing:** supply the
   SLO, rollback, and capacity evidence the PRR consolidates.
 - **incident-response:** the "recent incidents reviewed" and on-call items.

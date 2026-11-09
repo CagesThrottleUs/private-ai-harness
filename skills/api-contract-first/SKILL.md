@@ -21,7 +21,7 @@ Write the contract before the code. The API shape is the most important architec
 
 ## The Iron Law
 
-**Versioning gate:** For externally-facing APIs, confirm a versioning strategy ADR exists in `wiki/architecture/`. If not, invoke `api-versioning` skill first. The OpenAPI spec must reference the chosen versioning scheme.
+**Versioning:** for an external API with no versioning ADR in `wiki/architecture/`, ask the user: run `api-versioning` first (picking one after consumers integrate breaks them), or continue with a provisional `/v1`?
 
 <HARD-GATE>
 Do NOT write a handler, controller, route, or gRPC service implementation before the API spec exists and has been reviewed. The spec defines the contract. The handler implements the contract. Writing the handler first inverts this — the API becomes whatever was convenient to implement, not whatever consumers need.
@@ -31,7 +31,7 @@ Do NOT write a handler, controller, route, or gRPC service implementation before
 
 ## When to Use
 
-**Required** when a task creates a new externally-visible API surface: HTTP endpoint, gRPC method, WebSocket, GraphQL schema.
+**Use** when a task creates a new externally-visible API surface: HTTP endpoint, gRPC method, WebSocket, GraphQL schema.
 
 **Skip for:** internal helpers, DB queries, background jobs, adding a parameter to an existing endpoint (spec already exists — update it, don't create a new one).
 

@@ -18,7 +18,7 @@ The HLD Container diagram shows WHAT components exist. Sequence diagrams show HO
 
 ## When to Use
 
-**Required** for any task that:
+**Use** for any task that:
 - Creates a new database table
 - Adds or removes columns from an existing table
 - Changes relationships between entities

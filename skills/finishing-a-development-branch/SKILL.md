@@ -78,43 +78,47 @@ Stop. Don't proceed to Step 1.5.
 
 ### Step 1: Performance, E2E, and Deployment Artifacts Check
 
-Before running the review gate, verify required artifacts exist.
+Before running the review gate, check which of these artifacts exist. They are
+advice, not gates: for each one that applies and is missing, say what it would
+catch and ask the user whether to create it first (with the named tool) or
+continue without it. If no one can answer, continue and list every gap in the
+final summary.
 
-**Load tests** — required when spec contains performance NFRs (latency, throughput, availability):
+**Load tests** — recommended when spec contains performance NFRs (latency, throughput, availability):
 ```bash
 ls tests/performance/*.js 2>/dev/null | wc -l
 ```
-If zero load tests AND spec has NFR table → invoke `load-testing` skill first.
+If zero load tests AND spec has NFR table → ask about `load-testing` (thresholds tied to the NFRs catch a regression before users do).
 
-**Onboarding guide** — required on first production release or after major HLD changes:
+**Onboarding guide** — recommended on first production release or after major HLD changes:
 ```bash
 # Check if guide exists and is recent (< 6 months old)
 [ -f wiki/ONBOARDING.md ] && find wiki/ONBOARDING.md -mtime -180 | grep -q . || echo "NEEDS UPDATE"
 ```
-If missing or stale AND this is a significant release → invoke `onboarding-guide` skill.
+If missing or stale AND this is a significant release → ask about `onboarding-guide`.
 
-**E2E tests** — required for any feature with user-facing behavior:
+**E2E tests** — recommended for any feature with user-facing behavior:
 ```bash
 ls tests/e2e/**/*.spec.ts 2>/dev/null | wc -l
 ```
-If zero E2E tests AND feature has user-facing behavior → invoke `e2e-testing` skill first.
+If zero E2E tests AND feature has user-facing behavior → ask about `e2e-testing` (unit tests don't prove the user journey works end to end).
 
-**Deployment artifacts** — required for any feature changing user-facing behavior:
+**Deployment artifacts** — recommended for any feature changing user-facing behavior:
 
 ```bash
 ls .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-rollback.md .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-smoke-tests.md .ai/YYYY-MM-DD-<feature-slug>/deployment/deployment-<feature-slug>-deploy-runbook.md 2>/dev/null
 ```
 
 **If deployment artifacts are absent AND this branch changes user-facing behavior, endpoints, or DB schema:**
-Invoke `deployment-workflow` skill first. Do NOT proceed to review gate without deployment artifacts.
+Ask about `deployment-workflow`: without a tested rollback, smoke tests, and a runbook, a bad release has no rehearsed way back.
 
 **If documentation-only or config-only change:** skip.
 
-**DAST scan** — required for any externally-facing service (public endpoint, internet-reachable UI):
+**DAST scan** — recommended for any externally-facing service (public endpoint, internet-reachable UI):
 ```bash
 ls .zap/*.conf .github/workflows/*dast*.yml 2>/dev/null | wc -l
 ```
-If zero AND the branch exposes an external endpoint → invoke `dast-testing` skill first.
+If zero AND the branch exposes an external endpoint → ask about `dast-testing` (a passive scan catches common web vulnerabilities before an attacker does).
 
 ### Step 1.5: Review Gate
 
