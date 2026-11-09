@@ -19,7 +19,7 @@ E2E tests verify that a checkout flow completes. Visual regression tests verify 
 
 ## When to Use
 
-**Required** for UI features that have visual design intent (not just functional behavior):
+**Use** for UI features that have visual design intent (not just functional behavior):
 - Marketing/landing pages where layout matters
 - Design system components
 - Form layouts with specific field arrangement

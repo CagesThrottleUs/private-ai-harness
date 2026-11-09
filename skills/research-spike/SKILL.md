@@ -3,8 +3,7 @@ name: research-spike
 description: >
   Time-boxed investigation for feasibility questions, technology comparisons, design
   documents, or proof-of-concept work. Use when the deliverable is a decision or
-  recommendation, not working production code. Invoked by the research lane of /engineer.
-  Produces a decision artifact committed to .ai/ or wiki/architecture/. Spike code is
+  recommendation, not working production code. Produces a decision artifact committed to .ai/ or wiki/architecture/. Spike code is
   throwaway.
 user-invocable: true
 ---
@@ -100,7 +99,7 @@ If any item fails, fix the artifact before Phase 4. If the honest answer is "not
 
 Present findings. Three outcomes:
 
-1. **Decision clear** → artifact committed to `.ai/` (or `wiki/architecture/`), spike branch deleted. If continuing to build: re-invoke `/engineer "<task>"` with the artifact as context. **If the decision is architectural (new service, data model, external integration, security boundary), the build does not start from the spike artifact directly — it enters `high-level-design`, where the ADR and its consequences are gated by `hld-reviewer`.** The spike self-gate proves the decision is honest; the HLD gate proves the architecture is sound. A kill / "don't build" decision (outcome 3) needs only the self-gate.
+1. **Decision clear** → artifact committed to `.ai/` (or `wiki/architecture/`), spike branch deleted. If continuing to build: that is a new request — start it with the artifact as context (`/engineer "<task>"` picks the tools). **If the decision is architectural (new service, data model, external integration, security boundary), recommend `high-level-design` before building, where the ADR and its consequences are checked by `hld-reviewer`, and ask the user.** The spike self-gate proves the decision is honest; the HLD gate proves the architecture is sound. A kill / "don't build" decision (outcome 3) needs only the self-gate.
 2. **Decision blocked on more info** → artifact states what is missing and why. Spike ends; human decides next step.
 3. **Decision is "don't build this"** → artifact states why. This is a valid and valuable outcome — it prevents the wrong work.
 
@@ -110,7 +109,7 @@ Only the artifact. Spike code is deleted or left in a dead branch (`spike/<topic
 
 ## Red flags
 
-- Spike expanding into full implementation → STOP. Re-invoke `/engineer "<task>"` with the decision as context.
+- Spike expanding into full implementation → STOP. Building is a new request; start it with the decision as context.
 - Artifact saying "we need more time" with no decision → the question was too large; split it.
 - Prototype code "might be useful later" → delete it. The artifact has the learning.
 - Benchmarking on localhost instead of representative infra → results are misleading; note caveat in artifact.

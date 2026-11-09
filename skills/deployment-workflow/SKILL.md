@@ -21,7 +21,7 @@ Produce the deployment artifacts before the PR is opened — not as a post-merge
 
 ## When to Use
 
-**Required** before any PR is labeled deployment-ready — invoked from `finishing-a-development-branch`.
+**Use** before any PR is labeled deployment-ready; `finishing-a-development-branch` suggests it when deployment artifacts are missing.
 
 **Produces artifacts for:**
 - Any feature that changes user-facing behavior
@@ -63,7 +63,8 @@ budget status** from its SLO doc (`observability-standards` records it as
 to lower delivery stability. The error-budget gate is the objective circuit
 breaker that stops AI-accelerated velocity from burning the SLO — it binds
 regardless of how fast a change was produced. If no SLO/error budget exists yet,
-that is itself a release blocker: invoke `observability-standards` first.
+the gate has nothing to read: say so and ask the user whether to run
+`observability-standards` first or release without the error-budget check.
 
 ## Process
 

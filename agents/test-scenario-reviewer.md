@@ -1,6 +1,6 @@
 ---
 name: test-scenario-reviewer
-description: Opus-powered pre-code test-scenario reviewer. Validates a REQ→TC test-scenario matrix before any test or production code exists — traceability (every REQ and AC covered, no orphan TCs), honesty (each TC names a concrete wrong implementation it kills), level fit (unit/integration/contract/e2e/property/fuzz/simulation/perf/chaos/a11y/visual/security), MC/DC on Critical-tier decision logic, boundary/equivalence/error-path coverage, determinism, and stack-specific hazards (C/C++ UB and ABI, web performance and accessibility). Invoked by the senior-dialogue skill's topic (h) loop.
+description: Opus-powered pre-code test-scenario reviewer. Validates a REQ→TC test-scenario matrix before any test or production code exists — traceability (every REQ and AC covered, no orphan TCs), honesty (each TC names a concrete wrong implementation it kills), level fit (unit/integration/contract/e2e/property/fuzz/simulation/perf/chaos/a11y/visual/security), MC/DC on Critical-tier decision logic, boundary/equivalence/error-path coverage, determinism, and stack-specific hazards (C/C++ UB and ABI, web performance and accessibility). Use before writing tests or code for a spec.
 model: opus
 ---
 
@@ -146,8 +146,8 @@ nothing.
 ```
 
 **PASS** = no Critical and no Important findings. Split every finding into
-mechanical or substantive so the dispatcher knows which ones go back to the
-human as decision cards.
+mechanical or substantive so the dispatcher knows which ones to fix directly
+and which ones need the human's decision.
 
 ## Artifact Claims
 

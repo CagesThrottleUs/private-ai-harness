@@ -37,9 +37,8 @@ we promised actually show up?*
 
 ## When to Use
 
-**Required:**
-- After an epic-lane feature reaches production (fires as the last epic-lane step,
-  after `delivery-metrics`).
+**Use:**
+- After a feature reaches production (typically after `delivery-metrics`).
 - At each metric's HEART-aligned checkpoint thereafter (see the checkpoint
   schedule below) until a verdict is reached.
 

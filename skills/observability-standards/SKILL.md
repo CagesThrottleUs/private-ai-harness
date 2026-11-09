@@ -21,7 +21,7 @@ Instrument a system for production before it reaches production. Observability r
 
 ## When to Use
 
-**Required** when a task creates an external-facing component: API endpoint, background worker, service boundary, or anything handling external traffic.
+**Use** when a task creates an external-facing component: API endpoint, background worker, service boundary, or anything handling external traffic.
 
 **Skip** when: pure refactoring with no new endpoints, internal utility function, config change, documentation-only.
 

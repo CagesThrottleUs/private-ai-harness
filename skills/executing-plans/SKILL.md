@@ -44,17 +44,14 @@ For each task:
 5. Before committing: apply `karpathy` lens — no speculative code, surgical changes only, every changed line traces to the spec
 6. Before committing: apply `code-documentation` to every public construct written — full docstring, `@spec_id`, `@req_id`
 7. Run linter gate: detect language from manifest, run format check + lint + type check. Zero issues required.
-8. If task creates a component with external dependencies (DB, queue, cache, external HTTP): invoke `integration-testing` skill — write Testcontainers-based integration tests alongside unit tests
-8. If task created a new API endpoint or service component: invoke `observability-standards` — instrument logging, metrics, SLOs, alerts, runbooks before this endpoint is deployed
+8. If the task created a component with external dependencies (DB, queue, cache, external HTTP): say its unit tests don't verify the contract with the real dependency, and ask the user whether to add integration tests now with `integration-testing` (recommended) or later. If no one can answer, add them.
+8. If the task created a new API endpoint or service component: say it has no logging, metrics, SLOs, or runbook yet, and ask whether to run `observability-standards` now or before deploy. If no one can answer, note it in the progress ledger and the final summary.
 9. Mark as completed
 10. Append to ledger: `echo "Task N: complete" >> "$(git rev-parse --git-path executing-plans)/progress.md"`
 
 ### Step 3: Complete Development
 
-After all tasks complete and verified:
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- That skill starts with a wiki sync check (Step 0) — ensure all behavior changes are documented in `wiki/` before tests run
-- Follow that skill to verify tests, present options, execute choice
+After all tasks complete and verified, suggest `finishing-a-development-branch` as the next tool: it checks that docs match the behavior, verifies tests, runs the review gate, and presents merge/PR options. The user decides.
 
 ## When to Stop and Ask for Help
 
@@ -84,7 +81,7 @@ After all tasks complete and verified:
 
 ## Integration
 
-**Required workflow skills:**
+**Related tools** (suggest when relevant; none runs automatically):
 - **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks

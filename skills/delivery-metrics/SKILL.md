@@ -58,11 +58,11 @@ robust testing are the documented mitigations.
 | Flow time | work-item created → done (wall clock) |
 | Flow load | work-items in-progress at once (WIP — ties to `portfolio-management`) |
 
-## Data sources (already written by the harness)
+## Data sources (present only when the tools that write them were used)
 
 - **Work-item manifests** `.ai/<id>/manifest.md` — `phase:` transitions.
 - **Engineer cost-ledger** `~/.claude/private-ai-harness/engineer-cost-ledger.jsonl`
-  (or `$CODEX_HOME/...`) — one row per phase checkpoint with a timestamp. The
+  (or `$CODEX_HOME/...`), written only when `cost-checkpoint` is run — one row per phase checkpoint with a timestamp. The
   first→last timestamp gives **cycle/flow time** directly. **Flow efficiency
   additionally needs active work time**: `cost-checkpoint` should record
   `active_seconds` per step (its `start`→`end` delta). Without `active_seconds`

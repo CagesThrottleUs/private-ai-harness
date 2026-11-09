@@ -19,7 +19,7 @@ The difference between deployment and release: deployment is code reaching produ
 
 ## When to Use
 
-**Required** when:
+**Use** when:
 - Deploying a risky feature to production without exposing it to all users immediately
 - Gradual rollout needed (1% → 10% → 50% → 100%)
 - A/B test or experiment on a subset of users

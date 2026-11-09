@@ -72,9 +72,9 @@ digraph tdd_cycle {
 
 Write one minimal test showing what should happen.
 
-Inside `/engineer`, each RED test implements one TC from the agreed
-test-scenario matrix: carry the TC id and `@validates_req REQ-NNN`, and make it
-fail for the reason in the TC's Kills column.
+When a test-scenario matrix exists for this work, each RED test implements one
+TC from it: carry the TC id and `@validates_req REQ-NNN`, and make it fail for
+the reason in the TC's Kills column.
 
 <Good>
 ```typescript
@@ -171,7 +171,7 @@ Don't add features, refactor other code, or "improve" beyond the test.
 
 **Before moving to REFACTOR:** document every public construct added — apply `code-documentation` (full docstring, `@spec_id`, `@req_id`).
 
-**If this component has external dependencies (database, queue, cache, external HTTP):** after GREEN, invoke `integration-testing` skill. Unit tests verify logic; integration tests verify the contract with real dependencies. A mock at the DB boundary is a unit test, not an integration test. Write both.
+**If this component has external dependencies (database, queue, cache, external HTTP):** after GREEN, say that unit tests verify logic but not the contract with the real dependency (a mock at the DB boundary is a unit test, not an integration test), and ask the user whether to add integration tests now with `integration-testing` (recommended) or later. If no one can answer, write both.
 
 ### Verify GREEN - Watch It Pass
 
@@ -334,7 +334,7 @@ Before marking work complete:
 - [ ] Output pristine (no errors, warnings)
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Test cases cover boundary values, equivalence classes, and error inputs — not just happy paths
-- [ ] Self-grading check (mandatory when no independent reviewer runs on this change — e.g. the quick-fix lane, which skips `requesting-code-review`): for every assertion just written, ask "would this fail if the implementation were subtly wrong — off-by-one, inverted condition, wrong error code, swallowed exception?" An assertion that can't clear that bar is exactly what `test-quality-reviewer` exists to catch (testing a mock, trivial assertion, happy-path-only, asserting an implementation detail) — rewrite it now, before commit, since no one else will check
+- [ ] Self-grading check (mandatory when no independent reviewer runs on this change — e.g. a small fix that skips `requesting-code-review`): for every assertion just written, ask "would this fail if the implementation were subtly wrong — off-by-one, inverted condition, wrong error code, swallowed exception?" An assertion that can't clear that bar is exactly what `test-quality-reviewer` exists to catch (testing a mock, trivial assertion, happy-path-only, asserting an implementation detail) — rewrite it now, before commit, since no one else will check
 - [ ] Test-strength gate: mutation score meets the threshold (Stryker/PIT/mutmut), not just line coverage — a green suite with a low mutation score is tautological (`verification-before-completion` Test-Strength Gate)
 - [ ] Every public construct has full docstring, `@spec_id`, `@req_id` (code-documentation)
 - [ ] Linter gate passed: format check + lint + type check for this language — zero issues, no new suppressions (run `verification-before-completion` linter gate, dispatch `linter-reviewer`)

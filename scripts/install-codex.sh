@@ -94,11 +94,10 @@ end = "<!-- private-ai-harness:end -->"
 block = f"""{start}
 ## Private AI Harness
 
-- Use the installed `private-ai-harness:engineer` skill as the entry point for engineering work.
+- `private-ai-harness:engineer` is the front door: it shows the catalogue of every skill and subagent, runs a named tool, or picks tools for a request. Nothing chains on its own; when a tool works best after another, explain why and ask.
 - Apply `private-ai-harness:karpathy` and `private-ai-harness:commit-discipline` when writing code or commit messages.
 - Use the `private-ai-harness-<agent-name>` Codex custom agents when a harness skill requests a named reviewer.
 - Read `private-ai-harness:using-superpowers` for Codex tool and subagent mappings when a skill uses Claude-oriented tool names.
-- Senior Dialogue: `/engineer` discussion phases wait for the human even with approvals bypassed; agreement is recorded only by the plugin's consent hooks from a `request_user_input` answer or a typed message whose first line is the agreement. With no human present, park with one question and never self-agree.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""

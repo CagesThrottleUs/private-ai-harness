@@ -110,7 +110,7 @@ Independence buys nothing if the independent test is vacuous.
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** implement this plan task-by-task with `subagent-driven-development` (recommended) or `executing-plans`; ask the user which if they haven't said. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Spec:** [exact path to the spec this plan implements, e.g. `.ai/2026-08-13-feature-design/specs/specs-feature-design.md` — or "N/A" with reason for a spec-less trivial change. SDD reads this file at setup, so a plan conflict is resolved against the design's actual text, not guessed at.]
 
@@ -287,10 +287,6 @@ The plan-reviewer runs with fresh context — no brainstorming or spec history. 
 
 ## Execution Handoff
 
-*Senior Dialogue:* inside `/engineer` BUILD, do not ask — the human already
-agreed the build; use Subagent-Driven execution. Every task's test steps cite
-TC ids from the agreed test-scenario matrix.
-
 After plan-reviewer passes, offer execution choice:
 
 **"Plan complete and saved to `.ai/<feature-slug>/plans/plans-<feature-slug>.md`. Two execution options:**
@@ -302,9 +298,9 @@ After plan-reviewer passes, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
+- Use `subagent-driven-development`
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
+- Use `executing-plans`
 - Batch execution with checkpoints for review

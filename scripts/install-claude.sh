@@ -279,29 +279,47 @@ EOF
 fi
 echo ""
 
-# ── 13. Development workflow — global CLAUDE.md ─────────────────────────────
-echo "13. Development workflow (global CLAUDE.md)"
+# ── 13. Engineering catalogue — global CLAUDE.md ────────────────────────────
+echo "13. Engineering catalogue (global CLAUDE.md)"
 
-WORKFLOW_MARKER="## Development Workflow"
+# 6.0.0 replaced the mandatory workflow skill with a tool catalogue. Remove the
+# old block that imported it (exact shape only, so hand edits survive), then
+# add a short pointer. No @-import: the catalogue is read when choosing a tool,
+# not loaded into every session.
+python3 - "$GLOBAL_CLAUDE_MD" "$REPO_ROOT" <<'PYEOF'
+import re
+import sys
+from pathlib import Path
 
-if grep -q "$WORKFLOW_MARKER" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
-  ok "workflow block already present in $GLOBAL_CLAUDE_MD"
-else
-  # Insert before CODEGRAPH_START if present, otherwise append
-  if grep -q "<!-- CODEGRAPH_START -->" "$GLOBAL_CLAUDE_MD" 2>/dev/null; then
-    sed -i '' "s|<!-- CODEGRAPH_START -->|## Development Workflow\n\n**ALWAYS follow for any feature, fix, or spec work. Mandatory, not suggestions.**\n\n@$REPO_ROOT/skills/workflow/SKILL.md\n\n<!-- CODEGRAPH_START -->|" "$GLOBAL_CLAUDE_MD"
-  else
-    cat >> "$GLOBAL_CLAUDE_MD" <<EOF
+path, repo_root = Path(sys.argv[1]), sys.argv[2]
+text = path.read_text(encoding="utf-8") if path.exists() else ""
 
-## Development Workflow
+old_block = re.compile(
+    r"\n*^## Development Workflow\n(?:(?!## )[^\n]*\n)*?@[^\n]*/skills/workflow/SKILL\.md[^\n]*(?:\n|$)",
+    re.MULTILINE,
+)
+text, removed = old_block.subn("\n", text)
 
-**ALWAYS follow for any feature, fix, or spec work. Mandatory, not suggestions.**
+marker = "## Engineering Catalogue"
+block = (
+    f"{marker}\n\n"
+    "Browse or pick tools with `/engineer`. Every skill and subagent is indexed in "
+    f"`{repo_root}/skills/engineer/catalogue.md`; read it when choosing a tool. "
+    "Nothing in it runs on its own.\n"
+)
+added = marker not in text
+if added:
+    anchor = "<!-- CODEGRAPH_START -->"
+    if anchor in text:
+        text = text.replace(anchor, block + "\n" + anchor, 1)
+    else:
+        text = text.rstrip() + ("\n\n" if text.strip() else "") + block
 
-@$REPO_ROOT/skills/workflow/SKILL.md
-EOF
-  fi
-  ok "workflow block added to $GLOBAL_CLAUDE_MD"
-fi
+path.write_text(text, encoding="utf-8")
+print(f"    removed old workflow block: {'yes' if removed else 'no'}; "
+      f"catalogue block: {'added' if added else 'already present'}")
+PYEOF
+ok "engineering catalogue block synchronized in $GLOBAL_CLAUDE_MD"
 echo ""
 
 # ── 14. Karpathy guidelines — global CLAUDE.md ──────────────────────────────

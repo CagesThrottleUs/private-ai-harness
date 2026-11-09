@@ -1,15 +1,18 @@
 ---
 name: senior-dialogue
 description: >
-  Use inside /engineer for every lane (depth scales with lane and risk). Runs the
-  Senior Dialogue working model: understand → discuss → iterate to explicit,
-  ledger-recorded human agreement → document → build test-first with zero
-  check-ins. Explains every decision plainly from first principles with evidence
-  and numbers, waits for the human even in autopilot/allow-all, and parks with one
-  clear question instead of ever self-agreeing.
+  RETIRED in private-ai-harness 6.0.0 and pending removal — do not invoke unless
+  the user names this skill explicitly. /engineer no longer uses it. Was: a
+  decision-card dialogue with a host-hook consent ledger (understand → discuss →
+  ledger-recorded agreement → document → build).
 ---
 
 # Senior Dialogue
+
+> **Retired (6.0.0).** `/engineer` is now a tool catalogue and no longer runs
+> this protocol. The consent hooks stay installed until a human removes them
+> with the guard off. Everything below describes the protocol for when the
+> user explicitly asks for it by name.
 
 ## Why this exists
 

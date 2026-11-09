@@ -26,7 +26,7 @@ Load tests prove the system handles expected load. Chaos tests prove the system 
 
 ## When to Use
 
-**Required** only for services with explicit resilience NFRs:
+**Use** only for services with explicit resilience NFRs:
 - Circuit breaker pattern documented in HLD
 - Retry with backoff in the design
 - Graceful degradation to cached/default data

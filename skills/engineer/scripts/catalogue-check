@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""Check that catalogue.md lists exactly the skills and agents on disk.
+
+A skill is a directory under skills/ with a SKILL.md; an agent is a file under
+agents/. Catalogue rows are table rows whose first cell is a backticked name;
+rows above the "## Subagents" heading are skills, rows below it are agents.
+
+Usage: python3 catalogue-check    (exit 0 = in sync, 1 = drift)
+"""
+
+import re
+import sys
+from pathlib import Path
+
+ENGINEER_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = ENGINEER_DIR.parents[1]
+CATALOGUE = ENGINEER_DIR / "catalogue.md"
+SUBAGENTS_HEADING = "\n## Subagents"
+ROW = re.compile(r"^\|\s*`([a-z0-9-]+)`\s*\|", re.MULTILINE)
+
+
+def listed(section):
+    names = ROW.findall(section)
+    duplicates = sorted({name for name in names if names.count(name) > 1})
+    return set(names), duplicates
+
+
+def report(kind, on_disk, in_catalogue, duplicates):
+    problems = []
+    for name in sorted(on_disk - in_catalogue):
+        problems.append(f"{kind} missing from catalogue: {name}")
+    for name in sorted(in_catalogue - on_disk):
+        problems.append(f"{kind} in catalogue but not on disk: {name}")
+    for name in duplicates:
+        problems.append(f"{kind} listed more than once: {name}")
+    return problems
+
+
+def main():
+    text = CATALOGUE.read_text(encoding="utf-8")
+    if SUBAGENTS_HEADING not in text:
+        print(f"catalogue-check: no '{SUBAGENTS_HEADING.strip()}' heading in {CATALOGUE}")
+        return 1
+    skills_part, agents_part = text.split(SUBAGENTS_HEADING, 1)
+
+    skills = {p.parent.name for p in (REPO_ROOT / "skills").glob("*/SKILL.md")}
+    agents = {p.stem for p in (REPO_ROOT / "agents").glob("*.md")}
+
+    problems = report("skill", skills, *listed(skills_part))
+    problems += report("agent", agents, *listed(agents_part))
+    if problems:
+        print("\n".join(problems))
+        return 1
+    print(f"catalogue in sync: {len(skills)} skills, {len(agents)} subagents")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

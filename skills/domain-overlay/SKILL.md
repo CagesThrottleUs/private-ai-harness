@@ -36,16 +36,17 @@ A domain overlay converts fuzzy auto-trigger into **deterministic precedence +
 ordering + a stated tie-break reason**. The reason is the point: the agent needs
 to know *why* one skill wins so it can break ties confidently instead of blending.
 
-## How engineer uses an overlay
+## How `/engineer` uses an overlay
 
-`engineer`'s Universal constraints carry one hook:
+`/engineer`'s tool-picking rules carry one hook:
 
-> When the working files/task match a recognized domain, activate the matching
-> `<domain>-advisor` overlay FIRST inside each construct/test/verify step.
+> When the working files/task match a recognized domain, read the matching
+> `<domain>-advisor` overlay first.
 
-The overlay then tells the lane step which installed global skill to consult and
-suppresses the ones that would conflict. Engineer's lane structure is unchanged —
-the overlay only decides *which specialist fills each already-existing step*.
+The overlay then tells each stage of the work (understand, build, test, verify)
+which installed global skill to consult and suppresses the ones that would
+conflict. It adds no stages — it only decides *which specialist fills the stage
+the work is already in*.
 
 ## Contract every domain instance MUST provide
 
@@ -56,7 +57,7 @@ A domain overlay skill (`<domain>-advisor`) is valid only if it states all four:
 2. **Precedence table** — for each sub-task, the PRIMARY skill, any support/verify
    skills, and a one-line **tie-break reason** (fresher / sole authority /
    fact-checker-only / measurement-vs-authoring). No row without a reason.
-3. **Lane-step mapping** — which skill fires at which engineer lane step
+3. **Stage mapping** — which skill fires at which stage of the work
    (comprehension, design, TDD-GREEN, TDD-test, verify).
 4. **Pre-review audit gate** — the domain-specific self-audit that runs at
    `verification-before-completion`, before any human/agent review, so smells are
@@ -67,9 +68,10 @@ A domain overlay skill (`<domain>-advisor`) is valid only if it states all four:
 1. Copy the four-part contract above into `skills/<domain>-advisor/SKILL.md`.
 2. List the installed global skills for that domain and, for every overlap, pick
    a winner with a stated reason (recency, authority, scope).
-3. Map each survivor to an engineer lane step.
-4. No new engineer hook is needed — the existing Universal-constraints hook
-   matches any `<domain>-advisor` by detection signal.
+3. Map each survivor to a stage of the work.
+4. No `/engineer` change is needed — its domain-overlay rule matches any
+   `<domain>-advisor` by detection signal. Add the new skill's row to
+   `engineer/catalogue.md`.
 
 ## Precedence heuristics (reusable across domains)
 

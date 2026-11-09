@@ -12,6 +12,7 @@ application code. No tests. No build step.
 
 ```
 skills/<name>/SKILL.md      skill definitions (frontmatter + prompt body)
+skills/engineer/catalogue.md  the tool catalogue: every skill + subagent (update with every tool change)
 agents/<name>.md            subagent definitions
 scripts/install-claude.sh    one-shot environment setup (Claude Code)
 scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
@@ -52,6 +53,13 @@ description: >
 Body is the prompt Claude Code or Codex receives when the skill is invoked.
 
 Rules:
+- **Catalogue row, always.** Adding, renaming, or removing a skill, or changing
+  what it is for or what it produces, updates its row in
+  `skills/engineer/catalogue.md` in the same commit. Then run
+  `python3 skills/engineer/scripts/catalogue-check` (must exit 0).
+- **No forced hand-offs.** A skill never makes another skill run. If it works
+  best after another, it says what the earlier skill would catch and asks the
+  user whether to run it first or continue.
 - `description` must answer "invoke this when…" — vague descriptions kill auto-trigger
 - Keep body focused — one skill, one responsibility
 - Auxiliary files (examples, prompts, references) go in `skills/<name>/` alongside SKILL.md
@@ -83,7 +91,11 @@ model: opus   # or sonnet, haiku
 ---
 ```
 
-These Markdown files are the source of truth. Do not hand-maintain duplicate
+These Markdown files are the source of truth. Every agent also has a row in
+`skills/engineer/catalogue.md` (what it checks, its required inputs, its
+model); adding, renaming, or removing an agent, or changing its purpose,
+required inputs, or model, updates that row in the same commit, then run
+`python3 skills/engineer/scripts/catalogue-check`. Do not hand-maintain duplicate
 Codex or opencode prompts. `scripts/install-codex-agents.py` generates Codex
 TOML agents, mapping Opus/Sonnet/Haiku to high/medium/low reasoning while
 inheriting the active Codex model. `scripts/install-opencode-agents.py`
@@ -115,11 +127,12 @@ opencode ignore this directory.
 
 ---
 
-## Senior Dialogue consent ledger
+## Senior Dialogue consent ledger (retired in 6.0.0)
 
-`/engineer` waits for the human during discussion and records agreement only
-through host hooks (see `AGENTS.md` → *Senior Dialogue consent model*). When
-working on this repo with the plugin installed:
+`/engineer` no longer runs the Senior Dialogue; `senior-dialogue` is retired
+and acts only if invoked by name. Its hooks and guard stay installed until a
+human removes them (see `AGENTS.md` → *Senior Dialogue consent model*). While
+they remain, when working on this repo with the plugin installed:
 
 - The guard blocks edits to the consent script, the hook wiring, and any tool
   input containing the agreement token followed by a decision id. Launch the
@@ -201,13 +214,18 @@ remains the four-agent, PR-scoped gate; auto does not replace it.
 
 ## Meta-doc sync rule
 
-`AGENTS.md`, `CLAUDE.md`, and `README.md` are a synchronized triple.
-Any change to skills, agents, install steps, or plugin structure must update all three in the same commit.
+`AGENTS.md`, `CLAUDE.md`, `README.md`, and `skills/engineer/catalogue.md` are
+one synchronized set. Any change to skills, agents, install steps, or plugin
+structure must update all of them that it affects, in the same commit. The
+catalogue is never optional: it is how you and `/engineer` find tools, so a
+tool missing from it is effectively invisible. `catalogue-check` enforces the
+catalogue's half of this mechanically.
 
 | Change | Must update |
 |--------|-------------|
-| New or renamed skill | `AGENTS.md` skill table, `README.md` skill table |
-| New or changed agent | `AGENTS.md` agent table, `README.md` agent table |
+| New, renamed, or removed skill | `AGENTS.md` skill table, `README.md` skill table, `catalogue.md` row |
+| New or changed agent (purpose, inputs, model) | `AGENTS.md` agent table, `README.md` agent table, `catalogue.md` row |
+| Skill's purpose or output changes | `catalogue.md` row (and the AGENTS/README rows if their summary is now wrong) |
 | New install step | `README.md` install list, `AGENTS.md` external skills (if applicable) |
 | Version bump rule change | `AGENTS.md` version bump table, `CLAUDE.md` version bump section |
 | Upstream skill change | `AGENTS.md` upstream section, `CLAUDE.md` upstream section |
@@ -222,7 +240,7 @@ Three skills are sourced from external references and can drift. Check and sync 
 | File | Source | How to check |
 |------|--------|-------------|
 | `skills/caveman/SKILL.md` | [emilkowalski/skill](https://github.com/emilkowalski/skill) | `gh repo view JuliusBrussee/caveman --web` |
-| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — reviewed against v7.0.2 (v7.0.2 integrated: brainstorming asks only when the answer changes what gets built and otherwise proposes its call, asks why first with no options attached, shows named choices with trade-offs and a pick, reads from how the human talks whether they want the technical choices, opens with a short design to approve when nothing is open, does recon and process steps without asking, and sketches in text before offering the visual companion; `start-server.sh --project-dir` resolves relative paths; SDD helpers act on the current directory's repo via new `sdd-repo`, take `-C DIR`, are run by absolute path from the working tree, `task-brief` matches IDs like `A1`/`6b`/`2.1` exactly and refuses briefs swallowed by an unclosed fence, `review-package` guards empty or non-descendant ranges, and `sdd-workspace` disambiguates plans sharing a basename; opencode guidance maps namespaced skill ids to bare ids; systematic-debugging pressure-test prompts removed from the installed skill. Skipped: Pi/Hermes/Muse/Windows-hook bootstrap fixes and executing-plans `task-start`/`task-done` (not present locally). v7.0.1 integrated: brainstorming looks before it asks, echoes a detailed request with findings and asks the one open question, offers to skip only when not invoked by name, asks Socratic questions, lays out approaches in a message of their own, and writes a short design doc even for small changes; compaction-survival split — brainstorming, subagent-driven-development, and writing-skills SKILL.md files kept under 20,000 bytes with detail moved to `references/` read at the step that needs it; local writing-skills replaced with upstream 7.0.1 (it had missed 7.0.0's form-to-failure and micro-test guidance); executing-plans Example Workflow trim was a no-op (local variant has none); issue/PR templates and diagnosing-superpowers skipped as not present locally. Earlier, v7.0.0's brainstorming rebuild integrated — open-question first message, play-back chunks, sizing, how-it-gets-made ownership, builder check replacing the spec-document reviewer prompt — layered under the local business-context/REQ-spec/spec-quality-gate hard gates; also integrated the visual-companion literal-replace fix, systematic-debugging secret-safe example, and sdd-workspace `.gitignore` preservation; Antigravity/Hermes/Windows-hook/`task-done` changes skipped as unsupported or not present locally. Previously, v6.4.2: Muse/Pi/Antigravity host refs skipped as unsupported; concepts integrated into writing-plans, test-driven-development, pr-reviewer, subagent-driven-development. v6.4.2 shifted writing-plans from "transcribe complete code" to "document only the decisions the implementer can't make" — signatures + spec-pinned values over full bodies — and added the Proportion self-review check; upstream's now-superseded `plan-document-reviewer-prompt.md` dropped in favor of the local `plan-reviewer` agent) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
+| `skills/using-superpowers/SKILL.md` | [obra/superpowers](https://github.com/obra/superpowers) — **local deviation since 6.0.0:** forced hand-offs (`REQUIRED SUB-SKILL`, HARD-GATEs that start another skill) in brainstorming, writing-plans, executing-plans, and subagent-driven-development are rewritten as "explain the intent and ask"; keep that when syncing. Reviewed against v7.0.2 (v7.0.2 integrated: brainstorming asks only when the answer changes what gets built and otherwise proposes its call, asks why first with no options attached, shows named choices with trade-offs and a pick, reads from how the human talks whether they want the technical choices, opens with a short design to approve when nothing is open, does recon and process steps without asking, and sketches in text before offering the visual companion; `start-server.sh --project-dir` resolves relative paths; SDD helpers act on the current directory's repo via new `sdd-repo`, take `-C DIR`, are run by absolute path from the working tree, `task-brief` matches IDs like `A1`/`6b`/`2.1` exactly and refuses briefs swallowed by an unclosed fence, `review-package` guards empty or non-descendant ranges, and `sdd-workspace` disambiguates plans sharing a basename; opencode guidance maps namespaced skill ids to bare ids; systematic-debugging pressure-test prompts removed from the installed skill. Skipped: Pi/Hermes/Muse/Windows-hook bootstrap fixes and executing-plans `task-start`/`task-done` (not present locally). v7.0.1 integrated: brainstorming looks before it asks, echoes a detailed request with findings and asks the one open question, offers to skip only when not invoked by name, asks Socratic questions, lays out approaches in a message of their own, and writes a short design doc even for small changes; compaction-survival split — brainstorming, subagent-driven-development, and writing-skills SKILL.md files kept under 20,000 bytes with detail moved to `references/` read at the step that needs it; local writing-skills replaced with upstream 7.0.1 (it had missed 7.0.0's form-to-failure and micro-test guidance); executing-plans Example Workflow trim was a no-op (local variant has none); issue/PR templates and diagnosing-superpowers skipped as not present locally. Earlier, v7.0.0's brainstorming rebuild integrated — open-question first message, play-back chunks, sizing, how-it-gets-made ownership, builder check replacing the spec-document reviewer prompt — layered under the local business-context/REQ-spec/spec-quality-gate hard gates; also integrated the visual-companion literal-replace fix, systematic-debugging secret-safe example, and sdd-workspace `.gitignore` preservation; Antigravity/Hermes/Windows-hook/`task-done` changes skipped as unsupported or not present locally. Previously, v6.4.2: Muse/Pi/Antigravity host refs skipped as unsupported; concepts integrated into writing-plans, test-driven-development, pr-reviewer, subagent-driven-development. v6.4.2 shifted writing-plans from "transcribe complete code" to "document only the decisions the implementer can't make" — signatures + spec-pinned values over full bodies — and added the Proportion self-review check; upstream's now-superseded `plan-document-reviewer-prompt.md` dropped in favor of the local `plan-reviewer` agent) | `gh api repos/obra/superpowers/tags --jq '.[0].name'` |
 | `skills/karpathy/SKILL.md` | [Karpathy tweet](https://x.com/karpathy/status/2015883857489522876) + community distillations | `gh search repos "karpathy claude skill"` |
 
 When upgrading: diff upstream against local, preserve any local customizations, bump patch version.
@@ -232,6 +250,8 @@ When upgrading: diff upstream against local, preserve any local customizations, 
 ## What not to do
 
 - Don't create application code, test files, or CI pipelines in this repo
+- Don't add, rename, or remove a skill or agent without its `skills/engineer/catalogue.md` row
+- Don't make one skill force another to run; explain the intent and ask
 - Don't add a build step — the plugin is loaded raw by Claude Code and Codex
 - Don't flatten `skills/` — each skill must be its own subdirectory
 - Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`

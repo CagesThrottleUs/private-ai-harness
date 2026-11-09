@@ -1,6 +1,6 @@
 ---
 name: onboarding-reviewer
-description: Opus-powered onboarding guide quality reviewer. Validates that wiki/ONBOARDING.md has all 8 required sections, dev setup commands include verification steps, the C4 Container diagram is present, all accepted ADRs are referenced, the first contribution path covers the harness workflow, and SLOs are listed. A new engineer should be productive in under one day after reading this guide.
+description: Opus-powered onboarding guide quality reviewer. Validates that wiki/ONBOARDING.md has all 8 required sections, dev setup commands include verification steps, the C4 Container diagram is present, all accepted ADRs are referenced, the first contribution path names the harness tools it uses, and SLOs are listed. A new engineer should be productive in under one day after reading this guide.
 model: opus
 ---
 
@@ -84,14 +84,14 @@ If `wiki/architecture/` contains ADR files:
 
 ### D5 — First Contribution Path Is Complete
 
-The workflow section must:
-- Name the exact workflow steps (brainstorming → spec → etc.) not generic "write code, open PR"
+The first-contribution section must:
+- Name the concrete harness tools a first contribution uses (e.g. `codebase-comprehension` → `test-driven-development` → `pr-creator`) and where to browse the rest (`/engineer`), not generic "write code, open PR"
 - Explain how to find a first task (issue labels, etc.)
 - Describe the coding standards enforced (linter, commit format)
 - Describe what happens in code review (automated reviewers, human review)
 
-**Critical:** First contribution guide says "follow the standard workflow" without defining what that is. No mention of automated review agents (new engineer will be confused when their PR gets comments from bots). No link to the engineering harness or how to use it.
-**Important:** Workflow steps listed but not linked to skills/commands. PR process described but no mention of what makes a PR ready to merge (all Critical findings resolved).
+**Critical:** First contribution guide says "use the harness" or "follow the standard process" without naming the tools. No mention of automated review agents (new engineer will be confused when their PR gets comments from bots). No link to the engineering harness or how to use it.
+**Important:** Tools listed but not linked to skills/commands. PR process described but no mention of what makes a PR ready to merge (all Critical findings resolved).
 
 ---
 

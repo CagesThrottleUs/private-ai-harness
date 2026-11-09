@@ -20,7 +20,7 @@ ClickOps dies at 2am when you need to provision a new environment and can't reme
 
 ## When to Use
 
-**Required** when the feature needs:
+**Use** when the feature needs:
 - New compute resource (EC2, ECS, Lambda, App Service, Cloud Run)
 - New database instance (RDS, Cloud SQL, Cosmos DB, MongoDB Atlas)
 - New object storage (S3, GCS, Azure Blob)

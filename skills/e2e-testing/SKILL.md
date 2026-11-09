@@ -38,7 +38,7 @@ A critical user journey is a sequence of actions that represents a core business
 
 ## When to Use
 
-**Required** before `finishing-a-development-branch` for any feature that:
+**Use** before finishing a branch, for any feature that:
 - Has a user-facing UI (web, mobile, CLI)
 - Changes a critical user flow (auth, checkout, core CRUD, search)
 - Has acceptance criteria that can only be verified end-to-end

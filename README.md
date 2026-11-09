@@ -4,7 +4,9 @@ Personal Claude Code + Codex + GitHub Copilot harness. One shared skill tree,
 full stack: Karpathy guidelines, commit discipline, parallel agent patterns,
 TDD workflows, systematic debugging, code review, and caveman mode.
 
-Not a product. Optimized for one workflow.
+Not a product, and not a pipeline: a catalogue of tools you pick from. Browse
+it with `/engineer`, or read [`skills/engineer/catalogue.md`](skills/engineer/catalogue.md).
+See [PHILOSOPHY.md](PHILOSOPHY.md) for why.
 
 ---
 
@@ -13,6 +15,7 @@ Not a product. Optimized for one workflow.
 | Directory | Contents |
 |-----------|----------|
 | `skills/` | Shared skills loaded into Claude Code and Codex; the `skills/*/SKILL.md` layout is also GitHub's native Agent Skills convention, so Copilot discovers it unmodified |
+| `skills/engineer/catalogue.md` | The tool catalogue: every skill and subagent grouped by job. Start here |
 | `agents/` | Canonical reviewer prompts used directly by Claude and adapted to Codex custom agents, opencode subagents, and Copilot agent skills |
 | `scripts/` | Shared installer, Codex installer/adapter, opencode installer/adapter, Copilot installer/adapter, and `commit-msg.sh` hook |
 | `.claude-plugin/` | Claude Code manifest and local marketplace |
@@ -25,15 +28,15 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — routes overlapping installed Android/Kotlin/Compose/KMP global skills to a single winner per sub-task with a stated tie-break reason; activated by engineer on Android work |
+| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — routes overlapping installed Android/Kotlin/Compose/KMP global skills to a single winner per sub-task with a stated tie-break reason; `/engineer` consults it first on Android work |
 | `brainstorming` | `/brainstorming` | Draw out what the user wants and why (open-question first message, play-back, sizing), then design/spec before implementing |
-| `business-context-intake` | `/business-context-intake` | Before brainstorming — captures user problem, JTBD, measurable success metrics, compliance constraints, non-goals; hard gate before design |
+| `business-context-intake` | `/business-context-intake` | Before brainstorming — captures user problem, JTBD, measurable success metrics, compliance constraints, non-goals; best before design (advice, not a gate) |
 | `caveman` | `/caveman` | 75% token reduction, full technical accuracy |
 | `code-documentation` | `/code-documentation` | Spec-traceable docs at authorship time |
 | `commit-discipline` | `/commit-discipline` | Conventional Commits + micro-commit rules |
 | `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | Parallel agent patterns for independent tasks |
-| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one tech domain; engineer activates the matching `<domain>-advisor` inside each construct/test/verify step |
+| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one tech domain; `/engineer` consults the matching `<domain>-advisor` first |
 | `executing-plans` | `/executing-plans` | Structured plan execution with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — platform-agnostic pipeline spec + config for GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket |
@@ -69,19 +72,18 @@ from `/skills`; installed plugin UIs may show the `private-ai-harness:` prefix.
 | `dast-testing` | `/dast-testing` | DAST for externally-facing services — ZAP baseline (PRs), API scan (staging), Nuclei, SARIF to Security tab, fails on HIGH |
 | `api-versioning` | `/api-versioning` | For externally-facing APIs — versioning strategy ADR, breaking change policy, Sunset headers, migration guide template, CI oasdiff breaking change detection |
 | `sequence-diagram` | `/sequence-diagram` | During HLD §5 or writing-plans for 3+ component flows — Mermaid sequenceDiagram with auth, error paths, sync/async, retry; runs `sequence-diagram-reviewer` |
-| `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; the engineer PORTFOLIO lane; runs `portfolio-reviewer` |
+| `portfolio-management` | `/portfolio-management` | Layer above one epic — SAFe Portfolio Kanban, WSJF ranking, WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; proposes the next epic to start; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffold for a NEW service (CNCF Platform Eng L3) — CI, observability, contract stub, tests, runbook, resource limits, catalog entry, scorecard from birth; runs `service-scaffolding-reviewer` |
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — zero-cost `pre-lint.sh` format check (incl. required `north_star` field) runs before the Opus reviewer |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging with condition-based waiting |
-| `teacher` | `/teacher` | Independent track (not an `/engineer` step) that checks and deepens your own understanding — evidence-maps actual vs. ideal solution (cited, no hand-waving), Socratic-questions the drift without ever stating the fix, assigns near/far transfer exercises, grades on return, logs for spaced re-quizzing |
-| `engineer` | `/engineer` | Universal entry point — classifies the request into a lane, opens the Senior Dialogue (card D-000), waits for recorded human agreement during DISCUSS, then runs the lane's BUILD chain with zero check-ins |
-| `senior-dialogue` | via `/engineer` | Senior Dialogue working model — evidence-backed Feynman decision cards, runtime risk reasoning for depth, human agreement recorded by host hooks in a signed consent ledger (autopilot is not consent; no human → park), docs generated from the agreed record, test scenarios agreed before code |
+| `teacher` | `/teacher` | Learning track, separate from build work, that checks and deepens your own understanding — evidence-maps actual vs. ideal solution (cited, no hand-waving), Socratic-questions the drift without ever stating the fix, assigns near/far transfer exercises, grades on return, logs for spaced re-quizzing |
+| `engineer` | `/engineer` | Front door to the tool catalogue — browse it, run a named skill or subagent, or describe a problem and get the fewest fitting tools with a reason each; does only what was asked and suggests next tools instead of chaining |
+| `senior-dialogue` | by name only | **Retired in 6.0.0, pending removal** — decision cards with a host-hook consent ledger; `/engineer` no longer uses it |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
 | `using-git-worktrees` | `/using-git-worktrees` | Parallel branches without stash churn |
 | `using-superpowers` | `/using-superpowers` | Leverage MCP tools effectively |
 | `verification-before-completion` | `/verification-before-completion` | Verify before marking done |
-| `workflow` | `/workflow` | Full feature development pipeline |
 | `writing-plans` | `/writing-plans` | Plan documents that agents can execute |
 | `writing-skills` | `/writing-skills` | Author new skills |
 
@@ -129,7 +131,7 @@ reviewer prompts do not drift between hosts.
 | `accessibility-reviewer` | **Sonnet** — Accessibility gate: axe-playwright on critical pages, WCAG 2.1/2.2 AA tags, violations fail CI, exclusions documented |
 | `linter-reviewer` | **Sonnet** — Linter gate validator: language detection, correct 2025 tool (Ruff/Biome/golangci-lint/Clippy), zero output, type checker, no new suppressions |
 | `delivery-metrics-reviewer` | **Sonnet** — Delivery-metrics honesty gate: DORA bands match 2024 clusters, no fabricated failure-dependent key, flow efficiency formula-correct or withheld, every key cites its source, no delivery metric sold as a business outcome |
-| `test-scenario-reviewer` | Pre-code test-scenario gate — REQ→TC traceability, honest kills, level fit, MC/DC on Critical-tier logic, determinism, C/C++ and web hazards; feeds the Senior Dialogue's test-scenario loop |
+| `test-scenario-reviewer` | Pre-code test-scenario gate — REQ→TC traceability, honest kills, level fit, MC/DC on Critical-tier logic, determinism, C/C++ and web hazards; use before writing tests or code for a spec |
 
 ### Hooks
 
@@ -151,7 +153,10 @@ session is the single Stop beep at the end.
 - Sounds: `assets/sounds/<Event>/default.mp3`, falls back to `assets/sounds/fallback.mp3`
 - Disable: create `~/.private-ai-harness/beep-disabled`, or set `PAH_BEEP_ENABLED=false`
 
-**Senior Dialogue consent hooks.** `/engineer` records a human's agreement to
+**Senior Dialogue consent hooks (retired in 6.0.0, pending removal).**
+`/engineer` no longer uses them; they act only if you invoke `senior-dialogue`
+by name, and stay wired until removed with the guard off. While installed,
+they record a human's agreement to
 each decision card through host hooks, never through the model:
 `skills/senior-dialogue/scripts/dialogue-consent.py` appends to a hash-chained,
 HMAC-signed ledger at `<git-root>/.ai/dialogue/consent.jsonl`, and a
@@ -246,7 +251,7 @@ This script installs (in order):
 9. **FFmpeg** — `brew install ffmpeg` and `brew install ffmpeg-full`
 10. **This repo for Claude Code** — registers the harness as a local marketplace and installs it at user scope
 11. **This repo for Codex** — registers the same local marketplace, installs the native Codex plugin, generates custom-agent TOML adapters, and synchronizes global Codex guidance
-12. **Global Claude guidance** — caveman (output style, default ultra, plus the skill for mid-session level switching), commit discipline, workflow, and Karpathy blocks
+12. **Global Claude guidance** — caveman (output style, default ultra, plus the skill for mid-session level switching), commit discipline, engineering catalogue pointer (re-running removes the pre-6.0 workflow import), and Karpathy blocks
 13. **commit-msg hook** — symlinks `scripts/commit-msg.sh` into `.git/hooks/commit-msg`
 14. **Android team skills** — Kotlin/Compose/KMP pack (chrisbanes, skydoves testing + performance, rcosteira79, new-silvermoon, aldefy, hamen, Meet-Miyani, Drjacky, ceorkm, baoyu); overlapping on purpose — the `android-advisor` overlay resolves which wins per sub-task
 15. **Cost-visibility plugins** — `context-guard` + `statusline` (context budget enforcement, subagent spend tracking) and `claude-context-optimizer` (`/cco*` dashboard, ROI reports, CLAUDE.md bloat audit)
@@ -341,7 +346,7 @@ verified against the actual CLIs rather than assumed:
 - **Ponytail** — Copilot CLI has the same plugin-marketplace mechanism as Claude/Codex (`copilot plugin marketplace add`/`copilot plugin install`), so `DietrichGebert/ponytail` installs the same way
 - **Copilot HUD** — installs [`griches/copilot-hud`](https://github.com/griches/copilot-hud) from its marketplace as `copilot-hud@copilot-hud`. Run `/copilot-hud:setup` once in Copilot to enable its status line; existing HUD configuration is left intact.
 - **Autopilot default** — sets `defaultMode` to `autopilot` in `~/.copilot/settings.json` (or `$COPILOT_HOME/settings.json`), preserving all other user settings. New interactive sessions start in autopilot; resumed and non-interactive sessions retain their own modes.
-- **Senior Dialogue consent hooks** — adds `userPromptSubmitted`, `postToolUse`, and `preToolUse` entries to `~/.copilot/hooks/private-ai-harness.json`. Autopilot speeds up execution but is not consent: `/engineer` still waits for an `ask_user` answer or a typed agreement before building, and parks when nobody answers.
+- **Senior Dialogue consent hooks** — adds `userPromptSubmitted`, `postToolUse`, and `preToolUse` entries to `~/.copilot/hooks/private-ai-harness.json`. Retired in 6.0.0: `/engineer` no longer runs the Senior Dialogue; the hooks remain until removed with the guard off.
 - **Cache keepalive extension** — nothing to install: the plugin ships `extensions/private-ai-harness-keepalive/`, which Copilot loads live with the plugin (see [Copilot cache keepalive](#copilot-cache-keepalive)).
 
 Not portable, and skipped with a reason printed at the end of the run:

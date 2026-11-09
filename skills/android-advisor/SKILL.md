@@ -4,15 +4,15 @@ description: >
   Use for any Android, Kotlin, Jetpack Compose, or Compose Multiplatform work when
   several overlapping global Android skills are installed. Resolves which installed
   specialist wins for each sub-task and in what order, so the agent gets one
-  coherent answer instead of four contradictory ones. The engineer router activates
-  this overlay inside each construct/test/verify step on Android work.
+  coherent answer instead of four contradictory ones. /engineer consults it first
+  on Android work; consult it at each understand/build/test/verify stage.
 ---
 
 # Android Advisor
 
 First instance of the `domain-overlay` pattern. This overlay owns **which
 installed Android skill the agent consults** for each sub-task, and in what order
-across an engineer lane. It carries no Android knowledge itself — it routes to the
+across the stages of the work. It carries no Android knowledge itself — it routes to the
 skills that do, and states why each wins so ties break cleanly.
 
 **Announce at start:** "Activating android-advisor to route Android skills."
@@ -54,11 +54,11 @@ avoid blending contradictory skills.
 - skydoves-perf and chrisbanes stability are ordered, not rival — never run both
   as "how to structure this code" in the same breath.
 
-## 3. Lane-step mapping (engineer)
+## 3. Stage mapping
 
-Where each survivor fires inside an engineer lane:
+Where each survivor fires as the work moves through its stages:
 
-| Lane step | Android skill(s) |
+| Stage | Android skill(s) |
 |---|---|
 | `codebase-comprehension` | rcosteira79 (architecture map); silvermoon `android-viewmodel` if MVVM |
 | design / mockups (UI features) | ceorkm, baoyu — mockups only |

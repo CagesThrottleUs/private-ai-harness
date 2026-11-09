@@ -74,7 +74,7 @@ static analysis) but do not replace the human gate on high-blast-radius code.
 | `visual-regression-reviewer` | `/review visual` | When visual regression tests are written. Screenshots on critical pages, animations off, baselines committed, masked dynamic content, pinned Docker — 5 dims. Not in `/review all`. |
 | `chaos-reviewer` | `/review chaos` | When chaos tests are written. Steady state + hypothesis, HLD failure modes, graceful degradation thresholds, abort criteria, CI staging — 5 dims. Not in `/review all`. |
 | `incident-response-reviewer` | `/review incident` | When IR docs are created. Severity matrix, IC role, 7-section postmortem, MTTD/MTTR targets — 5 dims. Not in `/review all`. |
-| `onboarding-reviewer` | `/review onboarding` | When onboarding guide is created or updated. Validates 8 sections, dev setup, C4 diagram, ADRs, harness workflow, actionable ops. Not in `/review all`. |
+| `onboarding-reviewer` | `/review onboarding` | When onboarding guide is created or updated. Validates 8 sections, dev setup, C4 diagram, ADRs, harness tools, actionable ops. Not in `/review all`. |
 | `dast-reviewer` | `/review dast` | When DAST is configured. Validates ZAP baseline on PRs, API scan on staging, HIGH fails CI, SARIF upload, auth — 5 dims. Not in `/review all`. |
 | `accessibility-reviewer` | `/review accessibility` | When UI feature ships. Validates axe-playwright on critical pages, WCAG 2.1 AA (+ 2.2 for EU), violations fail CI, exclusions documented — 4 dims. Not in `/review all`. |
 | `api-versioning-reviewer` | `/review versioning` | When versioning strategy is defined or updated. Validates ADR, breaking change policy, Sunset headers, migration guides, CI detection — 5 dimensions. Not in `/review all`. |
