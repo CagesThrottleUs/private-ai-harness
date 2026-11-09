@@ -1,7 +1,7 @@
 {
   "name": "private-ai-harness",
   "description": "Personal AI harness: Karpathy guidelines, commit discipline, parallel agent patterns, TDD, debugging, code review workflows, and caveman mode",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "author": {
     "name": "CagesThrottleUs"
   },
@@ -12,7 +12,6 @@
     "./hooks/notification.json",
     "./hooks/stop.json",
     "./hooks/pre-compact.json",
-    "./hooks/permission-request.json",
-    "./hooks/dialogue-consent.json"
+    "./hooks/permission-request.json"
   ]
 }

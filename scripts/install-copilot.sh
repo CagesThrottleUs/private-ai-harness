@@ -98,11 +98,19 @@ ok "harness plugin loaded live from $REPO_ROOT"
 
 info "Linking harness skills into $GLOBAL_SKILLS_DIR"
 mkdir -p "$GLOBAL_SKILLS_DIR"
+for link in "$GLOBAL_SKILLS_DIR"/*; do
+  [[ -L "$link" && ! -f "$link/SKILL.md" ]] || continue
+  case "$(readlink "$link")" in
+    "$REPO_ROOT"/skills/*) rm "$link" && ok "removed link to deleted skill $(basename "$link")" ;;
+  esac
+done
 linked=0
 for skill_dir in "$REPO_ROOT"/skills/*/; do
   name="$(basename "$skill_dir")"
   target="$GLOBAL_SKILLS_DIR/$name"
-  if [[ -e "$target" && ! -L "$target" ]]; then
+  if [[ ! -f "$skill_dir/SKILL.md" ]]; then
+    continue
+  elif [[ -e "$target" && ! -L "$target" ]]; then
     warn "$target exists and is not a symlink — leaving it untouched"
   else
     ln -sfn "${skill_dir%/}" "$target" && linked=$((linked + 1))
@@ -296,20 +304,15 @@ ensure_hook("postToolUse", "PostToolUse")
 ensure_hook("notification", "PermissionRequest", "permission_prompt")
 ensure_hook("preCompact", "PreCompact")
 
-# Senior Dialogue consent ledger (skills/senior-dialogue): record human
-# agreement from typed prompts and ask_user answers; guard the ledger.
-consent_script = f"{repo_root}/skills/senior-dialogue/scripts/dialogue-consent.py"
-
-def ensure_consent_hook(event_key: str, consent_event: str) -> None:
-    entries = hooks.setdefault(event_key, [])
-    bash_cmd = (f'python3 "{consent_script}" hook --host copilot '
-                f'--event {consent_event} 2>/dev/null || true')
-    if not any(e.get("bash") == bash_cmd for e in entries):
-        entries.append({"type": "command", "bash": bash_cmd, "timeoutSec": 10})
-
-ensure_consent_hook("userPromptSubmitted", "prompt")
-ensure_consent_hook("postToolUse", "answer")
-ensure_consent_hook("preToolUse", "guard")
+# senior-dialogue was removed in 7.0.0; drop the consent hooks that older
+# installs wired so they stop calling a script that no longer exists.
+retired = "/skills/senior-dialogue/scripts/dialogue-consent.py"
+for event_key in list(hooks):
+    kept = [e for e in hooks[event_key] if retired not in e.get("bash", "")]
+    if kept:
+        hooks[event_key] = kept
+    else:
+        del hooks[event_key]
 
 if path.exists():
     backup = path.with_name(f"{path.name}.bak.{datetime.datetime.now():%Y%m%d%H%M%S}")
@@ -318,7 +321,6 @@ if path.exists():
 path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 PYEOF
 ok "sound hooks wired into $GLOBAL_HOOKS_FILE (SessionStart/Stop/PreToolUse/PostToolUse/PermissionRequest/PreCompact)"
-ok "Senior Dialogue consent hooks wired into $GLOBAL_HOOKS_FILE (userPromptSubmitted/postToolUse/preToolUse)"
 echo ""
 
 # ── 9. Copilot defaults ───────────────────────────────────────────────────────

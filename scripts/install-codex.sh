@@ -132,5 +132,4 @@ fi
 echo ""
 echo "Start a new Codex session, then open /plugins to verify the plugin."
 echo "Use /agent to inspect harness reviewer agents."
-echo "Open /hooks and trust the private-ai-harness hooks: the Senior Dialogue consent ledger is skipped until they are trusted."
 echo ""

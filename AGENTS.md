@@ -1,7 +1,9 @@
 # AGENTS.md — AI agent reference for private-ai-harness
 
-This file is the authoritative index for any AI (Claude Code, Codex, Gemini CLI, etc.)
-working inside this repo. Keep it current whenever skills, agents, or the install flow change.
+This file is the authoritative index and rulebook for any AI (Claude Code, Codex,
+Copilot, Gemini CLI, etc.) working inside this repo. `CLAUDE.md` only imports it
+(`@AGENTS.md`); put every repo rule here. Keep it current whenever skills,
+agents, or the install flow change.
 
 ---
 
@@ -20,16 +22,14 @@ plugin-reload step of its own).
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
 | `skills/engineer/catalogue.md` | The tool catalogue: every skill and subagent grouped by job, with use-when, outputs, and each subagent's required inputs. `/engineer` reads it to pick tools; humans browse it directly |
 | `skills/engineer/scripts/catalogue-check` | Stdlib Python drift check: exits 1 when the catalogue and the skills/agents on disk disagree (missing, extra, or duplicate rows) |
-| `skills/senior-dialogue/scripts/dialogue-consent.py` | Senior Dialogue consent ledger (stdlib Python): host hook entry point (`hook --host … --event prompt`/`answer`/`guard`) plus `activate`/`status`/`check`/`selftest`; ledger `<git-root>/.ai/dialogue/consent.jsonl`, hash-chained and HMAC-signed |
 | `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex, opencode, and Copilot adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
-| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
-| `scripts/install-copilot.sh` | Copilot installer — registers this checkout as a local marketplace and loads the harness plugin live on new sessions (no copying), retains per-skill symlinks, adapts `agents/*.md` to native user-level custom agents and Agent Skills via `install-copilot-agents.py`, installs RTK, Context7, UI/Android skills, ponytail, and the copilot-hud plugin; merges `defaultMode: autopilot` into `~/.copilot/settings.json` without replacing existing settings; wires sound hooks and global guidance. HUD status-line setup remains `/copilot-hud:setup` in Copilot. |
+| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively (removing links to deleted harness skills and the retired senior-dialogue consent plugin), registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
+| `scripts/install-copilot.sh` | Copilot installer — registers this checkout as a local marketplace and loads the harness plugin live on new sessions (no copying), retains per-skill symlinks (removing links to deleted harness skills), adapts `agents/*.md` to native user-level custom agents and Agent Skills via `install-copilot-agents.py`, installs RTK, Context7, UI/Android skills, ponytail, and the copilot-hud plugin; merges `defaultMode: autopilot` into `~/.copilot/settings.json` without replacing existing settings; wires sound hooks (dropping the retired senior-dialogue consent hooks) and global guidance. HUD status-line setup remains `/copilot-hud:setup` in Copilot. |
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
 | `scripts/copilot-notify.sh` | Adapter: Copilot CLI's per-event hooks (`sessionStart`/`agentStop`/`preToolUse`/`postToolUse`) → `hook-beep.sh` event names, invoked with the target event name as an argument since Copilot's own hook payloads don't always name the firing event |
 | `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
-| `scripts/opencode-dialogue-consent-plugin.js` | opencode plugin copied into `plugin/` by `install-opencode.sh`: bridges `chat.message` and `tool.execute.before`/`after` to the Senior Dialogue consent script (typed agreement, `question` answers, guard) |
 | `extensions/private-ai-harness-keepalive/extension.mjs` | Copilot CLI extension, loaded live with the plugin (no install step): keeps the main session's prompt cache warm while the human is away — one message at `cacheExpiresAt` − lead between turns, stopping when spend + next keepalive > min(cap, rebuild saved), then compacting; mid-turn, a main-agent pre-tool hook caps sync `bash`/`read_bash` waits at expiry − lead and runs a sync `task` in background on short caches; `/break:long` compacts now (skipped when only keepalives ran since the last compaction; slow compactions are awaited, never failed), `/break:off` disables for the session; `ttlSeconds` shortens the assumed cache life for testing; `--selftest` covers the decision logic |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/install-opencode-agents.py` | Deterministic Markdown-to-opencode-subagent adapter (renders `agents/*.md` → `private-ai-harness-<name>.md` in opencode's global agents dir, `mode: subagent`, no `model` → inherits the invoking agent's model) |
@@ -37,11 +37,13 @@ plugin-reload step of its own).
 | `scripts/configure-copilot.py` | Merge `defaultMode: autopilot` into Copilot's `settings.json` without discarding other user settings |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
-| `hooks/*.json` | Claude Code hook manifests: sound feedback via `scripts/hook-beep.sh`, and `dialogue-consent.json` (Senior Dialogue consent ledger). `codex-dialogue-consent.json` is the Codex equivalent, loaded through `.codex-plugin/plugin.json`'s `hooks` key; Claude does not load it |
+| `hooks/*.json` | Claude Code hook manifests: sound feedback via `scripts/hook-beep.sh` |
 | `assets/sounds/` | Default beep sound files, ported from voicemode (MIT) so the sound survives uninstalling that plugin |
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
 | `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
 | `.codex-plugin/plugin.json` | Native Codex plugin manifest and install-surface metadata |
+| `PHILOSOPHY.md` | Design rationale — read before changing structure |
+| `CLAUDE.md` | One line, `@AGENTS.md`, so Claude Code loads this file; holds no rules of its own |
 
 ---
 
@@ -82,7 +84,6 @@ when one works best after another, it explains why and asks.
 | `e2e-testing` | `/e2e-testing` | Before `finishing-a-development-branch` for user-facing features — identifies critical user journeys, sets up Playwright with POM/auth fixtures/semantic locators, adds post-deploy CI E2E job against staging; runs `e2e-reviewer` |
 | `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
 | `engineer` | `/engineer` | **Front door to the tool catalogue** — `/engineer` browses `catalogue.md`, `/engineer <job>` shows one group, `/engineer <tool>` runs that skill or subagent, `/engineer <request>` picks the fewest fitting tools with a one-line reason each. Does only what was asked, treats prerequisites as advice (explain and ask), suggests next tools instead of chaining; optional cost ledger and review-discipline detail in `references/` |
-| `senior-dialogue` | by name only | **Retired in 6.0.0, pending removal.** Decision cards with a host-hook consent ledger; `/engineer` no longer uses it and no host should pick it automatically. Its hooks stay wired until a human removes them with the consent guard off |
 | `epic-decomposition` | `/epic-decomposition` | After an HLD is approved (asks if not) — breaks epic into bounded stories, creates child work-item manifests under `.ai/<epic-slug>/children/`, identifies parallel vs sequential dependency waves |
 | `portfolio-management` | `/portfolio-management` | The layer ABOVE a single epic — SAFe Portfolio Kanban (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), WSJF ranking (cost of delay ÷ job size), WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; proposes the top-WSJF unblocked epic when WIP allows; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffolding for a NEW service (CNCF Platform Eng Maturity L3) — emits the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, `catalog-info.yaml`, scorecard) so the service is born compliant; registers it in the service catalog; run it before child stories build into the new service; runs `service-scaffolding-reviewer` |
@@ -288,38 +289,6 @@ A delivery metric is a **guardrail**, not the needle. "Deployment frequency is e
 
 ---
 
-## Senior Dialogue consent model (retired in 6.0.0)
-
-> **Retired.** `/engineer` no longer runs the Senior Dialogue; it is a tool
-> catalogue. The hooks and guard described below stay installed until a human
-> relaunches the host with the guard off and removes them (the guard blocks the
-> model from doing it). Until then they only act if the user invokes
-> `senior-dialogue` by name, and the guard still denies tool calls that touch
-> its files.
-
-When invoked by name, `senior-dialogue`'s DISCUSS waits for the
-human at each decision card; BUILD runs with zero check-ins once every card is
-agreed. Agreement is recorded only by host hooks from human input, never by the
-model, into `<git-root>/.ai/dialogue/consent.jsonl` (hash-chained, HMAC-signed
-with `~/.private-ai-harness/consent.key`). A PreToolUse guard denies tool calls
-that touch the ledger, the key, or the hook wiring, or that carry the agreement
-token outside the ask-user tool. Script:
-`skills/senior-dialogue/scripts/dialogue-consent.py`.
-
-| Host | Agreement channel | Wiring |
-|------|-------------------|--------|
-| Claude Code | `AskUserQuestion` answers only (its `UserPromptSubmit` also fires for model-originated turns) | `hooks/dialogue-consent.json` via `.claude-plugin/plugin.json` |
-| Copilot CLI | `ask_user` answers + typed first-line agreement | `~/.copilot/hooks/private-ai-harness.json` (installer) |
-| Codex | `request_user_input` answers + typed first-line agreement | `hooks/codex-dialogue-consent.json` via `.codex-plugin/plugin.json` (trust it in `/hooks`) |
-| opencode | `question` answers + typed first-line agreement | `~/.config/opencode/plugin/private-ai-harness-dialogue-consent.js` (installer) |
-
-With no human present the agent parks with one question; it never fabricates
-agreement. Editing the guarded files needs the host launched with
-`PRIVATE_AI_HARNESS_CONSENT_GUARD=off` (only a human can set the hook
-environment).
-
----
-
 ## External skills loaded at install time
 
 These are installed via `scripts/install-claude.sh` and available alongside this plugin.
@@ -336,16 +305,106 @@ These are installed via `scripts/install-claude.sh` and available alongside this
 
 ---
 
+## Editing skills
+
+Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter:
+
+```yaml
+---
+name: <kebab-case>
+description: >
+  One sentence that tells an AI host WHEN to invoke this skill automatically.
+  This text is the trigger — be specific and actionable.
+---
+```
+
+The body is the prompt the host receives when the skill is invoked.
+
+Rules:
+- **Catalogue row, always.** Adding, renaming, or removing a skill, or changing
+  what it is for or what it produces, updates its row in
+  `skills/engineer/catalogue.md` in the same commit. Then run
+  `python3 skills/engineer/scripts/catalogue-check` (must exit 0).
+- **No forced hand-offs.** A skill never makes another skill run. If it works
+  best after another, it says what the earlier skill would catch and asks the
+  user whether to run it first or continue.
+- `description` must answer "invoke this when…" — vague descriptions kill auto-trigger
+- Keep body focused — one skill, one responsibility
+- Auxiliary files (examples, prompts, references) go in `skills/<name>/` alongside SKILL.md
+- Do not nest skills inside other skill directories
+- **Teach reasoning, don't hardcode it.** A skill explains how to think about
+  its job and how to iterate with the human; it does not hand the model fixed
+  numbers, thresholds, word counts, or step counts to apply mechanically.
+  Estimates, thresholds, and depth are derived at runtime for the case at
+  hand, with the reasoning shown. Hardcode only what is intrinsic to the
+  skill — a security mechanism, a host or API limit, a standard's own
+  definition (MC/DC, Core Web Vitals), or a format another tool parses.
+  Worked numbers belong in clearly labeled examples, never in rules.
+- **SKILL.md stays under 20,000 bytes.** Claude Code truncates re-attached
+  skills after compaction. Move detail into `references/` and point to it
+  from the step that needs it.
+
+---
+
+## Editing agents
+
+Agents live in `agents/<name>.md`. Frontmatter controls model routing and tool access:
+
+```yaml
+---
+name: <name>
+description: <one-line purpose>
+model: opus   # or sonnet, haiku
+---
+```
+
+These Markdown files are the source of truth. Every agent also has a row in
+`skills/engineer/catalogue.md` (what it checks, its required inputs, its
+model); adding, renaming, or removing an agent, or changing its purpose,
+required inputs, or model, updates that row in the same commit, then run
+`python3 skills/engineer/scripts/catalogue-check`. Do not hand-maintain
+duplicate Codex, opencode, or Copilot prompts: the adapters described under
+*Available agents* generate them, and the native agent profiles need an
+installer re-run after a source change.
+
+---
+
+## Editing Copilot extensions
+
+`extensions/<name>/extension.mjs` files are Copilot CLI extensions. Copilot
+loads them live from this checkout as part of the plugin; there is no install
+step and no build. After changing one, run `extensions_reload` (or start a new
+session) and, for the keepalive, its `--selftest`. Live-test keepalive timing
+with a short `ttlSeconds` in `~/.private-ai-harness/keepalive.json`, then delete
+it: the file is shared by every session. Don't return `additionalContext` from
+an extension pre-tool hook: Copilot delivers it as a steering message, which
+interrupts `read_bash` and reads as human input. Claude Code, Codex, and
+opencode ignore this directory.
+
+---
+
 ## Doc-sync rule
 
 **Any change to skills, agents, install steps, or plugin structure must update:**
 
-1. `AGENTS.md` — skill/agent table, external skill list, input contracts
-2. `CLAUDE.md` — rules affected by the change (version bump criteria, workflow steps, upstream watch list)
-3. `README.md` — install step list, prerequisites, skill/agent tables
-4. `skills/engineer/catalogue.md` — **always** when a skill or agent is added, renamed, removed, or changes what it is for, what it produces, or what inputs it needs. The catalogue is how humans and `/engineer` find tools; a tool missing from it is effectively invisible.
+1. `AGENTS.md` — skill/agent tables, external skill list, input contracts, and the rules below
+2. `README.md` — install step list, prerequisites, skill/agent tables
+3. `skills/engineer/catalogue.md` — **always** when a skill or agent is added, renamed, removed, or changes what it is for, what it produces, or what inputs it needs. The catalogue is how humans and `/engineer` find tools; a tool missing from it is effectively invisible.
 
-Treat these four files as one synchronized set: if one changes, check the others.
+Treat these three files as one synchronized set: if one changes, check the
+others, and update them in the same commit. `CLAUDE.md` only imports this
+file, so it never needs a sync edit.
+
+| Change | Must update |
+|--------|-------------|
+| New, renamed, or removed skill | `AGENTS.md` skill table, `README.md` skill table, `catalogue.md` row |
+| New or changed agent (purpose, inputs, model) | `AGENTS.md` agent table, `README.md` agent table, `catalogue.md` row |
+| Skill's purpose or output changes | `catalogue.md` row (and the AGENTS/README rows if their summary is now wrong) |
+| New install step | `README.md` install list, `AGENTS.md` external skills (if applicable) |
+| Version bump rule change | `AGENTS.md` version bump table |
+| Upstream skill change | `AGENTS.md` upstream section |
+| New repo rule or convention | The matching `AGENTS.md` section |
+
 Before committing, run `python3 skills/engineer/scripts/catalogue-check`; it
 must print `catalogue in sync` (exit 0).
 
@@ -373,9 +432,63 @@ Version lives in `.claude-plugin/plugin.json`,
 | Change | Bump |
 |--------|------|
 | Typo, description tweak, prompt fix | patch |
-| New skill or agent | minor |
-| Structural change (manifest format, breaking rename) | major |
+| New skill or agent; new auxiliary files in a skill directory (scripts, prompt templates) that add capability | minor |
+| Structural change (manifest format, install flow, breaking rename or removal) | major |
 
 Always bump all three before committing a skill/agent change. Claude Code then
 uses `/reload-plugins`; Codex reinstalls the local plugin and starts a new
 session.
+
+---
+
+## Commit discipline
+
+Enforced by `scripts/commit-msg.sh` (installed as `.git/hooks/commit-msg`).
+
+```
+type(scope): imperative summary   ← ≤50 chars aim, ≤72 hard
+<blank line>
+WHY body — required when >1 file staged
+```
+
+Types: `feat` `fix` `docs` `refactor` `chore`
+Scopes: `skills` `agents` `scripts` `plugin` `docs`
+
+Sign off every commit (`git commit -s`): pull requests fail the DCO check
+without a `Signed-off-by` line.
+
+---
+
+## PR review protocol
+
+A session that opens on an already-open PR — answering bot comments (Talos,
+CodeRabbit), a queued human review, or "address the review" — is **re-entering**
+work, not starting fresh. Before the first fix:
+
+- Invoke `closing-review-loops` explicitly. Its step 0 (MEASURE) asks "is
+  this still one describable change?" — run it even if you don't yet know
+  the branch's full history, because a branch can drift through many
+  individually-small rounds that never re-trigger a first-submission-only
+  gate.
+- Never fix comment-by-comment. Batch every open finding, fix in one pass,
+  run an internal self-review, push once, then re-trigger the external
+  reviewer — the Iron Law in `closing-review-loops`.
+
+This binds in every repo the harness touches, not just this one.
+
+For an exploratory codebase review, `/review auto` publishes the entire
+reviewer inventory (including inapplicable agents) and their purposes, selects
+agents with valid artifacts and exact scopes, then runs them. `/review all`
+remains the four-agent, PR-scoped gate; auto does not replace it.
+
+---
+
+## What not to do
+
+- Don't create application code, test files, or CI pipelines in this repo
+- Don't put repo rules in `CLAUDE.md`; it stays a one-line `@AGENTS.md` import
+- Don't add, rename, or remove a skill or agent without its `skills/engineer/catalogue.md` row
+- Don't make one skill force another to run; explain the intent and ask
+- Don't add a build step — the plugin is loaded raw by every host
+- Don't flatten `skills/` — each skill must be its own subdirectory
+- Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`
