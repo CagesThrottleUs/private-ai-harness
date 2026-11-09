@@ -1,7 +1,9 @@
 # AGENTS.md — AI agent reference for private-ai-harness
 
-This file is the authoritative index for any AI (Claude Code, Codex, Gemini CLI, etc.)
-working inside this repo. Keep it current whenever skills, agents, or the install flow change.
+This file is the authoritative index and rulebook for any AI (Claude Code, Codex,
+Copilot, Gemini CLI, etc.) working inside this repo. `CLAUDE.md` only imports it
+(`@AGENTS.md`); put every repo rule here. Keep it current whenever skills,
+agents, or the install flow change.
 
 ---
 
@@ -40,6 +42,8 @@ plugin-reload step of its own).
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
 | `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
 | `.codex-plugin/plugin.json` | Native Codex plugin manifest and install-surface metadata |
+| `PHILOSOPHY.md` | Design rationale — read before changing structure |
+| `CLAUDE.md` | One line, `@AGENTS.md`, so Claude Code loads this file; holds no rules of its own |
 
 ---
 
@@ -301,16 +305,106 @@ These are installed via `scripts/install-claude.sh` and available alongside this
 
 ---
 
+## Editing skills
+
+Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter:
+
+```yaml
+---
+name: <kebab-case>
+description: >
+  One sentence that tells an AI host WHEN to invoke this skill automatically.
+  This text is the trigger — be specific and actionable.
+---
+```
+
+The body is the prompt the host receives when the skill is invoked.
+
+Rules:
+- **Catalogue row, always.** Adding, renaming, or removing a skill, or changing
+  what it is for or what it produces, updates its row in
+  `skills/engineer/catalogue.md` in the same commit. Then run
+  `python3 skills/engineer/scripts/catalogue-check` (must exit 0).
+- **No forced hand-offs.** A skill never makes another skill run. If it works
+  best after another, it says what the earlier skill would catch and asks the
+  user whether to run it first or continue.
+- `description` must answer "invoke this when…" — vague descriptions kill auto-trigger
+- Keep body focused — one skill, one responsibility
+- Auxiliary files (examples, prompts, references) go in `skills/<name>/` alongside SKILL.md
+- Do not nest skills inside other skill directories
+- **Teach reasoning, don't hardcode it.** A skill explains how to think about
+  its job and how to iterate with the human; it does not hand the model fixed
+  numbers, thresholds, word counts, or step counts to apply mechanically.
+  Estimates, thresholds, and depth are derived at runtime for the case at
+  hand, with the reasoning shown. Hardcode only what is intrinsic to the
+  skill — a security mechanism, a host or API limit, a standard's own
+  definition (MC/DC, Core Web Vitals), or a format another tool parses.
+  Worked numbers belong in clearly labeled examples, never in rules.
+- **SKILL.md stays under 20,000 bytes.** Claude Code truncates re-attached
+  skills after compaction. Move detail into `references/` and point to it
+  from the step that needs it.
+
+---
+
+## Editing agents
+
+Agents live in `agents/<name>.md`. Frontmatter controls model routing and tool access:
+
+```yaml
+---
+name: <name>
+description: <one-line purpose>
+model: opus   # or sonnet, haiku
+---
+```
+
+These Markdown files are the source of truth. Every agent also has a row in
+`skills/engineer/catalogue.md` (what it checks, its required inputs, its
+model); adding, renaming, or removing an agent, or changing its purpose,
+required inputs, or model, updates that row in the same commit, then run
+`python3 skills/engineer/scripts/catalogue-check`. Do not hand-maintain
+duplicate Codex, opencode, or Copilot prompts: the adapters described under
+*Available agents* generate them, and the native agent profiles need an
+installer re-run after a source change.
+
+---
+
+## Editing Copilot extensions
+
+`extensions/<name>/extension.mjs` files are Copilot CLI extensions. Copilot
+loads them live from this checkout as part of the plugin; there is no install
+step and no build. After changing one, run `extensions_reload` (or start a new
+session) and, for the keepalive, its `--selftest`. Live-test keepalive timing
+with a short `ttlSeconds` in `~/.private-ai-harness/keepalive.json`, then delete
+it: the file is shared by every session. Don't return `additionalContext` from
+an extension pre-tool hook: Copilot delivers it as a steering message, which
+interrupts `read_bash` and reads as human input. Claude Code, Codex, and
+opencode ignore this directory.
+
+---
+
 ## Doc-sync rule
 
 **Any change to skills, agents, install steps, or plugin structure must update:**
 
-1. `AGENTS.md` — skill/agent table, external skill list, input contracts
-2. `CLAUDE.md` — rules affected by the change (version bump criteria, workflow steps, upstream watch list)
-3. `README.md` — install step list, prerequisites, skill/agent tables
-4. `skills/engineer/catalogue.md` — **always** when a skill or agent is added, renamed, removed, or changes what it is for, what it produces, or what inputs it needs. The catalogue is how humans and `/engineer` find tools; a tool missing from it is effectively invisible.
+1. `AGENTS.md` — skill/agent tables, external skill list, input contracts, and the rules below
+2. `README.md` — install step list, prerequisites, skill/agent tables
+3. `skills/engineer/catalogue.md` — **always** when a skill or agent is added, renamed, removed, or changes what it is for, what it produces, or what inputs it needs. The catalogue is how humans and `/engineer` find tools; a tool missing from it is effectively invisible.
 
-Treat these four files as one synchronized set: if one changes, check the others.
+Treat these three files as one synchronized set: if one changes, check the
+others, and update them in the same commit. `CLAUDE.md` only imports this
+file, so it never needs a sync edit.
+
+| Change | Must update |
+|--------|-------------|
+| New, renamed, or removed skill | `AGENTS.md` skill table, `README.md` skill table, `catalogue.md` row |
+| New or changed agent (purpose, inputs, model) | `AGENTS.md` agent table, `README.md` agent table, `catalogue.md` row |
+| Skill's purpose or output changes | `catalogue.md` row (and the AGENTS/README rows if their summary is now wrong) |
+| New install step | `README.md` install list, `AGENTS.md` external skills (if applicable) |
+| Version bump rule change | `AGENTS.md` version bump table |
+| Upstream skill change | `AGENTS.md` upstream section |
+| New repo rule or convention | The matching `AGENTS.md` section |
+
 Before committing, run `python3 skills/engineer/scripts/catalogue-check`; it
 must print `catalogue in sync` (exit 0).
 
@@ -338,9 +432,63 @@ Version lives in `.claude-plugin/plugin.json`,
 | Change | Bump |
 |--------|------|
 | Typo, description tweak, prompt fix | patch |
-| New skill or agent | minor |
-| Structural change (manifest format, breaking rename) | major |
+| New skill or agent; new auxiliary files in a skill directory (scripts, prompt templates) that add capability | minor |
+| Structural change (manifest format, install flow, breaking rename or removal) | major |
 
 Always bump all three before committing a skill/agent change. Claude Code then
 uses `/reload-plugins`; Codex reinstalls the local plugin and starts a new
 session.
+
+---
+
+## Commit discipline
+
+Enforced by `scripts/commit-msg.sh` (installed as `.git/hooks/commit-msg`).
+
+```
+type(scope): imperative summary   ← ≤50 chars aim, ≤72 hard
+<blank line>
+WHY body — required when >1 file staged
+```
+
+Types: `feat` `fix` `docs` `refactor` `chore`
+Scopes: `skills` `agents` `scripts` `plugin` `docs`
+
+Sign off every commit (`git commit -s`): pull requests fail the DCO check
+without a `Signed-off-by` line.
+
+---
+
+## PR review protocol
+
+A session that opens on an already-open PR — answering bot comments (Talos,
+CodeRabbit), a queued human review, or "address the review" — is **re-entering**
+work, not starting fresh. Before the first fix:
+
+- Invoke `closing-review-loops` explicitly. Its step 0 (MEASURE) asks "is
+  this still one describable change?" — run it even if you don't yet know
+  the branch's full history, because a branch can drift through many
+  individually-small rounds that never re-trigger a first-submission-only
+  gate.
+- Never fix comment-by-comment. Batch every open finding, fix in one pass,
+  run an internal self-review, push once, then re-trigger the external
+  reviewer — the Iron Law in `closing-review-loops`.
+
+This binds in every repo the harness touches, not just this one.
+
+For an exploratory codebase review, `/review auto` publishes the entire
+reviewer inventory (including inapplicable agents) and their purposes, selects
+agents with valid artifacts and exact scopes, then runs them. `/review all`
+remains the four-agent, PR-scoped gate; auto does not replace it.
+
+---
+
+## What not to do
+
+- Don't create application code, test files, or CI pipelines in this repo
+- Don't put repo rules in `CLAUDE.md`; it stays a one-line `@AGENTS.md` import
+- Don't add, rename, or remove a skill or agent without its `skills/engineer/catalogue.md` row
+- Don't make one skill force another to run; explain the intent and ask
+- Don't add a build step — the plugin is loaded raw by every host
+- Don't flatten `skills/` — each skill must be its own subdirectory
+- Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`
