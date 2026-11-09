@@ -20,16 +20,14 @@ plugin-reload step of its own).
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
 | `skills/engineer/catalogue.md` | The tool catalogue: every skill and subagent grouped by job, with use-when, outputs, and each subagent's required inputs. `/engineer` reads it to pick tools; humans browse it directly |
 | `skills/engineer/scripts/catalogue-check` | Stdlib Python drift check: exits 1 when the catalogue and the skills/agents on disk disagree (missing, extra, or duplicate rows) |
-| `skills/senior-dialogue/scripts/dialogue-consent.py` | Senior Dialogue consent ledger (stdlib Python): host hook entry point (`hook --host … --event prompt`/`answer`/`guard`) plus `activate`/`status`/`check`/`selftest`; ledger `<git-root>/.ai/dialogue/consent.jsonl`, hash-chained and HMAC-signed |
 | `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex, opencode, and Copilot adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
 | `scripts/install-codex.sh` | Codex plugin, custom-agent, global-guidance, and sound-notify installer |
-| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively, registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
-| `scripts/install-copilot.sh` | Copilot installer — registers this checkout as a local marketplace and loads the harness plugin live on new sessions (no copying), retains per-skill symlinks, adapts `agents/*.md` to native user-level custom agents and Agent Skills via `install-copilot-agents.py`, installs RTK, Context7, UI/Android skills, ponytail, and the copilot-hud plugin; merges `defaultMode: autopilot` into `~/.copilot/settings.json` without replacing existing settings; wires sound hooks and global guidance. HUD status-line setup remains `/copilot-hud:setup` in Copilot. |
+| `scripts/install-opencode.sh` | opencode installer — symlinks `skills/` natively (removing links to deleted harness skills and the retired senior-dialogue consent plugin), registers Context7 MCP, installs sound plugin, commit-msg hook, adapts `agents/*.md` to opencode subagents, AGENTS.md guidance |
+| `scripts/install-copilot.sh` | Copilot installer — registers this checkout as a local marketplace and loads the harness plugin live on new sessions (no copying), retains per-skill symlinks (removing links to deleted harness skills), adapts `agents/*.md` to native user-level custom agents and Agent Skills via `install-copilot-agents.py`, installs RTK, Context7, UI/Android skills, ponytail, and the copilot-hud plugin; merges `defaultMode: autopilot` into `~/.copilot/settings.json` without replacing existing settings; wires sound hooks (dropping the retired senior-dialogue consent hooks) and global guidance. HUD status-line setup remains `/copilot-hud:setup` in Copilot. |
 | `scripts/codex-notify.sh` | Adapter: Codex's single `notify` hook → `hook-beep.sh` event names |
 | `scripts/copilot-notify.sh` | Adapter: Copilot CLI's per-event hooks (`sessionStart`/`agentStop`/`preToolUse`/`postToolUse`) → `hook-beep.sh` event names, invoked with the target event name as an argument since Copilot's own hook payloads don't always name the firing event |
 | `scripts/opencode-notify-plugin.js` | opencode plugin (auto-loaded from `plugin/`): maps tool executes (blocking `tool.execute.before`/`after` hooks, NOT bus events) plus bus events (`session.idle`/`session.error`/`session.compacted`/`permission.asked`) → `hook-beep.sh` event names |
-| `scripts/opencode-dialogue-consent-plugin.js` | opencode plugin copied into `plugin/` by `install-opencode.sh`: bridges `chat.message` and `tool.execute.before`/`after` to the Senior Dialogue consent script (typed agreement, `question` answers, guard) |
 | `extensions/private-ai-harness-keepalive/extension.mjs` | Copilot CLI extension, loaded live with the plugin (no install step): keeps the main session's prompt cache warm while the human is away — one message at `cacheExpiresAt` − lead between turns, stopping when spend + next keepalive > min(cap, rebuild saved), then compacting; mid-turn, a main-agent pre-tool hook caps sync `bash`/`read_bash` waits at expiry − lead and runs a sync `task` in background on short caches; `/break:long` compacts now (skipped when only keepalives ran since the last compaction; slow compactions are awaited, never failed), `/break:off` disables for the session; `ttlSeconds` shortens the assumed cache life for testing; `--selftest` covers the decision logic |
 | `scripts/install-codex-agents.py` | Deterministic Markdown-to-Codex-TOML agent adapter |
 | `scripts/install-opencode-agents.py` | Deterministic Markdown-to-opencode-subagent adapter (renders `agents/*.md` → `private-ai-harness-<name>.md` in opencode's global agents dir, `mode: subagent`, no `model` → inherits the invoking agent's model) |
@@ -37,7 +35,7 @@ plugin-reload step of its own).
 | `scripts/configure-copilot.py` | Merge `defaultMode: autopilot` into Copilot's `settings.json` without discarding other user settings |
 | `scripts/commit-msg.sh` | Conventional Commits enforcement hook |
 | `scripts/hook-beep.sh` | Claude Code hook: plays a sound on tool/notification/stop/compact/permission events |
-| `hooks/*.json` | Claude Code hook manifests: sound feedback via `scripts/hook-beep.sh`, and `dialogue-consent.json` (Senior Dialogue consent ledger). `codex-dialogue-consent.json` is the Codex equivalent, loaded through `.codex-plugin/plugin.json`'s `hooks` key; Claude does not load it |
+| `hooks/*.json` | Claude Code hook manifests: sound feedback via `scripts/hook-beep.sh` |
 | `assets/sounds/` | Default beep sound files, ported from voicemode (MIT) so the sound survives uninstalling that plugin |
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest (name, version) |
 | `.claude-plugin/marketplace.json` | Local marketplace manifest used by Claude and supported by Codex as a legacy-compatible marketplace |
@@ -82,7 +80,6 @@ when one works best after another, it explains why and asks.
 | `e2e-testing` | `/e2e-testing` | Before `finishing-a-development-branch` for user-facing features — identifies critical user journeys, sets up Playwright with POM/auth fixtures/semantic locators, adds post-deploy CI E2E job against staging; runs `e2e-reviewer` |
 | `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
 | `engineer` | `/engineer` | **Front door to the tool catalogue** — `/engineer` browses `catalogue.md`, `/engineer <job>` shows one group, `/engineer <tool>` runs that skill or subagent, `/engineer <request>` picks the fewest fitting tools with a one-line reason each. Does only what was asked, treats prerequisites as advice (explain and ask), suggests next tools instead of chaining; optional cost ledger and review-discipline detail in `references/` |
-| `senior-dialogue` | by name only | **Retired in 6.0.0, pending removal.** Decision cards with a host-hook consent ledger; `/engineer` no longer uses it and no host should pick it automatically. Its hooks stay wired until a human removes them with the consent guard off |
 | `epic-decomposition` | `/epic-decomposition` | After an HLD is approved (asks if not) — breaks epic into bounded stories, creates child work-item manifests under `.ai/<epic-slug>/children/`, identifies parallel vs sequential dependency waves |
 | `portfolio-management` | `/portfolio-management` | The layer ABOVE a single epic — SAFe Portfolio Kanban (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), WSJF ranking (cost of delay ÷ job size), WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; proposes the top-WSJF unblocked epic when WIP allows; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffolding for a NEW service (CNCF Platform Eng Maturity L3) — emits the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, `catalog-info.yaml`, scorecard) so the service is born compliant; registers it in the service catalog; run it before child stories build into the new service; runs `service-scaffolding-reviewer` |
@@ -285,38 +282,6 @@ The harness measures two different things, and conflating them is a documented f
 | Owned by | `delivery-metrics`, `observability-standards`, `ci-pipeline-setup`, `deployment-workflow`, `incident-response` | `business-context-intake` (defines) → spec `north_star` → `outcome-review` (measures) |
 
 A delivery metric is a **guardrail**, not the needle. "Deployment frequency is elite" or "p99 is under target" says the machine runs well — it does **not** say the feature succeeded. That question belongs to `outcome-review` against the business north-star. A skill that presents a DORA/SLO number as evidence of business success has confused the layers; `delivery-metrics-reviewer` (D5) and `spec-quality-reviewer` (§2f) both reject that confusion.
-
----
-
-## Senior Dialogue consent model (retired in 6.0.0)
-
-> **Retired.** `/engineer` no longer runs the Senior Dialogue; it is a tool
-> catalogue. The hooks and guard described below stay installed until a human
-> relaunches the host with the guard off and removes them (the guard blocks the
-> model from doing it). Until then they only act if the user invokes
-> `senior-dialogue` by name, and the guard still denies tool calls that touch
-> its files.
-
-When invoked by name, `senior-dialogue`'s DISCUSS waits for the
-human at each decision card; BUILD runs with zero check-ins once every card is
-agreed. Agreement is recorded only by host hooks from human input, never by the
-model, into `<git-root>/.ai/dialogue/consent.jsonl` (hash-chained, HMAC-signed
-with `~/.private-ai-harness/consent.key`). A PreToolUse guard denies tool calls
-that touch the ledger, the key, or the hook wiring, or that carry the agreement
-token outside the ask-user tool. Script:
-`skills/senior-dialogue/scripts/dialogue-consent.py`.
-
-| Host | Agreement channel | Wiring |
-|------|-------------------|--------|
-| Claude Code | `AskUserQuestion` answers only (its `UserPromptSubmit` also fires for model-originated turns) | `hooks/dialogue-consent.json` via `.claude-plugin/plugin.json` |
-| Copilot CLI | `ask_user` answers + typed first-line agreement | `~/.copilot/hooks/private-ai-harness.json` (installer) |
-| Codex | `request_user_input` answers + typed first-line agreement | `hooks/codex-dialogue-consent.json` via `.codex-plugin/plugin.json` (trust it in `/hooks`) |
-| opencode | `question` answers + typed first-line agreement | `~/.config/opencode/plugin/private-ai-harness-dialogue-consent.js` (installer) |
-
-With no human present the agent parks with one question; it never fabricates
-agreement. Editing the guarded files needs the host launched with
-`PRIVATE_AI_HARNESS_CONSENT_GUARD=off` (only a human can set the hook
-environment).
 
 ---
 

@@ -125,6 +125,12 @@ echo ""
 # ── 4. Skills — symlink into opencode's global skill dir ────────────────────
 echo "4. private-ai-harness skills (native, no adapter needed)"
 mkdir -p "$GLOBAL_SKILLS"
+for link in "$GLOBAL_SKILLS"/*; do
+  [[ -L "$link" && ! -f "$link/SKILL.md" ]] || continue
+  case "$(readlink "$link")" in
+    "$REPO_ROOT"/skills/*) rm "$link" && ok "removed link to deleted skill $(basename "$link")" ;;
+  esac
+done
 count=0
 for skill_dir in "$REPO_ROOT"/skills/*/; do
   name="$(basename "$skill_dir")"
@@ -145,10 +151,10 @@ sed "s#__HOOK_BEEP_PATH__#$REPO_ROOT/scripts/hook-beep.sh#" \
 ok "sound-notify plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-notify.js"
 info "Note: the installed copy has an absolute path to this checkout's hook-beep.sh"
 info "baked in — do not move or delete this repo checkout, or re-run this installer after moving it."
-sed "s#__CONSENT_SCRIPT_PATH__#$REPO_ROOT/skills/senior-dialogue/scripts/dialogue-consent.py#" \
-  "$REPO_ROOT/scripts/opencode-dialogue-consent-plugin.js" \
-  > "$GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js"
-ok "Senior Dialogue consent plugin installed → $GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js"
+if [[ -f "$GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js" ]]; then
+  rm "$GLOBAL_PLUGIN_DIR/private-ai-harness-dialogue-consent.js"
+  ok "removed the retired senior-dialogue consent plugin"
+fi
 echo ""
 
 # ── 6. commit-msg git hook ───────────────────────────────────────────────────

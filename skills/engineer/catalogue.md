@@ -135,12 +135,6 @@ What to build and why.
 | `writing-skills` | Creating or editing a skill | A skill tested against the failure it exists to prevent |
 | `caveman` | You want terse, low-token replies | A compressed output mode |
 
-### Retired
-
-| Tool | Use when | You get |
-|---|---|---|
-| `senior-dialogue` | Only when you name it | Decision cards with a consent ledger. Retired in 6.0.0 and pending removal; never picked automatically |
-
 ## Subagents
 
 **Needs** lists the required inputs; optional ones are in `agents/<name>.md`.
