@@ -12,6 +12,7 @@ application code. No tests. No build step.
 
 ```
 skills/<name>/SKILL.md      skill definitions (frontmatter + prompt body)
+skills/engineer/catalogue.md  the tool catalogue: every skill + subagent (update with every tool change)
 agents/<name>.md            subagent definitions
 scripts/install-claude.sh    one-shot environment setup (Claude Code)
 scripts/install-codex.sh    Codex plugin + custom-agent + sound-notify installer
@@ -52,6 +53,13 @@ description: >
 Body is the prompt Claude Code or Codex receives when the skill is invoked.
 
 Rules:
+- **Catalogue row, always.** Adding, renaming, or removing a skill, or changing
+  what it is for or what it produces, updates its row in
+  `skills/engineer/catalogue.md` in the same commit. Then run
+  `python3 skills/engineer/scripts/catalogue-check` (must exit 0).
+- **No forced hand-offs.** A skill never makes another skill run. If it works
+  best after another, it says what the earlier skill would catch and asks the
+  user whether to run it first or continue.
 - `description` must answer "invoke this when…" — vague descriptions kill auto-trigger
 - Keep body focused — one skill, one responsibility
 - Auxiliary files (examples, prompts, references) go in `skills/<name>/` alongside SKILL.md
@@ -83,7 +91,11 @@ model: opus   # or sonnet, haiku
 ---
 ```
 
-These Markdown files are the source of truth. Do not hand-maintain duplicate
+These Markdown files are the source of truth. Every agent also has a row in
+`skills/engineer/catalogue.md` (what it checks, its required inputs, its
+model); adding, renaming, or removing an agent, or changing its purpose,
+required inputs, or model, updates that row in the same commit, then run
+`python3 skills/engineer/scripts/catalogue-check`. Do not hand-maintain duplicate
 Codex or opencode prompts. `scripts/install-codex-agents.py` generates Codex
 TOML agents, mapping Opus/Sonnet/Haiku to high/medium/low reasoning while
 inheriting the active Codex model. `scripts/install-opencode-agents.py`
@@ -115,11 +127,12 @@ opencode ignore this directory.
 
 ---
 
-## Senior Dialogue consent ledger
+## Senior Dialogue consent ledger (retired in 6.0.0)
 
-`/engineer` waits for the human during discussion and records agreement only
-through host hooks (see `AGENTS.md` → *Senior Dialogue consent model*). When
-working on this repo with the plugin installed:
+`/engineer` no longer runs the Senior Dialogue; `senior-dialogue` is retired
+and acts only if invoked by name. Its hooks and guard stay installed until a
+human removes them (see `AGENTS.md` → *Senior Dialogue consent model*). While
+they remain, when working on this repo with the plugin installed:
 
 - The guard blocks edits to the consent script, the hook wiring, and any tool
   input containing the agreement token followed by a decision id. Launch the
@@ -201,13 +214,18 @@ remains the four-agent, PR-scoped gate; auto does not replace it.
 
 ## Meta-doc sync rule
 
-`AGENTS.md`, `CLAUDE.md`, and `README.md` are a synchronized triple.
-Any change to skills, agents, install steps, or plugin structure must update all three in the same commit.
+`AGENTS.md`, `CLAUDE.md`, `README.md`, and `skills/engineer/catalogue.md` are
+one synchronized set. Any change to skills, agents, install steps, or plugin
+structure must update all of them that it affects, in the same commit. The
+catalogue is never optional: it is how you and `/engineer` find tools, so a
+tool missing from it is effectively invisible. `catalogue-check` enforces the
+catalogue's half of this mechanically.
 
 | Change | Must update |
 |--------|-------------|
-| New or renamed skill | `AGENTS.md` skill table, `README.md` skill table |
-| New or changed agent | `AGENTS.md` agent table, `README.md` agent table |
+| New, renamed, or removed skill | `AGENTS.md` skill table, `README.md` skill table, `catalogue.md` row |
+| New or changed agent (purpose, inputs, model) | `AGENTS.md` agent table, `README.md` agent table, `catalogue.md` row |
+| Skill's purpose or output changes | `catalogue.md` row (and the AGENTS/README rows if their summary is now wrong) |
 | New install step | `README.md` install list, `AGENTS.md` external skills (if applicable) |
 | Version bump rule change | `AGENTS.md` version bump table, `CLAUDE.md` version bump section |
 | Upstream skill change | `AGENTS.md` upstream section, `CLAUDE.md` upstream section |
@@ -232,6 +250,8 @@ When upgrading: diff upstream against local, preserve any local customizations, 
 ## What not to do
 
 - Don't create application code, test files, or CI pipelines in this repo
+- Don't add, rename, or remove a skill or agent without its `skills/engineer/catalogue.md` row
+- Don't make one skill force another to run; explain the intent and ask
 - Don't add a build step — the plugin is loaded raw by Claude Code and Codex
 - Don't flatten `skills/` — each skill must be its own subdirectory
 - Don't modify `scripts/commit-msg.sh` without testing the hook: `printf 'test(x): subject\n\nbody' | bash scripts/commit-msg.sh /dev/stdin`

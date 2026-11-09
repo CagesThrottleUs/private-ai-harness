@@ -18,6 +18,8 @@ plugin-reload step of its own).
 |-----------|------|
 | `skills/<name>/SKILL.md` | Shared skill loaded by Claude Code and Codex; the same `skills/*/SKILL.md` layout is GitHub's native Agent Skills discovery convention, so Copilot loads it unmodified too |
 | `skills/<name>/scripts/` | Auxiliary bash scripts for a skill (e.g., `task-brief`, `review-package` in `subagent-driven-development`) |
+| `skills/engineer/catalogue.md` | The tool catalogue: every skill and subagent grouped by job, with use-when, outputs, and each subagent's required inputs. `/engineer` reads it to pick tools; humans browse it directly |
+| `skills/engineer/scripts/catalogue-check` | Stdlib Python drift check: exits 1 when the catalogue and the skills/agents on disk disagree (missing, extra, or duplicate rows) |
 | `skills/senior-dialogue/scripts/dialogue-consent.py` | Senior Dialogue consent ledger (stdlib Python): host hook entry point (`hook --host … --event prompt`/`answer`/`guard`) plus `activate`/`status`/`check`/`selftest`; ledger `<git-root>/.ai/dialogue/consent.jsonl`, hash-chained and HMAC-signed |
 | `agents/<name>.md` | Canonical reviewer definition; Claude loads it directly, and Codex, opencode, and Copilot adapters are generated from it |
 | `scripts/install-claude.sh` | One-shot shared + detected-host environment setup (Claude Code primary, also chains Codex install) |
@@ -51,18 +53,23 @@ plugin UIs may display the `private-ai-harness:` namespace). Copilot
 auto-loads them from `~/.copilot/skills/` once relevant to the task — describe
 the task, or name the skill directly in the prompt.
 
+The harness is a catalogue, not a pipeline: `/engineer` browses
+[`skills/engineer/catalogue.md`](skills/engineer/catalogue.md), runs a named
+tool, or picks the fewest tools for a request. No skill forces another to run;
+when one works best after another, it explains why and asks.
+
 | Skill name | Invocation | When to use |
 |------------|------------|-------------|
-| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — for Android/Kotlin/Compose/KMP work with multiple overlapping installed global skills, resolves which specialist wins per sub-task (precedence table + tie-break reason), maps each to an engineer lane step, defines the hamen+skydoves-perf pre-review audit gate; activated by the engineer Universal-constraints domain-overlay hook |
+| `android-advisor` | `/android-advisor` | First `domain-overlay` instance — for Android/Kotlin/Compose/KMP work with multiple overlapping installed global skills, resolves which specialist wins per sub-task (precedence table + tie-break reason), maps each to a stage of work, defines the hamen+skydoves-perf pre-review audit gate; `/engineer` consults it first on Android work |
 | `brainstorming` | `/brainstorming` | Before any feature/component work — draws out intent (open-question first message, play-back, sizing) then writes the spec; builder check after `spec-quality-gate` |
 | `business-context-intake` | `/business-context-intake` | Before brainstorming — structured interview capturing user problem, JTBD, measurable success metrics, compliance, non-goals, stakeholder map; runs `business-context-reviewer`; hard gate before brainstorming |
 | `caveman` | `/caveman` | Ultra-compressed comms, ~75% token reduction |
 | `code-documentation` | `/code-documentation` | Writing or modifying any public construct |
-| `codebase-comprehension` | `/codebase-comprehension` | Universal Step 1 in every lane — maps relevant symbols, callers, data flow, and dependencies using codegraph/scout before any code change; inline for quick-fix, writes `.ai/<id>/comprehension.md` for task/epic |
+| `codebase-comprehension` | `/codebase-comprehension` | Before changing code you don't know well — maps relevant symbols, callers, data flow, and dependencies using codegraph/scout; inline for small changes, writes `.ai/<id>/comprehension.md` for larger work |
 | `commit-discipline` | `/commit-discipline` | Generating compliant commit messages |
 | `design-principles` | `/design-principles` | DRY, KISS, YAGNI, SOLID, GoF patterns — planning and review lens |
 | `dispatching-parallel-agents` | `/dispatching-parallel-agents` | 2+ independent tasks |
-| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one technology domain — defines the four-part contract each `<domain>-advisor` instance must provide (detection signals, precedence table with tie-break reasons, lane-step mapping, pre-review audit gate); engineer's Universal-constraints hook activates the matching instance |
+| `domain-overlay` | `/domain-overlay` | Pattern for a precedence+ordering layer over overlapping externally-installed global skills in one technology domain — defines the four-part contract each `<domain>-advisor` instance must provide (detection signals, precedence table with tie-break reasons, stage-of-work mapping, pre-review audit gate); `/engineer` consults the matching instance first |
 | `executing-plans` | `/executing-plans` | Running a `.ai/<feature-slug>/plans/` plan with checkpoints |
 | `finishing-a-development-branch` | `/finishing-a-development-branch` | Pre-merge checklist |
 | `ci-pipeline-setup` | `/ci-pipeline-setup` | After worktree creation — detects CI platform, generates platform-agnostic pipeline spec + config (GitHub Actions/GitLab CI/Jenkins/CircleCI/Azure DevOps/Bitbucket), runs `ci-reviewer` before committing |
@@ -74,8 +81,8 @@ the task, or name the skill directly in the prompt.
 | `api-contract-first` | `/api-contract-first` | Before any handler/gRPC service implementation — writes OpenAPI 3.1 spec or .proto file, sets up Spectral linting, Prism mock server, CI spec lint job; runs `api-contract-reviewer`; hard gate before handler code |
 | `e2e-testing` | `/e2e-testing` | Before `finishing-a-development-branch` for user-facing features — identifies critical user journeys, sets up Playwright with POM/auth fixtures/semantic locators, adds post-deploy CI E2E job against staging; runs `e2e-reviewer` |
 | `emil-design-eng` | `/emil-design-eng` | UI polish, component design, animation decisions, and invisible details that make software feel great — Emil Kowalski's design engineering philosophy |
-| `engineer` | `/engineer` | **Universal entry point** — classifies the request into a lane (quick-fix/task/epic/portfolio/research/refactoring), opens the Senior Dialogue with card D-000 (lane, depth, risk-ordered agenda with runtime reasoning, skill chain, test-scenario cap N, doc targets), waits for ledger-recorded human agreement even in autopilot/allow-all, then runs the lane's BUILD phase with zero check-ins; `/engineer resume .ai/<id>` re-enters a parked work item; cost and review-discipline detail in `references/` |
-| `senior-dialogue` | via `/engineer` | The Senior Dialogue working model behind every `/engineer` lane — understand → discuss → explicit human agreement recorded by host hooks in a signed consent ledger → documentation generated from the agreed record → test-first build with zero check-ins. Feynman-style decision cards with citations and numbers derived at runtime; agenda ordered by runtime risk reasoning; waits for the human in autopilot/allow-all and parks instead of self-agreeing; test-scenario loop with `test-scenario-reviewer` to sync or a human-set cap N; C23 / C++23/26 and web-frontend depth in `references/` |
+| `engineer` | `/engineer` | **Front door to the tool catalogue** — `/engineer` browses `catalogue.md`, `/engineer <job>` shows one group, `/engineer <tool>` runs that skill or subagent, `/engineer <request>` picks the fewest fitting tools with a one-line reason each. Does only what was asked, treats prerequisites as advice (explain and ask), suggests next tools instead of chaining; optional cost ledger and review-discipline detail in `references/` |
+| `senior-dialogue` | by name only | **Retired in 6.0.0, pending removal.** Decision cards with a host-hook consent ledger; `/engineer` no longer uses it and no host should pick it automatically. Its hooks stay wired until a human removes them with the consent guard off |
 | `epic-decomposition` | `/epic-decomposition` | After HLD human approval in the epic lane — breaks epic into bounded stories, creates child work-item manifests under `.ai/<epic-slug>/children/`, identifies parallel vs sequential dependency waves |
 | `portfolio-management` | `/portfolio-management` | The layer ABOVE a single epic — SAFe Portfolio Kanban (Funnel→Reviewing→Analyzing→Backlog→Implementing→Done), WSJF ranking (cost of delay ÷ job size), WIP limits (Little's Law), cross-epic dependency DAG, OKR linkage; pulls the top-WSJF epic into the epic lane when WIP allows; the engineer PORTFOLIO lane routes here; runs `portfolio-reviewer` |
 | `service-scaffolding` | `/service-scaffolding` | Golden-path scaffolding for a NEW service (CNCF Platform Eng Maturity L3) — emits the paved starting artifact (CI, observability, API contract stub, test harness, runbook, resource limits, `catalog-info.yaml`, scorecard) so the service is born compliant; registers it in the service catalog; runs in the epic lane before children build into it; runs `service-scaffolding-reviewer` |
@@ -109,12 +116,11 @@ the task, or name the skill directly in the prompt.
 | `spec-quality-gate` | `/spec-quality-gate` | Gate on spec completeness before coding — runs `scripts/pre-lint.sh` (zero-cost mechanical Section 1 format check) before ever dispatching the Opus reviewer, so specs stop failing the gate on frontmatter/heading defects the author can fix for free; pre-lint also requires the `north_star:` frontmatter field so a feature spec cannot pass without a declared business outcome |
 | `subagent-driven-development` | `/subagent-driven-development` | Orchestrate subagents for implementation — file-based handoffs (`scripts/task-brief` + `scripts/review-package`), single-pass unified task reviewer (`task-reviewer-prompt.md`), plan-scoped progress ledger (`.ai/<feature-slug>/sdd/`), pre-flight plan scan, 5-round fix loop (resume implementer rounds 1-3, escalate fresh+stronger model rounds 4-5, scoped re-review via `re-review-prompt.md`, park/BLOCK adjudication at the cap) |
 | `systematic-debugging` | `/systematic-debugging` | Scientific debugging |
-| `teacher` | `/teacher` | **Independent front door, separate track from `/engineer`** — never touches production code. Takes a request, evidence-maps what was actually built (Scout/codegraph/git diff, cited `file:line`) against an ideal solution backed only by derived complexity proofs, official docs, or canonical references (no hand-wavy claims), then runs a Socratic question loop to surface the drift — never states the fix. Assigns near- and far-transfer exercises, grades the returned explanation via feed up/feed back/feed forward, and logs concepts for spaced re-quizzing. Exists to prevent engineering skill atrophy. |
+| `teacher` | `/teacher` | **Learning track, separate from build work** — never touches production code. Takes a request, evidence-maps what was actually built (Scout/codegraph/git diff, cited `file:line`) against an ideal solution backed only by derived complexity proofs, official docs, or canonical references (no hand-wavy claims), then runs a Socratic question loop to surface the drift — never states the fix. Assigns near- and far-transfer exercises, grades the returned explanation via feed up/feed back/feed forward, and logs concepts for spaced re-quizzing. Exists to prevent engineering skill atrophy. |
 | `test-driven-development` | `/test-driven-development` | Red-green-refactor TDD loop |
 | `using-git-worktrees` | `/using-git-worktrees` | Parallel branches without stash churn |
 | `using-superpowers` | `/using-superpowers` | How to find and invoke skills |
 | `verification-before-completion` | `/verification-before-completion` | Verify before marking done — includes linter gate (Ruff/Biome/golangci-lint/Clippy auto-detected, zero issues required, dispatches `linter-reviewer`) |
-| `workflow` | `/workflow` | Full feature development pipeline |
 | `writing-plans` | `/writing-plans` | Plan documents agents can execute |
 | `writing-skills` | `/writing-skills` | Author new skills |
 
@@ -167,7 +173,7 @@ installer after an agent definition changes.
 | `chaos-reviewer` | **sonnet** | Chaos + deterministic-simulation test gate — steady state + hypothesis defined, scenarios match HLD failure modes, thresholds allow graceful degradation (not zero failures), abort criteria present, CI on staging only, seed reproducibility for simulation artifacts. 6 dimensions. Invoked by `chaos-engineering` and `deterministic-simulation-testing` skills. |
 | `incident-response-reviewer` | **sonnet** | Incident response docs gate — severity matrix (3 levels, SLAs), IC role documented, postmortem template has 7 required sections, MTTD/MTTR targets, communication templates, action-item closure loop (tracked tickets + closure review, not just a table), DiRT/game-day drill cadence. Invoked by `incident-response` skill. |
 | `production-readiness-reviewer` | opus | Production readiness gate — validates the PRR covers the SRE Launch Coordination Checklist's seven dimensions and, critically, that each readiness claim is *evidenced* not plausibly restated (tested rollback linked, SLO/capacity numbers sourced, dependencies verified to exist, runbooks exercised); flags AI-plausible-but-unverified readiness. Advisory to the human go/no-go. Invoked by `production-readiness-review` skill. |
-| `onboarding-reviewer` | opus | Onboarding guide quality gate — validates 8 required sections, dev setup has executable commands with verification steps, C4 Container diagram present, ADRs referenced with daily-impact explanations, first contribution path covers harness workflow, ops section actionable. Invoked by `onboarding-guide` skill. |
+| `onboarding-reviewer` | opus | Onboarding guide quality gate — validates 8 required sections, dev setup has executable commands with verification steps, C4 Container diagram present, ADRs referenced with daily-impact explanations, first contribution path names the harness tools it uses, ops section actionable. Invoked by `onboarding-guide` skill. |
 | `outcome-review-reviewer` | opus | Post-launch outcome quality gate — every promised metric present (no cherry-picking), every realized value cites a re-runnable source (fabricated-number = Critical), no metric failed before its HEART-aligned earliest read (premature-failure guard), unmeasurable metrics routed to instrumentation not guessed, persevere/iterate/kill follows the evidence. Invoked by `outcome-review` skill. |
 | `dast-reviewer` | **sonnet** | DAST configuration gate — validates ZAP baseline on PRs, API scan on staging with OpenAPI spec, HIGH findings fail CI, SARIF uploaded, authentication configured. 5 dimensions. Invoked by `dast-testing` skill. |
 | `accessibility-reviewer` | **sonnet** | Accessibility test gate — validates axe-playwright present on critical pages, correct WCAG tags (wcag21aa, wcag22aa for EU), violations fail CI (not just logged), exclusions documented. 4 dimensions. Invoked by `e2e-testing` skill. |
@@ -263,7 +269,7 @@ See each `agents/<name>.md` for the full input contract.
 | `delivery-metrics-reviewer` | sonnet | Mechanical — band label vs 2024 DORA cluster (table lookup), fabricated-key detection (number present with no ledger/incident row = deterministic cross-check), flow-efficiency formula/withhold check, source-citation presence, delivery-vs-outcome keyword scan. No performance judgment. | ✅ Correct — Sonnet |
 | `test-scenario-reviewer` | opus | High — "would a subtly wrong implementation pass this scenario?" and "is this the cheapest level that can observe the behavior?" are judgment calls, as are MC/DC independence on real decision logic and spotting failure modes the spec implies but never states; a checklist-matcher would pass vague oracles | ✅ Correct |
 
-**When adding a new agent:** fill in the right-size verdict before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.
+**When adding a new agent:** fill in the right-size verdict and add its row to `skills/engineer/catalogue.md` before merging. An agent created as `model: opus` without a rationale entry here is flagged for review.
 
 ---
 
@@ -282,9 +288,16 @@ A delivery metric is a **guardrail**, not the needle. "Deployment frequency is e
 
 ---
 
-## Senior Dialogue consent model
+## Senior Dialogue consent model (retired in 6.0.0)
 
-`/engineer` runs every lane through `senior-dialogue`: DISCUSS waits for the
+> **Retired.** `/engineer` no longer runs the Senior Dialogue; it is a tool
+> catalogue. The hooks and guard described below stay installed until a human
+> relaunches the host with the guard off and removes them (the guard blocks the
+> model from doing it). Until then they only act if the user invokes
+> `senior-dialogue` by name, and the guard still denies tool calls that touch
+> its files.
+
+When invoked by name, `senior-dialogue`'s DISCUSS waits for the
 human at each decision card; BUILD runs with zero check-ins once every card is
 agreed. Agreement is recorded only by host hooks from human input, never by the
 model, into `<git-root>/.ai/dialogue/consent.jsonl` (hash-chained, HMAC-signed
@@ -330,8 +343,11 @@ These are installed via `scripts/install-claude.sh` and available alongside this
 1. `AGENTS.md` — skill/agent table, external skill list, input contracts
 2. `CLAUDE.md` — rules affected by the change (version bump criteria, workflow steps, upstream watch list)
 3. `README.md` — install step list, prerequisites, skill/agent tables
+4. `skills/engineer/catalogue.md` — **always** when a skill or agent is added, renamed, removed, or changes what it is for, what it produces, or what inputs it needs. The catalogue is how humans and `/engineer` find tools; a tool missing from it is effectively invisible.
 
-Treat these three files as a synchronized triple. If one changes, check the others.
+Treat these four files as one synchronized set: if one changes, check the others.
+Before committing, run `python3 skills/engineer/scripts/catalogue-check`; it
+must print `catalogue in sync` (exit 0).
 
 ---
 

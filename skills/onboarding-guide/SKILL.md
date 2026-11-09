@@ -41,7 +41,7 @@ This skill reads **existing harness artifacts** — it does not invent content:
 | Key ADRs | `wiki/architecture/ADR-*.md` — summary of all Accepted ADRs |
 | API reference | `api/openapi.yaml` — endpoint listing |
 | Ops/monitoring | `.ai/YYYY-MM-DD-<feature-slug>/observability/observability-<feature-slug>-slos.md` + `wiki/guides/alerts.md` + `wiki/guides/runbooks/` |
-| First contribution | Harness workflow (this plugin's workflow skill) |
+| First contribution | The harness tool catalogue (`/engineer`, `skills/engineer/catalogue.md`) |
 
 ---
 
@@ -189,12 +189,12 @@ tutorial's job is a first success, not completeness. The other seven sections ma
 to the remaining Diátaxis modes — §1/§3/§4 explanation (understanding), §5
 reference (lookup), §7 how-to (operational steps).*
 
-**The development workflow** (defined by this project's engineering harness):
+**The tools** (this project's engineering harness is a catalogue, not a pipeline —
+browse it with `/engineer`; pick what the change needs). A typical first contribution uses:
 
 ```
-business-context-intake → brainstorming → spec-quality-gate →
-[high-level-design] → writing-plans → subagent-driven-development →
-tests → requesting-code-review → pr-creator
+codebase-comprehension → test-driven-development →
+verification-before-completion → requesting-code-review → pr-creator
 ```
 
 **Step by step:**

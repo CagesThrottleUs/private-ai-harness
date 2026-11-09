@@ -341,17 +341,15 @@ block = f"""{start}
 ## Private AI Harness
 
 - Skills auto-load from `~/.copilot/skills/` (symlinked to the harness `skills/` tree)
-  — invoke by describing the task, or by name (e.g. "use the workflow skill").
+  — invoke by describing the task, or by name (e.g. "use the teacher skill").
+- `/engineer` is the front door: it shows the catalogue of every skill and
+  subagent, runs a named tool, or picks tools for a request. Nothing chains
+  on its own; when a tool works best after another, explain why and ask.
 - Reviewer agent skills live in `~/.agents/skills/<name>/`; native custom
   agents live in `~/.copilot/agents/private-ai-harness-<name>.agent.md` and
   are selectable with `/agent`.
 - Repos built with this harness already ship an `AGENTS.md`; Copilot coding
   agent and Copilot CLI read it natively — no extra step needed per repo.
-- Senior Dialogue: `/engineer` discussion phases wait for the human even in
-  autopilot or allow-all; those permissions are not consent. Agreement is
-  recorded only by the consent hooks from an `ask_user` answer or a typed
-  message whose first line is the agreement. With no human present, park
-  with one question and never self-agree.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""

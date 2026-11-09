@@ -1,20 +1,21 @@
 # Cost Checkpoints, Circuit Breaker, and Ledger
 
-Moved verbatim from `SKILL.md` (private-ai-harness 5.0.0) to keep the skill
-under the 20,000-byte limit Claude Code applies when it re-attaches skills
-after compaction. Read it at the step that points here.
+Optional. Use these when you want per-step token accounting for a piece of
+work, or a spend ceiling on a long agentic run. `cost-checkpoint` reads Claude
+Code and Codex session transcripts, so it records nothing on other hosts.
+`delivery-metrics` reads the ledger it writes. `--lane` and `--phase` are free
+labels you choose for the work.
 
-## Checkpoint protocol (every lane)
+## Checkpoint protocol (when measuring)
 
-- **Cost checkpoints:** before each numbered step in the lane, run
+- **Cost checkpoints:** before each step you want measured, run
   `scripts/cost-checkpoint start <step-slug>` (from this skill's directory,
   e.g. `skills/engineer/scripts/cost-checkpoint`). Immediately after the step
   finishes — success, BLOCKED, or FAIL — run `scripts/cost-checkpoint end
   <step-slug> --row phase --lane <lane> --phase <phase> --skill <skill>`.
-  For task/epic lanes, `--phase` is the manifest's current `phase:` value at
-  that moment, read from `.ai/<id>/manifest.md` — the source of truth.
-  For lanes with no manifest (quick-fix, research, refactoring), use the
-  lane name as `--phase`. This appends one row to a global, cross-repo
+  If the work has a manifest (`.ai/<id>/manifest.md`), use its current
+  `phase:` value as `--phase`; otherwise use any stable label. This appends
+  one row to a global, cross-repo
   ledger — tokens only, no dollar figure, since pricing drifts and token
   counts don't. See "Cost ledger" below for the row schema and location.
 - **Spend circuit breaker (enforcement, not just monitoring):** the ledger
@@ -27,7 +28,7 @@ after compaction. Read it at the step that points here.
   budget-alert convention), tell the user the run is approaching its ceiling so
   they can decide to continue, raise the cap, or narrow scope. No cap set = no
   gate (opt-in), but always report `warning`/`breach` if a cap is present.
-- **Per-subagent cost attribution (required at every dispatch):** bracket every
+- **Per-subagent cost attribution (whenever you are measuring):** bracket every
   named-subagent dispatch — reviewers inside a gate, workers inside SDD, the
   `/review all` agents — with `cost-checkpoint start <agent-slug>` … `end
   <agent-slug> --row agent --lane <lane> --agent NAME --role ROLE --model MODEL
@@ -74,7 +75,6 @@ baked-in magic number, since a reasonable ceiling depends on the work.
 
 **Attribution:** `agent` rows (`--row agent --agent NAME --role ROLE --model
 MODEL`) attribute cost to each named-subagent dispatch, not just the coarse
-phase. The Universal-constraints "per-subagent cost attribution" bullet makes
-these required at every dispatch site — a `phase` row alone hides which reviewer
+phase. When you measure, bracket every dispatch site — a `phase` row alone hides which reviewer
 or worker actually spent the tokens, and both the circuit breaker and
 delivery-metrics are only as honest as that attribution.

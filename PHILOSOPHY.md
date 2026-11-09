@@ -23,7 +23,7 @@ This harness is a single entry point into a composable ecosystem of AI capabilit
 
 ## The Spec Is the Contract
 
-Modern AI-assisted development is moving away from reading code toward reading specs. The harness is built on this premise: you do not look at code — you look at requirements.
+Modern AI-assisted development is moving away from reading code toward reading specs. The harness is built on this premise: requirements are the first thing you read; code is read to the depth you choose to own it.
 
 Inspired by the [SQLite testing philosophy](https://sqlite.org/testing.html) and the DO-178B aviation safety standard, the quality bar for specs here is not "good enough to communicate intent." It is: **a spec is a testable statement of truth.**
 
@@ -47,52 +47,91 @@ Documented behavior must exactly match actual behavior. The test suite is the pr
 
 This approach is not bureaucratic overhead. It is the mechanism by which AI-generated code remains trustworthy at scale. The spec quality determines the code quality. There is no other lever.
 
-## Ownership Through Dialogue
+## Ownership Through Understanding
 
-Most code is now written by an agent and rarely read line by line. That moves
-ownership: you own a system when you can explain every decision that shaped
-it — why this boundary, why this data structure, what fails first and how we
-would know. The harness therefore treats the human and the agent as two senior
-engineers. The agent brings evidence, numbers, and options; the human brings
-intent, context, and judgment. They discuss until the human explicitly agrees
-and could re-explain the decision to a third engineer; only then is the
-agreement documented and built, test-first.
+Most code is now written by an agent and rarely read line by line, so
+ownership cannot come from having typed it. It comes from holding the theory
+of the system in your head: why this boundary, why this data structure, what
+fails first and how you would know. Naur called this programming as theory
+building ("Programming as Theory Building", 1985): the theory lives in people
+and cannot be fully recovered from code or docs. You own a solution when you
+can explain and teach it, from the highest level down to any line you choose.
 
-This is not a detour from "time from intent to done": an unexamined decision
-is the most expensive rework there is. Two consequences follow:
+That makes the harness a library, not a pipeline. A pipeline you hand a
+request to and walk away from is the fastest way to stop understanding what
+you ship.
 
-- **Agreement is a recorded human act, not a model inference.** Autopilot or
-  allow-all permissions speed up execution; they never stand in for consent to
-  a design decision. When no human is present, the agent stops with one clear
-  question instead of guessing.
-- **Skills teach reasoning, not recipes.** A skill explains how to think about
-  its job and how to iterate with the human. Numbers, thresholds, and depth are
-  derived for the case at hand and shown with their basis, so the human can
-  challenge an input instead of accepting a constant.
+- **Tools, not a workflow.** `/engineer` shows a catalogue of skills and
+  subagents. You pick, or the AI picks with a one-line reason. Nothing chains
+  on its own; when a tool works best after another, it says why and asks.
+- **You think first; the AI fetches and attacks.** Write your own read of the
+  problem before asking: the facts, what you infer from them, your first
+  guess. The AI is fastest at retrieving facts (code paths, docs, prior art,
+  numbers) and at attacking inferences. Drawing the inference is the skill,
+  so keep it.
+- **Validation points and asks; it does not hand over the fix.** In
+  [Anthropic's 2026 randomized trial](https://www.anthropic.com/research/AI-assistance-coding-skills)
+  (52 developers learning a new library), the AI group scored 50% on a
+  follow-up comprehension quiz against 67% for those coding by hand, with the
+  largest gap in debugging. How the AI was used mattered more than whether:
+  conceptual questions scored 65%, and generating code then questioning it
+  until it made sense scored 86%. Delegating scored 39%, and having the AI
+  debug your code scored 24%. Each pattern group had 2–7 people, so read
+  these as a direction, not a law.
+- **Predict, then check.** Before a test runs, a root cause is revealed, or a
+  reviewer reports, write down what you expect, then score it. Intuition
+  becomes trustworthy only with fast, honest feedback (Kahneman & Klein,
+  "Conditions for Intuitive Expertise", 2009). Repetition without scored
+  predictions builds familiarity, not fingertip feel.
+- **Explain it back.** People believe they understand mechanisms far better
+  than they do until asked to explain them step by step (Rozenblit & Keil,
+  "The Misunderstood Limits of Folk Science", 2002). The Feynman technique
+  (explain simply, find the gap, go back to the source) is the test;
+  `teacher` runs it on purpose.
+- **Choose how deeply you own each piece.** *Teach*: you could teach it line
+  by line (the core). *Explain*: you know why it is shaped this way and what
+  it trades off. *Trust*: tests prove it, and you deliberately don't
+  internalize it. Owning every line of everything doesn't scale; drifting from
+  teach to trust without deciding to is how the theory gets lost.
+- **Space and vary the practice.** Re-solve a problem from a blank page weeks
+  later, or apply its principle somewhere else. Spaced, effortful retrieval is
+  what lasts (Bjork); doing the same thing again and again is not.
+
+Skills teach reasoning, not recipes. Numbers, thresholds, and depth are
+derived for the case at hand and shown with their basis, so you can challenge
+an input instead of accepting a constant.
 
 ## The Measure of Success
 
-One metric: time from intent to done.
+Two measures, in this order:
 
-Not code quality. Not elegance. Not feature count. The only question is: did you achieve this faster?. This implies that code quality must be there from start, else you are spending time on fixing quality which increases the time to achieve the result. Same for elegance
+1. **Owned understanding.** Can you explain and teach what was built, at the
+   depth you chose for each piece? Track your prediction hit rate per area;
+   when it rises, your judgment is calibrating.
+2. **Time from intent to done.** Speed counts for work you understand. Quality
+   has to be there from the start, because fixing it later costs more time
+   than building it in.
 
 If a new plugin adds friction instead of removing it, it doesn't belong here.
+If it removes friction by removing your understanding, it doesn't belong here
+either.
 
 ## What This Is Not
 
 - Not a product. Not a platform. Not designed to scale to teams.
+- Not a pipeline you hand a request to and stop thinking.
 - Not a replacement for deep work. It handles the mechanical so you can go deeper.
 - Not a one-time build. It evolves — discarding what slows down, absorbing what accelerates.
 
 ## The Operating Model
 
-0. **Discuss to agreement** — understand the problem, discuss each decision with evidence and numbers, and record the human's explicit agreement.
-1. **Write the spec** — requirements as testable statements of truth, not prose descriptions.
-2. **Write the tests** — derived from the spec, covering every requirement and assumption.
-3. **Generate the code** — AI produces the implementation; the test suite is the acceptance criterion.
-4. **Find or wrap a plugin** — prefer existing tools; wrap, configure, compose.
-5. **Wire it in** — one interface, one invocation pattern, same mental model.
-6. **Measure** — if it doesn't make the workflow faster, remove it.
+0. **Understand first** — your own read of the problem: facts, inferences, a first guess, a prediction.
+1. **Pick the tools** — the fewest from the catalogue (`/engineer`) that do the job.
+2. **Write the spec** — requirements as testable statements of truth, when the work warrants one.
+3. **Write the tests** — derived from the spec, covering every requirement and assumption.
+4. **Generate the code** — AI produces the implementation; the tests are the acceptance criterion; you interrogate it to the depth you chose.
+5. **Explain it back** — teach it, find the gaps, close them.
+6. **Grow the harness** — prefer wrapping an existing plugin to building one; if a tool doesn't make the work faster without costing understanding, remove it.
 
 ## The Long Game
 

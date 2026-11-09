@@ -201,10 +201,9 @@ asks for a named reviewer, dispatch the matching `private-ai-harness-<name>`
 subagent via the Task tool or @mention — do not read the file and re-derive
 the brief.
 
-Senior Dialogue: `/engineer` discussion phases wait for the human even when
-permissions are set to allow; agreement is recorded only by the consent plugin
-from a `question` answer or a typed message whose first line is the agreement.
-With no human present, park with one question and never self-agree.
+`/engineer` is the front door: it shows the catalogue of every skill and
+subagent, runs a named tool, or picks tools for a request. Nothing chains on
+its own; when a tool works best after another, explain why and ask.
 {end}"""
 
 current = path.read_text(encoding="utf-8") if path.exists() else ""

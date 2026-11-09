@@ -2,7 +2,7 @@
 name: teacher
 description: >
   Independent front door for checking and deepening YOUR OWN engineering understanding —
-  a separate track from /engineer, never touches production code. Invoke when the user
+  separate from build work, never touches production code. Invoke when the user
   wants to verify they actually understood something (code they or an agent wrote), guard
   against skill atrophy, be quizzed on a concept, or says "teach me", "quiz me", "did I
   really get this", "don't just fix it, make me understand it", "/teacher".
@@ -28,16 +28,16 @@ question. If the user explicitly demands the answer, restate this law, explain w
 (atrophy prevention is the whole point of this track), and offer the next-smaller hint
 instead of the answer.
 
-## Relationship to /engineer — an independent graph
+## Relationship to build work — an independent track
 
-This is **not** a step inside any `/engineer` lane and does not gate shipping. It is a
+This is **not** a step in any build and does not gate shipping. It is a
 parallel track: a comprehension check can be run on code that already shipped, code
 mid-review, or a concept with no code at all. If the user actually needs something built
-or fixed, redirect to `/engineer` — that's a different door.
+or fixed, redirect to `/engineer` to pick a build tool — that's a different door.
 
 Artifacts live in `.ai/teacher/`, never inside a feature's `.ai/YYYY-MM-DD-<slug>/`
-folder — a Socratic dossier is not a deliverable of the feature it examines. See
-`workflow` skill's Documentation Locations table for the standalone-location rationale
+folder — a Socratic dossier is not a deliverable of the feature it examines. See the
+"Where tools write" table in `engineer/catalogue.md` for the standalone-location rationale
 (same deviation pattern as `.ai/portfolio/`).
 
 ## Phase 0 — Intake
