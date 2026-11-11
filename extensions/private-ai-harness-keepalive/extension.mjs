@@ -21,7 +21,8 @@
 // agent's next poll is a cache read instead of a full rebuild.
 //
 // Compaction is skipped when nothing but keepalives ran since the last one
-// (yours or ours), and never starts while another is running.
+// (yours or ours), and never starts while another is running. A manual /compact
+// pauses keepalives until your next message, like /break:long.
 //
 // Commands: /break:long  compact now; keepalives pause until you type again.
 //           /break:off   no keepalives or wait capping for the rest of this session.
@@ -154,6 +155,13 @@ export function changedSinceCompaction(changed, { type, data, inKeepalive }) {
   return changed;
 }
 
+// A finished /compact means the user is stepping away; the summary turn would
+// otherwise re-arm keepalives on a fresh cache. Automatic compactions
+// (threshold, context limit, memory, model switch) run mid-work and don't pause.
+export function pausesAfterCompaction({ type, data }) {
+  return type === "session.compaction_complete" && data?.success === true && data?.trigger === "manual";
+}
+
 export function loadConfig(env = {}, fileText = null) {
   let file = {};
   try { file = fileText ? JSON.parse(fileText) ?? {} : {}; } catch { file = {}; }
@@ -261,6 +269,11 @@ async function main() {
         break;
       case "session.compaction_complete":
         st.compacting = false;
+        if (pausesAfterCompaction({ type: e.type, data: d }) && !st.paused) {
+          st.paused = true;
+          log({ kind: "manual-compact-pause" });
+          note("paused after /compact. Keepalives resume after your next message.");
+        }
         break;
       case "assistant.turn_start":
         st.betweenTurns = false;
@@ -463,6 +476,14 @@ function selftest() {
   check("changed: manual /compact then keepalives only → skip", !replay([done, keepaliveTurn, keepaliveTurn]));
   check("changed: real turn after compaction → compact", replay([done, keepaliveTurn, realTurn]));
   check("changed: failed compaction keeps it", replay([{ type: "session.compaction_complete", data: { success: false } }]));
+
+  const complete = (data) => ({ type: "session.compaction_complete", data });
+  check("pause: successful manual /compact pauses", pausesAfterCompaction(complete({ success: true, trigger: "manual" })));
+  check("pause: automatic, failed or untagged compactions don't",
+    ["threshold", "context_limit_retry", "memory_pressure", "model_switch", undefined]
+      .every((trigger) => !pausesAfterCompaction(complete({ success: true, trigger }))) &&
+    !pausesAfterCompaction(complete({ success: false, trigger: "manual" })) &&
+    !pausesAfterCompaction({ type: "session.compaction_start", data: { trigger: "manual" } }));
 
   const cfg = loadConfig({ PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD: "0.5" }, '{"capUsd": 2, "leadSeconds": 60}');
   check("config: env beats file, file beats default", cfg.capUsd === 0.5 && cfg.leadSeconds === 60 && cfg.enabled);

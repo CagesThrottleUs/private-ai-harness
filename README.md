@@ -173,6 +173,8 @@ warm automatically while you are away:
   under 10 minutes left. The shell keeps running; each poll is a cache read
   instead of a rebuild. GPT's 30-minute cache is never capped.
 - **`/break:long`:** compact now; keepalives pause until you type again.
+- **`/compact`:** a successful manual compaction pauses keepalives the same
+  way; automatic compactions don't.
 - **`/break:off`:** no keepalives or wait capping for the rest of the session.
 
 Copilot loads plugin extensions from this checkout, so there is no install step.
