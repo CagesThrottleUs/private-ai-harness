@@ -26,6 +26,8 @@
 //
 // Commands: /break:long  compact now; keepalives pause until you type again.
 //           /break:off   no keepalives or wait capping for the rest of this session.
+//           Copilot CLI may print "No client found for command" even though the
+//           command ran (github/copilot-cli#5412); each handler logs its own receipt.
 // Config:   PRIVATE_AI_HARNESS_KEEPALIVE=off disables the extension.
 //           Cap, lead, and a shorter test TTL: PRIVATE_AI_HARNESS_KEEPALIVE_CAP_USD,
 //           PRIVATE_AI_HARNESS_KEEPALIVE_LEAD_SECONDS and
@@ -377,7 +379,7 @@ async function main() {
           st.paused = true;
           st.pendingCompact = "break:long";
           log({ kind: "break-long" });
-          if (!st.betweenTurns) note("compaction will run when the current turn ends.");
+          note(st.betweenTurns ? "/break:long received; compacting now." : "/break:long received; compaction will run when the current turn ends.");
         },
       },
       {
@@ -390,7 +392,7 @@ async function main() {
             writeFileSync(join(OFF_DIR, session.sessionId), new Date().toISOString() + "\n");
           } catch { /* the in-memory flag still holds for this process */ }
           log({ kind: "break-off" });
-          note("off for the rest of this session.");
+          note("/break:off received; off for the rest of this session.");
         },
       },
     ],
