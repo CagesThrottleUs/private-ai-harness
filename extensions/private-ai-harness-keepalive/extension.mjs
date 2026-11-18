@@ -185,10 +185,20 @@ export function loadConfig(env = {}, fileText = null) {
 const usd = (x) => (x == null ? "?" : `$${x.toFixed(3)}`);
 const readText = (path) => { try { return readFileSync(path, "utf8"); } catch { return null; } };
 
+// Copilot CLI 1.0.113 renamed the bundled SDK alias from @github to @microsoft
+// without keeping the old name, so accept either.
+const SDK_EXTENSION_SPECIFIERS = ["@microsoft/copilot-sdk/extension", "@github/copilot-sdk/extension"];
+
+function resolveSdkExtension() {
+  for (const specifier of SDK_EXTENSION_SPECIFIERS) {
+    try { return import.meta.resolve(specifier); } catch { /* try the next alias */ }
+  }
+  throw new Error(`Copilot SDK not found under ${SDK_EXTENSION_SPECIFIERS.join(" or ")}`);
+}
+
 function detectCliVersion() {
   try {
-    const url = import.meta.resolve("@github/copilot-sdk/extension");
-    return url.match(/\/(\d+\.\d+\.\d+[^/]*)\/copilot-sdk\//)?.[1] ?? "unknown";
+    return resolveSdkExtension().match(/\/(\d+\.\d+\.\d+[^/]*)\/copilot-sdk\//)?.[1] ?? "unknown";
   } catch { return "unknown"; }
 }
 
@@ -203,7 +213,7 @@ function beep() {
 }
 
 async function main() {
-  const { joinSession } = await import("@github/copilot-sdk/extension");
+  const { joinSession } = await import(resolveSdkExtension());
   let sessionId = null;
   const log = (entry) => {
     try {
